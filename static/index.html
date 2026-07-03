@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerSim AI - Predictive Maintenance</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #080808;
+            --bg-secondary: #0f0f0f;
+            --bg-panel: #121212;
+            --border-color: #1a1a1a;
+            --border-bright: #2a2a2a;
+            --accent-primary: #f59e0b;
+            --accent-secondary: #06b6d4;
+            --danger: #ef4444;
+            --warning: #f97316;
+            --ok: #22c55e;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --font-header: 'Orbitron', monospace;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            min-height: 100%; width: 100%;
+            background: var(--bg-primary); color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            overflow-y: auto;
+        }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9999;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.03), rgba(0,0,0,0.03) 1px, transparent 1px, transparent 2px);
+        }
+
+        .app-container { display: flex; flex-direction: column; height: 100vh; position: relative; z-index: 1; }
+
+        /* Navbar */
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            height: 50px; padding: 0 24px; background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-bright); flex-shrink: 0;
+        }
+
+        .navbar-brand {
+            font-family: var(--font-header); font-size: 1.4rem; font-weight: 800;
+            color: var(--accent-primary); text-shadow: 0 0 15px rgba(245,158,11,0.6); letter-spacing: 3px;
+        }
+
+        .navbar-tabs { display: flex; gap: 4px; }
+        .navbar-tab {
+            padding: 8px 20px; font-family: var(--font-header); font-size: 0.8rem; font-weight: 600;
+            color: var(--text-secondary); background: transparent; border: none; cursor: pointer;
+            border-radius: 4px; transition: all 0.2s;
+        }
+        .navbar-tab:hover { color: var(--text-primary); background: rgba(245,158,11,0.1); }
+        .navbar-tab.active { color: var(--accent-primary); background: rgba(245,158,11,0.15); box-shadow: 0 0 10px rgba(245,158,11,0.3); }
+
+        .navbar-status { display: flex; align-items: center; gap: 16px; font-family: var(--font-mono); font-size: 0.75rem; }
+        .status-indicator { display: flex; align-items: center; gap: 6px; color: var(--ok); }
+        .status-dot {
+            width: 7px; height: 7px; border-radius: 50%; background: var(--ok);
+            animation: pulse 2s infinite; box-shadow: 0 0 6px var(--ok);
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--ok); } 50% { opacity: 0.5; box-shadow: 0 0 3px var(--ok); } }
+
+        .status-item { display: flex; flex-direction: column; align-items: flex-end; }
+        .status-item-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .status-item-value { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600; color: var(--accent-secondary); }
+
+        .llm-status { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-muted); }
+        .llm-status-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .llm-status-dot.available { background: var(--ok); box-shadow: 0 0 4px var(--ok); }
+        .llm-status-dot.unavailable { background: var(--warning); box-shadow: 0 0 4px var(--warning); }
+
+        /* Pages */
+        .page { display: none; flex: 1; overflow: hidden; }
+        .page.active { display: flex; flex-direction: column; }
+
+        /* Dashboard Page */
+        #page-dashboard { min-height: calc(100vh - 100px); }
+
+        .dashboard-content { display: flex; flex-direction: column; padding: 12px; gap: 12px; }
+
+        .assets-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+        .asset-card {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 12px; position: relative; overflow: hidden;
+            border-left: 4px solid var(--ok);
+            transition: all 0.3s;
+            animation: borderGlow 2s infinite;
+        }
+        @keyframes borderGlow { 0%, 100% { box-shadow: 0 0 5px currentColor; } 50% { box-shadow: 0 0 15px currentColor; } }
+        .asset-card.status-ok { border-left-color: var(--ok); color: var(--ok); }
+        .asset-card.status-warning { border-left-color: var(--warning); color: var(--warning); }
+        .asset-card.status-critical { border-left-color: var(--danger); color: var(--danger); }
+
+        .asset-card.status-ok { animation-name: borderGlowOk; }
+        .asset-card.status-warning { animation-name: borderGlowWarning; }
+        .asset-card.status-critical { animation-name: borderGlowCritical; }
+        @keyframes borderGlowOk { 0%, 100% { box-shadow: 0 0 5px rgba(34,197,94,0.3); } 50% { box-shadow: 0 0 15px rgba(34,197,94,0.6); } }
+        @keyframes borderGlowWarning { 0%, 100% { box-shadow: 0 0 5px rgba(249,115,22,0.3); } 50% { box-shadow: 0 0 15px rgba(249,115,22,0.6); } }
+        @keyframes borderGlowCritical { 0%, 100% { box-shadow: 0 0 5px rgba(239,68,68,0.3); } 50% { box-shadow: 0 0 15px rgba(239,68,68,0.6); } }
+
+        .asset-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .asset-id { font-family: var(--font-header); font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+        .asset-name { font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px; }
+
+        .status-badge {
+            padding: 3px 8px; border-radius: 3px; font-size: 0.6rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .status-badge.normal { background: rgba(34,197,94,0.25); color: var(--ok); }
+        .status-badge.warning { background: rgba(249,115,22,0.25); color: var(--warning); }
+        .status-badge.critical { background: rgba(239,68,68,0.25); color: var(--danger); }
+
+        .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+        .metric-cell { background: var(--bg-secondary); border-radius: 3px; padding: 6px 8px; }
+        .metric-cell-value { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600; color: var(--accent-secondary); }
+        .metric-cell-label { font-size: 0.55rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
+
+        .health-container { margin-top: 8px; }
+        .health-bar { height: 5px; background: var(--bg-secondary); border-radius: 2px; overflow: hidden; }
+        .health-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease, background 0.3s; }
+        .health-text { display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.65rem; color: var(--text-muted); }
+        .health-value { font-family: var(--font-mono); color: var(--text-primary); }
+
+        .charts-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
+        .chart-card {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 10px; display: flex; flex-direction: column;
+            height: 200px;
+        }
+        .chart-title {
+            font-family: var(--font-header); font-size: 0.7rem; font-weight: 600;
+            color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+        }
+        .chart-container { flex: 1; position: relative; min-height: 0; }
+        .chart-container canvas { width: 100% !important; height: 100% !important; }
+
+        .controls-bar {
+            height: 50px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; background: var(--bg-panel); border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .controls-group { display: flex; align-items: center; gap: 10px; }
+        .control-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+
+        .btn {
+            padding: 8px 16px; border: none; border-radius: 4px; font-size: 0.7rem;
+            font-weight: 600; cursor: pointer; text-transform: uppercase; font-family: var(--font-header);
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--accent-secondary); color: var(--bg-primary);
+            box-shadow: 0 0 10px rgba(6,182,212,0.4);
+        }
+        .btn-primary:hover { background: #0891b2; box-shadow: 0 0 15px rgba(6,182,212,0.6); }
+        .btn-accent {
+            background: var(--accent-primary); color: var(--bg-primary);
+            box-shadow: 0 0 10px rgba(245,158,11,0.4);
+        }
+        .btn-accent:hover { background: #d97706; box-shadow: 0 0 15px rgba(245,158,11,0.6); }
+        .btn-danger {
+            background: rgba(239,68,68,0.2); color: var(--danger); border: 1px solid var(--danger);
+        }
+        .btn-danger:hover { background: rgba(239,68,68,0.3); }
+
+        select.control-select {
+            background: var(--bg-secondary); color: var(--text-primary);
+            border: 1px solid var(--border-bright); border-radius: 4px;
+            padding: 6px 10px; font-size: 0.75rem; font-family: var(--font-mono);
+            cursor: pointer;
+        }
+        select.control-select:focus { outline: none; border-color: var(--accent-primary); }
+
+        /* AI Analysis Page */
+        #page-ai-analysis { padding: 16px; gap: 16px; overflow-y: auto; }
+
+        .ai-summary-section {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 20px; display: flex; flex-direction: column;
+            margin-bottom: 16px;
+        }
+        .ai-summary-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+        }
+        .ai-summary-title {
+            font-family: var(--font-header); font-size: 1rem; font-weight: 700;
+            color: var(--accent-primary); text-transform: uppercase; letter-spacing: 2px;
+        }
+        .ai-summary-content {
+            flex: 1; background: var(--bg-secondary); border-radius: 6px; padding: 16px;
+            font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-primary);
+            overflow-y: auto; line-height: 1.6; border: 1px solid var(--border-color);
+        }
+
+        /* Hero Image Section */
+        .ai-hero-section {
+            position: relative;
+            height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .ai-hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.4) contrast(1.1);
+        }
+
+        .ai-hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(6,182,212,0.1) 100%);
+            pointer-events: none;
+        }
+
+        .ai-hero-title {
+            position: absolute;
+            bottom: 16px;
+            left: 20px;
+            font-family: var(--font-header);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            text-shadow: 0 0 20px rgba(245,158,11,0.8), 0 2px 4px rgba(0,0,0,0.8);
+            letter-spacing: 2px;
+        }
+        .ai-summary-content::-webkit-scrollbar { width: 6px; }
+        .ai-summary-content::-webkit-scrollbar-track { background: var(--bg-panel); }
+        .ai-summary-content::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+        .ai-summary-meta {
+            display: flex; justify-content: space-between; align-items: center; margin-top: 12px;
+        }
+        .ai-timestamp { font-size: 0.7rem; color: var(--text-muted); }
+        .ai-status-badge {
+            display: flex; align-items: center; gap: 6px; padding: 4px 10px;
+            background: var(--bg-secondary); border: 1px solid var(--border-bright);
+            border-radius: 4px; font-size: 0.7rem; color: var(--text-secondary);
+        }
+        .spinner {
+            width: 14px; height: 14px; border: 2px solid var(--border-bright);
+            border-top-color: var(--accent-primary); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .ai-cards-section {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+        }
+        .ai-asset-card {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 14px; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .ai-asset-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+        }
+        .ai-asset-id { font-family: var(--font-header); font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
+        .risk-badge {
+            padding: 3px 10px; border-radius: 3px; font-size: 0.65rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .risk-badge.critical { background: rgba(239,68,68,0.25); color: var(--danger); }
+        .risk-badge.high { background: rgba(249,115,22,0.25); color: var(--warning); }
+        .risk-badge.medium { background: rgba(245,158,11,0.25); color: var(--accent-primary); }
+        .risk-badge.low { background: rgba(34,197,94,0.25); color: var(--ok); }
+
+        .ai-asset-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .ai-asset-content::-webkit-scrollbar { width: 4px; }
+        .ai-asset-content::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+        .ai-section-title { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .ai-anomalies { list-style: disc; padding-left: 14px; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; }
+        .ai-anomalies li { margin-bottom: 3px; }
+        .ai-action { font-size: 0.75rem; color: var(--text-primary); background: var(--bg-secondary); padding: 8px; border-radius: 4px; }
+        .ai-urgency { font-size: 0.7rem; color: var(--warning); }
+        .ai-confidence-bar { height: 4px; background: var(--bg-secondary); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+        .ai-confidence-fill { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); border-radius: 2px; }
+        .ai-confidence-text { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+        .ai-reasoning {
+            font-size: 0.7rem; color: var(--text-secondary); font-style: italic;
+            background: var(--bg-secondary); padding: 8px; border-radius: 4px;
+            overflow-y: auto; max-height: 60px; line-height: 1.4;
+        }
+
+        .btn-maintenance {
+            width: 100%; padding: 8px; margin-top: 10px;
+            background: rgba(34,197,94,0.15); color: var(--ok);
+            border: 1px solid var(--ok); border-radius: 4px;
+            font-size: 0.7rem; font-weight: 600; cursor: pointer; text-transform: uppercase;
+            font-family: var(--font-header); transition: all 0.2s;
+        }
+        .btn-maintenance:hover { background: rgba(34,197,94,0.25); box-shadow: 0 0 10px rgba(34,197,94,0.3); }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .assets-row { grid-template-columns: repeat(2, 1fr); }
+            .charts-row { grid-template-columns: repeat(2, 1fr); }
+            .ai-cards-section { grid-template-columns: 1fr; }
+        }
+
+        /* Disconnected Banner */
+        .disconnected-banner {
+            display: none; position: fixed; top: 50px; left: 0; right: 0;
+            background: rgba(239,68,68,0.9); color: white; text-align: center;
+            padding: 8px; font-family: var(--font-header); font-size: 0.8rem;
+            letter-spacing: 2px; z-index: 10000;
+        }
+        .disconnected-banner.visible { display: block; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="navbar">
+            <div class="navbar-brand">⚡ POWERSIM AI</div>
+            <div class="navbar-tabs">
+                <button class="navbar-tab active" onclick="switchPage('dashboard')">DASHBOARD</button>
+                <button class="navbar-tab" onclick="switchPage('ai-analysis')">AI ANALYSIS</button>
+            </div>
+            <div class="navbar-status">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span>LIVE</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-item-label">Tick</span>
+                    <span class="status-item-value" id="tick-count">#0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-item-label">Uptime</span>
+                    <span class="status-item-value" id="uptime">0:00</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-item-label">Health</span>
+                    <span class="status-item-value" id="overall-health">100%</span>
+                </div>
+                <div class="llm-status">
+                    <span class="llm-status-dot available" id="llm-status-dot"></span>
+                    <span id="llm-status-text">LLM Ready</span>
+                </div>
+            </div>
+        </nav>
+
+        <div class="disconnected-banner" id="disconnected-banner">● DISCONNECTED - Reconnecting...</div>
+
+        <!-- PAGE 1: DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+            <div class="dashboard-content">
+                <div class="assets-row" id="assets-row"></div>
+                <div class="charts-row" id="charts-row"></div>
+            </div>
+            <div class="controls-bar">
+                <div class="controls-group">
+                    <span class="control-label">Inject Failure:</span>
+                    <select class="control-select" id="failure-select">
+                        <option value="">Select Asset</option>
+                        <option value="T1|bearing_wear">T1 - Bearing Wear</option>
+                        <option value="M1|misalignment">M1 - Misalignment</option>
+                        <option value="G1|oil_degradation">G1 - Oil Degradation</option>
+                        <option value="P1|overload">P1 - Overload</option>
+                    </select>
+                    <button class="btn btn-danger" onclick="injectFailure()">INJECT</button>
+                </div>
+                <div class="controls-group">
+                    <span class="control-label">Perform Maintenance:</span>
+                    <select class="control-select" id="maintenance-select">
+                        <option value="">Select Asset</option>
+                        <option value="T1">T1 - Main Transformer</option>
+                        <option value="M1">M1 - Induction Motor A</option>
+                        <option value="G1">G1 - Backup Generator</option>
+                        <option value="P1">P1 - Coolant Pump</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="performMaintenance()">EXECUTE</button>
+                </div>
+                <div class="controls-group">
+                    <button class="btn btn-accent" onclick="resetSimulation()">RESET SIMULATION</button>
+                    <span class="status-dot" id="ws-status-dot" style="background: var(--ok); margin-left: 10px;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: AI ANALYSIS -->
+        <div class="page" id="page-ai-analysis">
+            <div class="ai-hero-section">
+                <img class="ai-hero-image" src="/static/assets/shutterstock_2407148241.webp" alt="Power System">
+                <div class="ai-hero-overlay"></div>
+                <div class="ai-hero-title">⚡ AI-POWERED PREDICTIVE MAINTENANCE</div>
+            </div>
+            <div class="ai-summary-section">
+                <div class="ai-summary-header">
+                    <span class="ai-summary-title">Fleet Summary</span>
+                    <button class="btn btn-accent" id="run-ai-btn" onclick="runAiAnalysis()">
+                        <span id="run-ai-text">▶ RUN AI ANALYSIS</span>
+                    </button>
+                </div>
+                <div class="ai-summary-content" id="fleet-summary">
+                    Click "RUN AI ANALYSIS" to generate fleet-wide predictive maintenance insights...
+                </div>
+                <div class="ai-summary-meta">
+                    <span class="ai-timestamp" id="ai-timestamp">Last analysis: Never</span>
+                    <div class="ai-status-badge">
+                        <span class="status-dot" id="ollama-status-dot" style="width: 6px; height: 6px; background: var(--ok);"></span>
+                        <span id="ollama-status-text">Ollama Connected</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ai-cards-section" id="ai-cards-section">
+                <!-- AI cards rendered by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CHART_MAX_POINTS = 50;
+        const charts = {};
+        let wsConnected = false;
+        let aiAnalysisCache = null;
+
+        // Page Navigation
+        function switchPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.navbar-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('page-' + pageName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // WebSocket Connection
+        let ws = null;
+
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws/live`);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                wsConnected = true;
+                updateWsStatus(true);
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket closed - reconnecting...');
+                wsConnected = false;
+                updateWsStatus(false);
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onerror = (e) => {
+                console.error('WebSocket error:', e);
+                wsConnected = false;
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type !== 'tick') return;
+
+                    // Update navbar metrics
+                    document.getElementById('tick-count').textContent = '#' + data.tick_count;
+
+                    // Calculate uptime
+                    const uptimeSeconds = data.tick_count * 2; // 2 seconds per tick
+                    const mins = Math.floor(uptimeSeconds / 60);
+                    const secs = uptimeSeconds % 60;
+                    document.getElementById('uptime').textContent = mins + ':' + secs.toString().padStart(2, '0');
+
+                    // Update each asset card
+                    ['T1', 'M1', 'G1', 'P1'].forEach(assetId => {
+                        const tel = data.telemetry?.[assetId];
+                        if (!tel) return;
+
+                        // Update metric values
+                        setVal(assetId + '-temp', tel.temperature?.toFixed(1) ?? '--');
+                        setVal(assetId + '-vibration', tel.vibration?.toFixed(2) ?? '--');
+                        setVal(assetId + '-voltage', tel.voltage?.toFixed(0) ?? '--');
+                        setVal(assetId + '-current', tel.current?.toFixed(1) ?? '--');
+                        setVal(assetId + '-bearing', tel.bearing_wear?.toFixed(1) ?? '--');
+                        setVal(assetId + '-oil', tel.oil_pressure?.toFixed(2) ?? '--');
+                        setVal(assetId + '-health', tel.health_score?.toFixed(1) + '%');
+
+                        // Update health bar
+                        const bar = document.getElementById(assetId + '-health-bar');
+                        if (bar) {
+                            bar.style.width = tel.health_score + '%';
+                            if (tel.health_score >= 70) {
+                                bar.style.background = 'var(--ok)';
+                                updateAssetStatus(assetId, 'NORMAL', 'normal');
+                            } else if (tel.health_score >= 40) {
+                                bar.style.background = 'var(--warning)';
+                                updateAssetStatus(assetId, 'WARNING', 'warning');
+                            } else {
+                                bar.style.background = 'var(--danger)';
+                                updateAssetStatus(assetId, 'CRITICAL', 'critical');
+                            }
+                        }
+
+                        // Update chart
+                        updateChart(assetId, data.tick_count, tel.health_score, tel.temperature);
+                    });
+
+                    // Update overall health
+                    const assets = Object.values(data.telemetry);
+                    const avgHealth = assets.reduce((s, a) => s + (a.health_score || 0), 0) / assets.length;
+                    document.getElementById('overall-health').textContent = avgHealth.toFixed(1) + '%';
+
+                } catch (e) {
+                    console.error('Error processing WebSocket message:', e);
+                }
+            };
+        }
+
+        function updateAssetStatus(assetId, statusText, statusClass) {
+            const statusEl = document.getElementById(assetId + '-status');
+            const cardEl = document.getElementById(assetId + '-card');
+            if (statusEl) {
+                statusEl.textContent = statusText;
+                statusEl.className = 'status-badge ' + statusClass;
+            }
+            if (cardEl) {
+                cardEl.className = 'asset-card status-' + statusClass;
+            }
+        }
+
+        function setVal(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        }
+
+        function updateWsStatus(connected) {
+            const dot = document.getElementById('ws-status-dot');
+            const banner = document.getElementById('disconnected-banner');
+            if (connected) {
+                dot.style.background = 'var(--ok)';
+                banner.classList.remove('visible');
+            } else {
+                dot.style.background = 'var(--danger)';
+                banner.classList.add('visible');
+            }
+        }
+
+        // Charts
+        function initCharts() {
+            const chartColors = {
+                'T1': { health: '#f59e0b', temp: '#06b6d4' },
+                'M1': { health: '#ef4444', temp: '#22c55e' },
+                'G1': { health: '#f97316', temp: '#3b82f6' },
+                'P1': { health: '#8b5cf6', temp: '#ec4899' },
+            };
+
+            ['T1', 'M1', 'G1', 'P1'].forEach(assetId => {
+                const container = document.getElementById('chart-' + assetId);
+                if (!container) return;
+
+                const ctx = container.getContext('2d');
+                charts[assetId] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [
+                            { label: 'Health', data: [], borderColor: chartColors[assetId].health, borderWidth: 2, fill: false, tension: 0.4, pointRadius: 0 },
+                            { label: 'Temp', data: [], borderColor: chartColors[assetId].temp, borderWidth: 1.5, fill: false, tension: 0.4, pointRadius: 0 }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, animation: false,
+                        plugins: {
+                            legend: {
+                                display: true, position: 'top',
+                                labels: { color: '#9ca3af', font: { size: 8 }, boxWidth: 8, padding: 4 }
+                            }
+                        },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false, min: 0, max: 100 }
+                        }
+                    }
+                });
+
+                for (let i = 0; i < CHART_MAX_POINTS; i++) {
+                    charts[assetId].data.labels.push('');
+                    charts[assetId].data.datasets[0].data.push(null);
+                    charts[assetId].data.datasets[1].data.push(null);
+                }
+                charts[assetId].update();
+            });
+        }
+
+        function updateChart(assetId, tick, health, temp) {
+            const chart = charts[assetId];
+            if (!chart) return;
+
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+            chart.data.datasets[1].data.shift();
+
+            chart.data.labels.push(tick);
+            chart.data.datasets[0].data.push(health);
+            chart.data.datasets[1].data.push(temp);
+
+            chart.update('none');
+        }
+
+        // Render Assets
+        function renderAssets() {
+            const container = document.getElementById('assets-row');
+            const assetConfigs = {
+                'T1': { name: 'Main Transformer' },
+                'M1': { name: 'Induction Motor A' },
+                'G1': { name: 'Backup Generator' },
+                'P1': { name: 'Coolant Pump' },
+            };
+
+            container.innerHTML = Object.keys(assetConfigs).map(assetId => {
+                const config = assetConfigs[assetId];
+                return `
+                    <div class="asset-card status-ok" id="${assetId}-card">
+                        <div class="asset-header">
+                            <div>
+                                <div class="asset-id">${assetId}</div>
+                                <div class="asset-name">${config.name}</div>
+                            </div>
+                            <span class="status-badge normal" id="${assetId}-status">NORMAL</span>
+                        </div>
+                        <div class="metrics-grid">
+                            <div class="metric-cell">
+                                <div class="metric-cell-value" id="${assetId}-temp">--</div>
+                                <div class="metric-cell-label">Temp (°C)</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-value" id="${assetId}-vibration">--</div>
+                                <div class="metric-cell-label">Vibration</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-cell-value" id="${assetId}-voltage">--</div>
+                                <div class="metric-cell-label">Voltage</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-cell-value" id="${assetId}-current">--</div>
+                                <div class="metric-cell-label">Current</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-cell-value" id="${assetId}-bearing">--</div>
+                                <div class="metric-cell-label">Bearing %</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-cell-value" id="${assetId}-oil">--</div>
+                                <div class="metric-cell-label">Oil (bar)</div>
+                            </div>
+                        </div>
+                        <div class="health-container">
+                            <div class="health-bar">
+                                <div class="health-fill" id="${assetId}-health-bar" style="width: 100%; background: var(--ok);"></div>
+                            </div>
+                            <div class="health-text">
+                                <span>Health</span>
+                                <span class="health-value" id="${assetId}-health">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render AI Cards
+        function renderAiCards(analysis) {
+            const container = document.getElementById('ai-cards-section');
+            if (!analysis || !analysis.assets) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">No AI analysis available. Click "RUN AI ANALYSIS" to generate insights.</div>';
+                return;
+            }
+
+            const riskColors = {
+                'CRITICAL': 'critical',
+                'HIGH': 'high',
+                'MEDIUM': 'medium',
+                'LOW': 'low'
+            };
+
+            container.innerHTML = Object.keys(analysis.assets).map(assetId => {
+                const asset = analysis.assets[assetId];
+                const riskLevel = asset.risk_level || 'LOW';
+                const riskClass = riskColors[riskLevel] || 'low';
+                const anomalies = asset.anomalies || [];
+                const confidence = asset.confidence || 0;
+
+                return `
+                    <div class="ai-asset-card">
+                        <div class="ai-asset-header">
+                            <span class="ai-asset-id">${assetId}</span>
+                            <span class="risk-badge ${riskClass}">${riskLevel} RISK</span>
+                        </div>
+                        <div class="ai-asset-content">
+                            <div>
+                                <div class="ai-section-title">Anomalies Detected</div>
+                                <ul class="ai-anomalies">
+                                    ${anomalies.length > 0 ? anomalies.map(a => '<li>' + a + '</li>').join('') : '<li style="color: var(--text-muted);">No significant anomalies</li>'}
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="ai-section-title">Recommended Action</div>
+                                <div class="ai-action">${asset.recommended_action || 'Continue monitoring'}</div>
+                            </div>
+                            <div class="ai-urgency">Urgency: ${asset.urgency_days !== undefined ? asset.urgency_days + ' days' : 'N/A'}</div>
+                            <div>
+                                <div class="ai-section-title">Confidence</div>
+                                <div class="ai-confidence-bar">
+                                    <div class="ai-confidence-fill" style="width: ${confidence}%"></div>
+                                </div>
+                                <div class="ai-confidence-text">${confidence}%</div>
+                            </div>
+                            <div>
+                                <div class="ai-section-title">Reasoning</div>
+                                <div class="ai-reasoning">${asset.reasoning || 'No reasoning available'}</div>
+                            </div>
+                            <button class="btn-maintenance" onclick="performMaintenanceFromAi('${assetId}')">✓ Perform Maintenance</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Controls
+        function injectFailure() {
+            const select = document.getElementById('failure-select');
+            const value = select.value;
+            if (!value) return;
+            const [assetId, failureType] = value.split('|');
+            fetch('/api/inject-failure', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ asset_id: assetId, failure_type: failureType }),
+            });
+            select.value = '';
+        }
+
+        function performMaintenance() {
+            const select = document.getElementById('maintenance-select');
+            const assetId = select.value;
+            if (!assetId) return;
+            fetch('/api/maintenance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ asset_id: assetId }),
+            });
+            select.value = '';
+        }
+
+        function performMaintenanceFromAi(assetId) {
+            fetch('/api/maintenance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ asset_id: assetId }),
+            });
+        }
+
+        function resetSimulation() {
+            fetch('/api/reset', { method: 'POST' });
+        }
+
+        // AI Analysis
+        async function runAiAnalysis() {
+            const btn = document.getElementById('run-ai-btn');
+            const btnText = document.getElementById('run-ai-text');
+            const summaryEl = document.getElementById('fleet-summary');
+
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span>Agent thinking...';
+
+            // Create timeout promise
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Analysis timeout - please try again')), 45000);
+            });
+
+            // Race between fetch and timeout
+            const fetchPromise = fetch('/api/ai-analysis', { method: 'POST' }).then(r => r.json());
+
+            try {
+                const data = await Promise.race([fetchPromise, timeoutPromise]);
+
+                aiAnalysisCache = data;
+
+                // Update fleet summary
+                if (data.fleet_summary) {
+                    summaryEl.textContent = data.fleet_summary;
+                }
+
+                // Update timestamp
+                const now = new Date();
+                document.getElementById('ai-timestamp').textContent = 'Last analysis: ' + now.toLocaleString();
+
+                // Render asset cards
+                renderAiCards(data);
+
+                // Update Ollama status
+                document.getElementById('ollama-status-dot').style.background = 'var(--ok)';
+                document.getElementById('ollama-status-text').textContent = 'Ollama Connected';
+
+                // Show toast notification
+                showToast('AI Analysis Complete');
+
+            } catch (err) {
+                summaryEl.textContent = 'Analysis failed. Using fallback mode...';
+                document.getElementById('ollama-status-dot').style.background = 'var(--warning)';
+                document.getElementById('ollama-status-text').textContent = 'Using Fallback';
+                showToast('AI Analysis Failed - Using Fallback', 'warning');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = '▶ RUN AI ANALYSIS';
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                right: 24px;
+                background: ${type === 'warning' ? 'var(--warning)' : 'var(--ok)'};
+                color: var(--bg-primary);
+                padding: 12px 24px;
+                border-radius: 6px;
+                font-family: var(--font-header);
+                font-size: 0.8rem;
+                font-weight: 700;
+                box-shadow: 0 0 20px ${type === 'warning' ? 'rgba(249,115,22,0.5)' : 'rgba(34,197,94,0.5)'};
+                z-index: 10001;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // LLM Status
+        function checkLlmStatus() {
+            fetch('/api/llm/status').then(r => r.json()).then(data => {
+                const dot = document.getElementById('llm-status-dot');
+                const text = document.getElementById('llm-status-text');
+                if (data.available) {
+                    dot.classList.add('available'); dot.classList.remove('unavailable');
+                    text.textContent = 'LLM: ' + data.model; text.style.color = 'var(--ok)';
+                } else {
+                    dot.classList.add('unavailable'); dot.classList.remove('available');
+                    text.textContent = 'Rule-based'; text.style.color = 'var(--warning)';
+                }
+            }).catch(() => {});
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Render charts containers
+            document.getElementById('charts-row').innerHTML = ['T1', 'M1', 'G1', 'P1'].map(id => `
+                <div class="chart-card">
+                    <div class="chart-title">${id}</div>
+                    <div class="chart-container"><canvas id="chart-${id}"></canvas></div>
+                </div>
+            `).join('');
+
+            renderAssets();
+            initCharts();
+            connectWebSocket();
+            checkLlmStatus();
+            setInterval(checkLlmStatus, 60000);
+        });
+    </script>
+</body>
+</html>
