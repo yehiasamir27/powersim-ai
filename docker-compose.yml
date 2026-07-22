@@ -1,0 +1,44 @@
+# PowerSim AI — full stack (app + Ollama LLM) in one command:
+#
+#   docker compose up --build
+#
+# The app is fully functional immediately using the deterministic rule engine.
+# To enable LLM narrative reasoning, pull a model once (a few GB):
+#
+#   docker compose exec ollama ollama pull qwen2.5:7b
+#
+# Then open http://localhost:8000
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      POWERSIM_ENVIRONMENT: production
+      POWERSIM_LOG_JSON: "true"
+      POWERSIM_OLLAMA_ENABLED: "true"
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5:7b
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+    # GPU acceleration (optional): uncomment if you have NVIDIA Container Toolkit.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  ollama_models:
