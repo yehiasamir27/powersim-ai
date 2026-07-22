@@ -1,50 +1,64 @@
 """
-AI Agent implementation for predictive maintenance diagnostics.
+Agentic AI for predictive-maintenance diagnostics (sense -> think -> act).
 
-This module implements an Agentic AI system following the sense→think→act
-paradigm for industrial predictive maintenance. The agent analyzes telemetry
-data from power system assets and generates maintenance recommendations using
-LLM-based reasoning (via Ollama) with rule-based fallback.
+The agent observes asset telemetry, reasons about condition and risk, and emits a
+decision with a transparent **reasoning trail** (the "why" behind every
+recommendation — a named buyer requirement, see docs/MARKET_RESEARCH.md). Reasoning
+uses a local LLM via Ollama when available and a deterministic rule engine
+otherwise; the active mode is always reported honestly rather than degrading
+silently.
 """
 
-import asyncio
+from __future__ import annotations
+
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
+
 import httpx
+
+from logging_config import get_logger
+
+logger = get_logger("powersim.agent")
 
 
 class DecisionType(Enum):
     """Types of decisions the agent can make."""
-    MONITOR = "monitor"  # Continue monitoring, no action needed
-    INSPECT = "inspect"  # Schedule inspection
-    MAINTAIN = "maintain"  # Schedule preventive maintenance
-    REPAIR = "repair"  # Schedule corrective maintenance
-    EMERGENCY = "emergency"  # Immediate emergency response required
+
+    MONITOR = "monitor"      # continue monitoring, no action
+    INSPECT = "inspect"      # schedule inspection
+    MAINTAIN = "maintain"    # schedule preventive maintenance
+    REPAIR = "repair"        # schedule corrective maintenance
+    EMERGENCY = "emergency"  # immediate response required
+
+
+class AgentMode(str, Enum):
+    """Which reasoning path produced the most recent decision (honest status)."""
+
+    LLM = "llm"
+    RULES = "rules"
+    LLM_UNAVAILABLE = "llm_unavailable"  # rules used: Ollama unreachable
+    LLM_ERROR = "llm_error"              # rules used: Ollama call failed
+    LLM_DISABLED = "llm_disabled"        # rules used: LLM disabled by config
 
 
 @dataclass
 class SenseData:
-    """
-    Data collected during the sense phase.
+    """Snapshot of an asset assembled during the sense phase."""
 
-    Contains telemetry readings, asset state, and historical context
-    for a single asset at a point in time.
-    """
     asset_id: str
     asset_type: str
     asset_name: str
     health: float
     operating_state: str
-    telemetry: Dict[str, float]
-    failure_mode: Optional[str]
+    telemetry: dict[str, float]
+    failure_mode: str | None
     total_operating_hours: float
     tick_count: int
 
     def to_dict(self) -> dict:
-        """Convert sense data to dictionary."""
         return {
             "asset_id": self.asset_id,
             "asset_type": self.asset_type,
@@ -60,19 +74,8 @@ class SenseData:
 
 @dataclass
 class AgentDecision:
-    """
-    Decision output from the agent's think/act phases.
+    """Decision output from the think phase, with a transparent reasoning trail."""
 
-    Attributes:
-        decision_type: Type of decision made
-        confidence: Confidence level 0-100%
-        description: Human-readable explanation
-        recommended_action: Specific action to take
-        reasoning: Chain of thought leading to decision
-        strategic_recommendation: Long-term policy suggestions
-        requires_maintenance: Whether maintenance should be scheduled
-        priority: Suggested priority level
-    """
     decision_type: DecisionType
     confidence: float
     description: str
@@ -81,124 +84,95 @@ class AgentDecision:
     strategic_recommendation: str
     requires_maintenance: bool = False
     priority: str = "medium"
+    source: str = AgentMode.RULES.value        # "llm" | "rules"
+    reasoning_trail: list[str] = field(default_factory=list)
+    detected_factors: list[str] = field(default_factory=list)
+    rul_hours: float = 0.0
 
     def to_dict(self) -> dict:
-        """Convert decision to dictionary."""
         return {
             "decision_type": self.decision_type.value,
-            "confidence": round(self.confidence, 2),
+            "confidence": round(self.confidence, 1),
             "description": self.description,
             "recommended_action": self.recommended_action,
             "reasoning": self.reasoning,
             "strategic_recommendation": self.strategic_recommendation,
             "requires_maintenance": self.requires_maintenance,
             "priority": self.priority,
+            "source": self.source,
+            "reasoning_trail": self.reasoning_trail,
+            "detected_factors": self.detected_factors,
+            "rul_hours": round(self.rul_hours, 1),
         }
 
 
 class AIAgent:
-    """
-    AI Agent for predictive maintenance using sense→think→act loop.
+    """Predictive-maintenance agent with an LLM-or-rules think phase."""
 
-    This agent continuously monitors power system assets, analyzes telemetry
-    data using LLM-based reasoning (with rule-based fallback), and generates
-    maintenance work orders with strategic recommendations.
+    DIAGNOSTIC_PROMPT = """You are an expert predictive-maintenance AI agent for \
+industrial power systems. Analyse the asset telemetry and return a diagnostic \
+assessment.
 
-    Attributes:
-        ollama_url: URL of the Ollama API server
-        model: Ollama model name to use
-        timeout_seconds: Timeout for LLM requests
-        use_llm: Whether to use LLM or rule-based reasoning
-    """
+ASSET:
+- ID: {asset_id} | Type: {asset_type} ({asset_name})
+- Estimated health: {health}% | State: {operating_state}
+- Operating hours: {operating_hours:.1f} | Active fault: {failure_mode}
 
-    # LLM prompt template for diagnostics
-    DIAGNOSTIC_PROMPT = """
-You are an expert predictive maintenance AI agent for industrial power systems.
-Analyze the following asset telemetry data and provide a diagnostic assessment.
-
-ASSET INFORMATION:
-- Asset ID: {asset_id}
-- Type: {asset_type} ({asset_name})
-- Current Health: {health}%
-- Operating State: {operating_state}
-- Total Operating Hours: {operating_hours:.2f}
-- Failure Mode (if any): {failure_mode}
-
-TELEMETRY READINGS:
-- Temperature: {temperature}°C
+TELEMETRY:
+- Temperature: {temperature} C
 - Vibration: {vibration} mm/s RMS
-- Voltage: {voltage}V
-- Current: {current}A
-- Bearing Wear: {bearing_wear}%
-- Oil Pressure: {oil_pressure} bar
-- Health Score: {health_score}%
-- Power Factor: {power_factor}
+- Voltage: {voltage} V | Current: {current} A
+- Bearing wear: {bearing_wear}% | Oil pressure: {oil_pressure} bar
+- Power factor: {power_factor} | Anomaly score: {anomaly_score}/100
+- Estimated remaining useful life: {rul_hours} hours
 
-SIMULATION CONTEXT:
-- Current Tick: {tick_count}
-
-TASK:
-1. Analyze the telemetry data and identify any anomalies or concerning trends.
-2. Determine the current asset health status and risk level.
-3. Recommend immediate actions if needed.
-4. Provide strategic recommendations for long-term maintenance policy.
-
-Respond in JSON format with these exact fields:
+Respond in JSON with EXACTLY these fields:
 {{
-    "decision_type": "monitor" | "inspect" | "maintain" | "repair" | "emergency",
-    "confidence": 0-100,
-    "description": "Brief summary of asset condition",
-    "recommended_action": "Specific action to take",
-    "reasoning": "Detailed chain of thought explaining your analysis",
-    "strategic_recommendation": "Long-term policy suggestion (e.g., extend maintenance interval, upgrade component, change operating parameters)",
-    "priority": "low" | "medium" | "high" | "critical"
+  "decision_type": "monitor" | "inspect" | "maintain" | "repair" | "emergency",
+  "confidence": 0-100,
+  "description": "one-line condition summary",
+  "recommended_action": "specific action to take",
+  "reasoning": "concise chain of thought explaining the call",
+  "strategic_recommendation": "long-term policy suggestion",
+  "priority": "low" | "medium" | "high" | "critical"
 }}
+Be concise and actionable."""
 
-Be concise but thorough. Focus on actionable insights.
-"""
-
-    # Rule-based thresholds for fallback
     RULE_THRESHOLDS = {
-        "critical_health": 15.0,
-        "high_health": 30.0,
-        "degraded_health": 50.0,
-        "high_temperature": 80.0,
+        "critical_health": 20.0,
+        "high_health": 35.0,
+        "degraded_health": 55.0,
+        "high_temperature": 95.0,
         "high_vibration": 5.0,
-        "low_efficiency": 0.75,
         "low_oil_pressure": 2.5,
-        "high_bearing_wear": 70.0,
-        "high_harmonic": 0.10,
+        "high_bearing_wear": 55.0,
+        "low_rul_hours": 72.0,
     }
 
     def __init__(
         self,
         ollama_url: str = "http://localhost:11434",
         model: str = "qwen2.5:7b",
-        timeout_seconds: int = 30,
-    ):
-        """
-        Initialize the AI agent.
-
-        Args:
-            ollama_url: Base URL for Ollama API
-            model: Model name to use for inference
-            timeout_seconds: Request timeout
-        """
+        timeout_seconds: float = 30.0,
+        enabled: bool = True,
+        llm_every_n_cycles: int = 1,
+    ) -> None:
         self.ollama_url = ollama_url.rstrip("/")
         self.model = model
-        self.timeout_seconds = timeout_seconds
-        self.use_llm = True
-        self._llm_available: Optional[bool] = None
-        self._last_llm_check: Optional[datetime] = None
+        self.timeout_seconds = float(timeout_seconds)
+        self.enabled = enabled
+        self.llm_every_n_cycles = max(1, llm_every_n_cycles)
+        self._llm_available: bool | None = None
+        self._last_llm_check: datetime | None = None
+        self._cycle_counts: dict[str, int] = {}
+        self.last_mode: str = AgentMode.RULES.value
+
+    # -- LLM availability -------------------------------------------------
 
     async def check_llm_availability(self) -> bool:
-        """
-        Check if Ollama LLM is available.
-
-        Returns:
-            True if LLM is reachable and responsive
-        """
-        # Cache check for 60 seconds
+        """Return whether Ollama is reachable (cached for 60s)."""
+        if not self.enabled:
+            return False
         now = datetime.now()
         if (
             self._llm_available is not None
@@ -207,33 +181,37 @@ Be concise but thorough. Focus on actionable insights.
         ):
             return self._llm_available
 
+        previous = self._llm_available
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(f"{self.ollama_url}/api/tags")
-                self._llm_available = response.status_code == 200
-        except Exception:
+            self._llm_available = response.status_code == 200
+        except Exception as exc:  # network error, connection refused, etc.
             self._llm_available = False
+            logger.debug("Ollama availability check failed: %s", exc)
 
+        if previous != self._llm_available:
+            logger.info(
+                "Ollama availability changed",
+                extra={"available": self._llm_available, "url": self.ollama_url},
+            )
         self._last_llm_check = now
         return self._llm_available
 
-    async def sense(
-        self,
-        asset_state: dict,
-        telemetry: dict,
-        tick_count: int,
-    ) -> SenseData:
-        """
-        Sense phase: Collect and preprocess asset data.
+    def get_status(self) -> dict:
+        """Honest, UI-facing status of the reasoning backend."""
+        return {
+            "enabled": self.enabled,
+            "available": bool(self._llm_available),
+            "model": self.model,
+            "url": self.ollama_url,
+            "last_mode": self.last_mode,
+        }
 
-        Args:
-            asset_state: Current state of the asset
-            telemetry: Current telemetry readings
-            tick_count: Current simulation tick
+    # -- sense ------------------------------------------------------------
 
-        Returns:
-            Structured sense data for the think phase
-        """
+    def sense(self, asset_state: dict, telemetry: dict, tick_count: int) -> SenseData:
+        """Assemble a structured snapshot from raw asset state + telemetry."""
         return SenseData(
             asset_id=asset_state["asset_id"],
             asset_type=asset_state["asset_type"],
@@ -246,337 +224,288 @@ Be concise but thorough. Focus on actionable insights.
             tick_count=tick_count,
         )
 
+    # -- think ------------------------------------------------------------
+
     async def think(self, sense_data: SenseData) -> AgentDecision:
+        """Produce a decision, preferring the LLM and falling back to rules.
+
+        The chosen path (and any fallback reason) is recorded in ``last_mode`` so
+        the UI can report it honestly.
         """
-        Think phase: Analyze sense data and make a decision.
+        should_use_llm = self.enabled and self._llm_turn(sense_data.asset_id)
 
-        Attempts LLM-based reasoning first, falls back to rule-based
-        diagnostics if LLM is unavailable or times out.
+        if not self.enabled:
+            self.last_mode = AgentMode.LLM_DISABLED.value
+            return self._think_with_rules(sense_data, fallback_from=self.last_mode)
 
-        Args:
-            sense_data: Data from the sense phase
+        if should_use_llm:
+            if await self.check_llm_availability():
+                try:
+                    decision = await self._think_with_llm(sense_data)
+                    self.last_mode = AgentMode.LLM.value
+                    return decision
+                except (TimeoutError, httpx.HTTPError, json.JSONDecodeError) as exc:
+                    logger.warning(
+                        "LLM reasoning failed; using rule engine",
+                        extra={"asset_id": sense_data.asset_id, "error": str(exc)},
+                    )
+                    self.last_mode = AgentMode.LLM_ERROR.value
+                    return self._think_with_rules(sense_data, fallback_from=self.last_mode)
+                except Exception as exc:  # defensive: never let the loop die
+                    logger.warning(
+                        "Unexpected LLM error; using rule engine",
+                        extra={"asset_id": sense_data.asset_id, "error": str(exc)},
+                    )
+                    self.last_mode = AgentMode.LLM_ERROR.value
+                    return self._think_with_rules(sense_data, fallback_from=self.last_mode)
+            else:
+                self.last_mode = AgentMode.LLM_UNAVAILABLE.value
+                return self._think_with_rules(sense_data, fallback_from=self.last_mode)
 
-        Returns:
-            Agent decision with reasoning and recommendations
-        """
-        # Check LLM availability
-        llm_available = await self.check_llm_availability()
-
-        if llm_available and self.use_llm:
-            try:
-                return await self._think_with_llm(sense_data)
-            except asyncio.TimeoutError:
-                pass  # Fall through to rule-based
-            except Exception:
-                pass  # Fall through to rule-based
-
-        # Rule-based fallback
+        # Throttled cycle: use rules this time (LLM narrative runs periodically).
+        self.last_mode = AgentMode.RULES.value
         return self._think_with_rules(sense_data)
 
+    def _llm_turn(self, asset_id: str) -> bool:
+        """Return True if this cycle should attempt the (throttled) LLM path."""
+        count = self._cycle_counts.get(asset_id, 0)
+        self._cycle_counts[asset_id] = count + 1
+        return count % self.llm_every_n_cycles == 0
+
     async def _think_with_llm(self, sense_data: SenseData) -> AgentDecision:
-        """
-        Think phase using LLM reasoning.
-
-        Args:
-            sense_data: Data from the sense phase
-
-        Returns:
-            Agent decision from LLM analysis
-
-        Raises:
-            asyncio.TimeoutError: If LLM request times out
-            Exception: If LLM request fails
-        """
+        """LLM-backed reasoning via Ollama (raises on failure to trigger fallback)."""
+        tel = sense_data.telemetry
         prompt = self.DIAGNOSTIC_PROMPT.format(
             asset_id=sense_data.asset_id,
             asset_type=sense_data.asset_type,
             asset_name=sense_data.asset_name,
-            health=sense_data.health,
+            health=round(sense_data.health, 1),
             operating_state=sense_data.operating_state,
             operating_hours=sense_data.total_operating_hours,
-            failure_mode=sense_data.failure_mode or "None",
-            tick_count=sense_data.tick_count,
-            temperature=sense_data.telemetry["temperature"],
-            vibration=sense_data.telemetry["vibration"],
-            voltage=sense_data.telemetry["voltage"],
-            current=sense_data.telemetry["current"],
-            bearing_wear=sense_data.telemetry["bearing_wear"],
-            oil_pressure=sense_data.telemetry["oil_pressure"],
-            health_score=sense_data.telemetry["health_score"],
-            power_factor=sense_data.telemetry["power_factor"],
+            failure_mode=sense_data.failure_mode or "none",
+            temperature=round(tel.get("temperature", 0), 1),
+            vibration=round(tel.get("vibration", 0), 2),
+            voltage=round(tel.get("voltage", 0), 1),
+            current=round(tel.get("current", 0), 1),
+            bearing_wear=round(tel.get("bearing_wear", 0), 1),
+            oil_pressure=round(tel.get("oil_pressure", 0), 2),
+            power_factor=round(tel.get("power_factor", 0), 3),
+            anomaly_score=round(tel.get("anomaly_score", 0), 1),
+            rul_hours=round(tel.get("rul_hours", 0), 1),
         )
 
-        async with httpx.AsyncClient(timeout=float(self.timeout_seconds)) as client:
+        async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
             response = await client.post(
                 f"{self.ollama_url}/api/generate",
-                json={
-                    "model": self.model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "format": "json",
-                },
+                json={"model": self.model, "prompt": prompt, "stream": False, "format": "json"},
             )
             response.raise_for_status()
 
-        result = response.json()
-        response_text = result.get("response", "")
+        response_text = response.json().get("response", "")
+        data = self._extract_json(response_text)
 
-        # Parse JSON response
         try:
-            # Try to extract JSON from response
-            json_start = response_text.find("{")
-            json_end = response_text.rfind("}") + 1
-            if json_start >= 0 and json_end > json_start:
-                json_str = response_text[json_start:json_end]
-                decision_data = json.loads(json_str)
-            else:
-                decision_data = json.loads(response_text)
-        except json.JSONDecodeError:
-            # If JSON parsing fails, use rule-based fallback
-            return self._think_with_rules(sense_data)
-
-        # Map string decision type to enum
-        decision_type_str = decision_data.get("decision_type", "monitor")
-        try:
-            decision_type = DecisionType(decision_type_str)
+            decision_type = DecisionType(data.get("decision_type", "monitor"))
         except ValueError:
             decision_type = DecisionType.MONITOR
+        priority = data.get("priority", "medium")
+        if priority not in ("low", "medium", "high", "critical"):
+            priority = "medium"
 
-        priority_str = decision_data.get("priority", "medium")
-        if priority_str not in ("low", "medium", "high", "critical"):
-            priority_str = "medium"
-
+        reasoning = data.get("reasoning", "LLM analysis complete.")
+        trail = [
+            f"Sensed {sense_data.asset_name}: {round(tel.get('temperature', 0), 1)} C, "
+            f"{round(tel.get('vibration', 0), 2)} mm/s, health {round(sense_data.health, 1)}%.",
+            f"LLM ({self.model}) diagnosis: {reasoning}",
+            f"Decision: {decision_type.value.upper()} — {data.get('recommended_action', '')}",
+        ]
+        requires = decision_type != DecisionType.MONITOR
         return AgentDecision(
             decision_type=decision_type,
-            confidence=float(decision_data.get("confidence", 50.0)),
-            description=decision_data.get("description", "Analysis complete"),
-            recommended_action=decision_data.get("recommended_action", "Continue monitoring"),
-            reasoning=decision_data.get("reasoning", "LLM analysis completed"),
-            strategic_recommendation=decision_data.get(
-                "strategic_recommendation",
-                "Continue current maintenance schedule",
+            confidence=float(data.get("confidence", 60.0)),
+            description=data.get("description", "Analysis complete"),
+            recommended_action=data.get("recommended_action", "Continue monitoring"),
+            reasoning=reasoning,
+            strategic_recommendation=data.get(
+                "strategic_recommendation", "Continue current maintenance schedule"
             ),
-            requires_maintenance=decision_type in (
-                DecisionType.INSPECT,
-                DecisionType.MAINTAIN,
-                DecisionType.REPAIR,
-                DecisionType.EMERGENCY,
-            ),
-            priority=priority_str,
+            requires_maintenance=requires,
+            priority=priority,
+            source=AgentMode.LLM.value,
+            reasoning_trail=trail,
+            detected_factors=self._detect_factors(sense_data),
+            rul_hours=float(tel.get("rul_hours", 0.0)),
         )
 
-    def _think_with_rules(self, sense_data: SenseData) -> AgentDecision:
-        """
-        Think phase using rule-based diagnostics.
+    @staticmethod
+    def _extract_json(text: str) -> dict:
+        """Best-effort JSON extraction from an LLM response."""
+        start, end = text.find("{"), text.rfind("}") + 1
+        if 0 <= start < end:
+            return json.loads(text[start:end])
+        return json.loads(text)
 
-        Args:
-            sense_data: Data from the sense phase
-
-        Returns:
-            Agent decision from rule-based analysis
-        """
+    def _detect_factors(self, sense_data: SenseData) -> list[str]:
+        """Named risk factors from telemetry (shared by both reasoning paths)."""
         t = self.RULE_THRESHOLDS
         tel = sense_data.telemetry
-
-        # Calculate risk score
-        risk_score = 0.0
-        reasons: List[str] = []
-
-        # Health-based risk
-        if sense_data.health <= t["critical_health"]:
-            risk_score += 50.0
-            reasons.append("Critical health level")
-        elif sense_data.health <= t["high_health"]:
-            risk_score += 30.0
-            reasons.append("High risk health level")
-        elif sense_data.health <= t["degraded_health"]:
-            risk_score += 15.0
-            reasons.append("Degraded health level")
-
-        # Temperature risk
-        if tel["temperature"] >= t["high_temperature"]:
-            risk_score += 20.0
-            reasons.append("High temperature")
-
-        # Vibration risk
-        if tel["vibration"] >= t["high_vibration"]:
-            risk_score += 20.0
-            reasons.append("Excessive vibration")
-
-        # Bearing wear risk
-        if tel["bearing_wear"] >= t["high_bearing_wear"]:
-            risk_score += 20.0
-            reasons.append("High bearing wear")
-
-        # Oil pressure risk
-        if tel["oil_pressure"] <= t["low_oil_pressure"]:
-            risk_score += 15.0
-            reasons.append("Low oil pressure")
-
-        # Failure mode risk
+        factors: list[str] = []
+        if sense_data.health <= t["degraded_health"]:
+            factors.append(f"Health at {round(sense_data.health, 1)}% (degraded)")
+        if tel.get("temperature", 0) >= t["high_temperature"]:
+            factors.append(f"High temperature {round(tel['temperature'], 1)} C")
+        if tel.get("vibration", 0) >= t["high_vibration"]:
+            factors.append(f"Excessive vibration {round(tel['vibration'], 2)} mm/s")
+        if tel.get("bearing_wear", 0) >= t["high_bearing_wear"]:
+            factors.append(f"Bearing wear {round(tel['bearing_wear'], 1)}%")
+        if tel.get("oil_pressure", 99) <= t["low_oil_pressure"]:
+            factors.append(f"Low oil pressure {round(tel['oil_pressure'], 2)} bar")
+        if 0 < tel.get("rul_hours", 1e9) <= t["low_rul_hours"]:
+            factors.append(f"Short RUL {round(tel['rul_hours'], 1)} h")
         if sense_data.failure_mode:
-            risk_score += 25.0
-            reasons.append(f"Active failure mode: {sense_data.failure_mode}")
+            factors.append(f"Active fault: {sense_data.failure_mode}")
+        return factors
 
-        # Determine decision based on risk score
-        if risk_score >= 70.0:
-            decision_type = DecisionType.EMERGENCY
-            priority = "critical"
-            action = "Initiate emergency shutdown and dispatch maintenance team immediately"
-        elif risk_score >= 50.0:
-            decision_type = DecisionType.REPAIR
-            priority = "high"
+    def _think_with_rules(
+        self, sense_data: SenseData, fallback_from: str | None = None
+    ) -> AgentDecision:
+        """Deterministic rule-based reasoning with a scored risk model."""
+        t = self.RULE_THRESHOLDS
+        tel = sense_data.telemetry
+        factors = self._detect_factors(sense_data)
+
+        risk = 0.0
+        if sense_data.health <= t["critical_health"]:
+            risk += 50.0
+        elif sense_data.health <= t["high_health"]:
+            risk += 30.0
+        elif sense_data.health <= t["degraded_health"]:
+            risk += 15.0
+        if tel.get("temperature", 0) >= t["high_temperature"]:
+            risk += 15.0
+        if tel.get("vibration", 0) >= t["high_vibration"]:
+            risk += 20.0
+        if tel.get("bearing_wear", 0) >= t["high_bearing_wear"]:
+            risk += 15.0
+        if tel.get("oil_pressure", 99) <= t["low_oil_pressure"]:
+            risk += 15.0
+        if 0 < tel.get("rul_hours", 1e9) <= t["low_rul_hours"]:
+            risk += 20.0
+        if sense_data.failure_mode:
+            risk += 20.0
+
+        if risk >= 70.0:
+            dtype, priority = DecisionType.EMERGENCY, "critical"
+            action = "Dispatch maintenance team immediately; prepare controlled shutdown"
+        elif risk >= 50.0:
+            dtype, priority = DecisionType.REPAIR, "high"
             action = "Schedule corrective maintenance within 4 hours"
-        elif risk_score >= 30.0:
-            decision_type = DecisionType.MAINTAIN
-            priority = "medium"
+        elif risk >= 30.0:
+            dtype, priority = DecisionType.MAINTAIN, "medium"
             action = "Schedule preventive maintenance within 24 hours"
-        elif risk_score >= 15.0:
-            decision_type = DecisionType.INSPECT
-            priority = "low"
+        elif risk >= 15.0:
+            dtype, priority = DecisionType.INSPECT, "low"
             action = "Schedule inspection at next maintenance window"
         else:
-            decision_type = DecisionType.MONITOR
-            priority = "low"
+            dtype, priority = DecisionType.MONITOR, "low"
             action = "Continue normal monitoring"
 
-        # Generate strategic recommendation
-        strategic_rec = self._generate_strategic_recommendation(sense_data, risk_score)
-
-        # Build reasoning string
-        if reasons:
-            reasoning = f"Rule-based analysis identified {len(reasons)} risk factors: " + "; ".join(reasons) + "."
+        reasoning = (
+            "Rule engine flagged " + "; ".join(factors) + f". Risk score {risk:.0f}/100."
+            if factors
+            else "No significant risk factors; asset within normal parameters."
+        )
+        rul = float(tel.get("rul_hours", 0.0))
+        trail = [
+            f"Sensed {sense_data.asset_name}: {round(tel.get('temperature', 0), 1)} C, "
+            f"{round(tel.get('vibration', 0), 2)} mm/s, bearing {round(tel.get('bearing_wear', 0), 1)}%, "
+            f"health {round(sense_data.health, 1)}%, RUL {round(rul, 1)} h.",
+        ]
+        if factors:
+            trail.append("Flagged: " + "; ".join(factors) + ".")
         else:
-            reasoning = "No significant risk factors detected. Asset operating within normal parameters."
-
-        description = f"Asset {sense_data.asset_id} ({sense_data.asset_name}) - {sense_data.operating_state.upper()}"
+            trail.append("No thresholds breached.")
+        trail.append(f"Risk score {risk:.0f}/100 → {dtype.value.upper()}.")
+        trail.append(f"Recommended: {action}.")
 
         return AgentDecision(
-            decision_type=decision_type,
-            confidence=min(95.0, 50.0 + risk_score),
-            description=description,
+            decision_type=dtype,
+            confidence=min(95.0, 55.0 + risk * 0.4),
+            description=(
+                f"{sense_data.asset_id} ({sense_data.asset_name}) — "
+                f"{sense_data.operating_state.upper()}"
+            ),
             recommended_action=action,
             reasoning=reasoning,
-            strategic_recommendation=strategic_rec,
-            requires_maintenance=decision_type != DecisionType.MONITOR,
+            strategic_recommendation=self._strategic_recommendation(sense_data, risk),
+            requires_maintenance=dtype != DecisionType.MONITOR,
             priority=priority,
+            source=fallback_from or AgentMode.RULES.value,
+            reasoning_trail=trail,
+            detected_factors=factors,
+            rul_hours=rul,
         )
 
-    def _generate_strategic_recommendation(
-        self,
-        sense_data: SenseData,
-        risk_score: float,
-    ) -> str:
-        """
-        Generate strategic long-term recommendations.
-
-        Args:
-            sense_data: Current sense data
-            risk_score: Calculated risk score
-
-        Returns:
-            Strategic recommendation string
-        """
-        recommendations: List[str] = []
-
-        # Health-based recommendations
+    @staticmethod
+    def _strategic_recommendation(sense_data: SenseData, risk: float) -> str:
+        recs: list[str] = []
         if sense_data.health < 40.0:
-            recommendations.append(
-                f"Consider asset replacement planning for {sense_data.asset_name} - "
-                f"current health ({sense_data.health}%) indicates end-of-life approaching"
+            recs.append(
+                f"Plan replacement for {sense_data.asset_name}; health "
+                f"{round(sense_data.health, 1)}% suggests end-of-life approaching."
             )
+        mode_recs = {
+            "bearing_wear": "Add vibration-based condition monitoring to catch bearing wear earlier.",
+            "insulation_breakdown": "Increase insulation-testing frequency from annual to quarterly.",
+            "oil_degradation": "Upgrade oil filtration or shorten oil-change intervals.",
+            "misalignment": "Run a laser alignment check and adopt a precision-alignment program.",
+            "overload": "Review load distribution; consider capacity upgrade or load shedding.",
+        }
+        if sense_data.failure_mode in mode_recs:
+            recs.append(mode_recs[sense_data.failure_mode])
+        if risk >= 30.0 and not recs:
+            recs.append("Re-evaluate maintenance interval for current operating conditions.")
+        if not recs:
+            recs.append("Current maintenance strategy is effective; continue scheduled inspections.")
+        return " ".join(recs)
 
-        # Operating hours recommendations
-        if sense_data.total_operating_hours > 1000:
-            recommendations.append(
-                f"Asset has {sense_data.total_operating_hours:.0f} operating hours - "
-                "evaluate extended warranty or replacement options"
-            )
+    # -- act --------------------------------------------------------------
 
-        # Failure mode specific
-        if sense_data.failure_mode == "bearing_wear":
-            recommendations.append(
-                "Implement vibration-based condition monitoring program to detect bearing wear earlier"
-            )
-        elif sense_data.failure_mode == "insulation_breakdown":
-            recommendations.append(
-                "Review insulation testing schedule - consider increasing frequency from annual to quarterly"
-            )
-        elif sense_data.failure_mode == "oil_degradation":
-            recommendations.append(
-                "Evaluate oil filtration system upgrade or more frequent oil change intervals"
-            )
-        elif sense_data.failure_mode == "misalignment":
-            recommendations.append(
-                "Perform laser alignment check and implement precision alignment program"
-            )
-        elif sense_data.failure_mode == "overload":
-            recommendations.append(
-                "Review load distribution and consider capacity upgrade or load shedding"
-            )
+    def act(
+        self, decision: AgentDecision, asset_id: str, maintenance_manager: Any
+    ) -> dict[str, str] | None:
+        """Create a maintenance work order for an actionable decision.
 
-        # Risk-based recommendations
-        if risk_score >= 30.0:
-            recommendations.append(
-                "Review maintenance interval - current schedule may be insufficient for operating conditions"
-            )
-
-        if not recommendations:
-            recommendations.append(
-                "Current maintenance strategy appears effective - continue with scheduled inspections"
-            )
-
-        return " ".join(recommendations)
-
-    async def act(
-        self,
-        decision: AgentDecision,
-        maintenance_manager: Any,
-    ) -> Optional[Dict[str, str]]:
-        """
-        Act phase: Execute decision by creating maintenance work orders.
-
-        Args:
-            decision: Decision from the think phase
-            maintenance_manager: MaintenanceManager instance
-
-        Returns:
-            Work order ID if created, None otherwise
+        Returns the created work-order summary, or ``None`` if no action is
+        required. Import is local to avoid a hard dependency from the agent onto
+        the maintenance package at module load.
         """
         from simulator.maintenance import WorkOrderPriority, WorkOrderType
 
         if not decision.requires_maintenance:
             return None
 
-        # Map decision type to work order type
-        work_type_map = {
+        work_type = {
             DecisionType.INSPECT: WorkOrderType.INSPECTION,
             DecisionType.MAINTAIN: WorkOrderType.PREVENTIVE,
             DecisionType.REPAIR: WorkOrderType.CORRECTIVE,
             DecisionType.EMERGENCY: WorkOrderType.EMERGENCY,
-        }
-
-        # Map priority string to enum
-        priority_map = {
+        }.get(decision.decision_type, WorkOrderType.INSPECTION)
+        priority = {
             "low": WorkOrderPriority.LOW,
             "medium": WorkOrderPriority.MEDIUM,
             "high": WorkOrderPriority.HIGH,
             "critical": WorkOrderPriority.CRITICAL,
-        }
+        }.get(decision.priority, WorkOrderPriority.MEDIUM)
 
-        work_type = work_type_map.get(decision.decision_type, WorkOrderType.INSPECTION)
-        priority = priority_map.get(decision.priority, WorkOrderPriority.MEDIUM)
-
-        # Create work order
         work_order = maintenance_manager.create_work_order(
-            asset_id=sense_data.asset_id if "sense_data" in dir() else "unknown",
+            asset_id=asset_id,
             work_type=work_type,
             priority=priority,
             description=decision.description,
             reason=decision.reasoning,
             strategic_recommendation=decision.strategic_recommendation,
         )
-
         return {"work_order_id": work_order.id, "priority": priority.value}
 
     async def run_cycle(
@@ -585,58 +514,16 @@ Be concise but thorough. Focus on actionable insights.
         telemetry: dict,
         tick_count: int,
         maintenance_manager: Any,
-    ) -> Dict[str, Any]:
-        """
-        Run a complete sense→think→act cycle.
-
-        Args:
-            asset_state: Current asset state
-            telemetry: Current telemetry readings
-            tick_count: Current simulation tick
-            maintenance_manager: MaintenanceManager instance
-
-        Returns:
-            Dictionary containing sense data, decision, and action results
-        """
-        # Sense
-        sense_data = await self.sense(asset_state, telemetry, tick_count)
-
-        # Think
+        create_work_order: bool = True,
+    ) -> dict[str, Any]:
+        """Run a full sense -> think -> act cycle for one asset."""
+        sense_data = self.sense(asset_state, telemetry, tick_count)
         decision = await self.think(sense_data)
-
-        # Act - need to pass asset_id from sense_data
-        from simulator.maintenance import WorkOrderPriority, WorkOrderType
-
-        work_order_result = None
-        if decision.requires_maintenance:
-            work_type_map = {
-                DecisionType.INSPECT: WorkOrderType.INSPECTION,
-                DecisionType.MAINTAIN: WorkOrderType.PREVENTIVE,
-                DecisionType.REPAIR: WorkOrderType.CORRECTIVE,
-                DecisionType.EMERGENCY: WorkOrderType.EMERGENCY,
-            }
-            priority_map = {
-                "low": WorkOrderPriority.LOW,
-                "medium": WorkOrderPriority.MEDIUM,
-                "high": WorkOrderPriority.HIGH,
-                "critical": WorkOrderPriority.CRITICAL,
-            }
-
-            work_type = work_type_map.get(decision.decision_type, WorkOrderType.INSPECTION)
-            priority = priority_map.get(decision.priority, WorkOrderPriority.MEDIUM)
-
-            work_order = maintenance_manager.create_work_order(
-                asset_id=sense_data.asset_id,
-                work_type=work_type,
-                priority=priority,
-                description=decision.description,
-                reason=decision.reasoning,
-                strategic_recommendation=decision.strategic_recommendation,
-            )
-            work_order_result = {"work_order_id": work_order.id, "priority": priority.value}
-
+        action = None
+        if create_work_order:
+            action = self.act(decision, sense_data.asset_id, maintenance_manager)
         return {
             "sense": sense_data.to_dict(),
             "decision": decision.to_dict(),
-            "action": work_order_result,
+            "action": action,
         }
