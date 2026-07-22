@@ -1,0 +1,156 @@
+# PowerSim AI — Technical Overview
+
+A due-diligence-oriented tour of the architecture, the reasoning behind the key
+design decisions, the path from simulation to real industrial telemetry, and the
+security/data-handling considerations for a real deployment.
+
+> All current data is **simulated**. This document describes the architecture and
+> the intended production path, and is explicit about what is built vs. planned.
+
+---
+
+## 1. System architecture
+
+PowerSim AI is deliberately layered so the **agentic core is independent of both
+the data source and the web framework**.
+
+```
+Telemetry source(s)  ──▶  SimulationService  ──▶  FastAPI (REST + WebSocket)  ──▶  UI
+  simulator (built)         (application core)        (transport only)          site/dashboard/pitch
+  OPC-UA / MQTT (planned)   twin · agent · queue
+                            · business impact
+```
+
+| Layer | Module(s) | Responsibility |
+|---|---|---|
+| **Config** | `config.py` | Env-driven `pydantic-settings`; no hard-coded hosts/ports/models. |
+| **Observability** | `logging_config.py` | Structured console/JSON logging; no `print`. |
+| **Domain — twin** | `simulator/power_system.py` | Physics: latent health, sensor generation, health estimation, RUL. |
+| **Domain — maintenance** | `simulator/maintenance.py` | Work-order lifecycle + prioritised queue. |
+| **Domain — impact** | `simulator/business_impact.py` | Simulated ROI (downtime/energy/CO₂), buyer-configurable. |
+| **Agent** | `ai_agent/agent.py` | Sense → think → act; LLM-or-rules; reasoning trail. |
+| **Integrations** | `integrations/` | `TelemetrySource` contract + simulator impl + OPC-UA/MQTT stubs. |
+| **Core** | `simulation_service.py` | Orchestrates the loops; owns all mutable state. Imports **no** FastAPI. |
+| **Transport** | `main.py`, `schemas.py` | HTTP/WebSocket, validation, CORS, static hosting. |
+
+Two background loops run in the app:
+
+1. **Telemetry loop** (`SimulationService.advance_telemetry`) — advances the twin one tick, updates the impact model, broadcasts a `tick` frame. Fast and non-blocking.
+2. **Agent loop** (`SimulationService.run_agent_pass`) — runs the sense→think→act pass over the fleet, creates work orders idempotently, broadcasts an `agent` frame. Decoupled so a slow LLM call never stalls telemetry streaming.
+
+## 2. Why a digital twin *and* an agent
+
+**The digital twin** models each asset's **latent health** as the ground truth that
+drives degradation and failure signatures. Crucially, health is **not** read out
+directly — telemetry (temperature, vibration, etc.) is generated from the latent
+state, and a separate **sensor-fusion estimate** infers health *back* from those
+sensors. This mirrors reality: a real system never observes true condition; it
+*infers* it. The status badge, health bar, RUL, and agent all consume the same
+observed estimate, so they never disagree — a bug the earlier prototype had.
+
+**The agent** turns inference into decisions. The agentic framing (sense → think →
+act) matters because the market is shifting from *analytics that inform* to *agents
+that execute* (Schneider/Cognite, Siemens, Honeywell — see market research). The
+agent:
+
+- runs a deterministic **rule engine** (scored risk model) every cycle, and
+- optionally overlays **LLM reasoning** (via Ollama) for richer narrative, throttled to control cost,
+- always emitting a **reasoning trail** and an honest **mode** (`llm` / `rules` / `llm_unavailable` / `llm_error` / `llm_disabled`).
+
+The rule engine is the safety floor: the product is fully functional and
+explainable with no LLM at all, which matters for air-gapped OT environments.
+
+### Remaining Useful Life (RUL)
+
+RUL is projected from the observed health trajectory and the effective per-tick
+degradation rate (including any active fault multiplier). Uncertainty-aware RUL is
+a named market differentiator; the current estimate is deterministic, with
+learned/uncertainty-quantified models on the roadmap.
+
+## 3. Data model & contracts
+
+- **Telemetry** is a flat dict (`TelemetryData.to_dict()`) so every layer — agent,
+  API, UI — consumes one shape regardless of origin.
+- **`TelemetrySource`** (`integrations/base.py`) is the abstraction that decouples
+  the core from the data origin:
+
+  ```python
+  class TelemetrySource(ABC):
+      async def connect(self) -> None: ...
+      async def read(self) -> dict[str, dict]:   # asset_id -> telemetry
+      async def close(self) -> None: ...
+  ```
+
+  `SimulatedTelemetrySource` is the working implementation; `OpcUaTelemetrySource`
+  and `MqttTelemetrySource` are stubs that raise `NotImplementedError` with a clear
+  roadmap note. **Swapping simulation for a real plant is implementing this one
+  interface** — not re-architecting.
+
+## 4. Scalability path: from simulation to real telemetry
+
+1. **Today** — in-process simulator; single-process app; in-memory state.
+2. **Connectors** — implement `OpcUaTelemetrySource` (targeting `asyncua`) and
+   `MqttTelemetrySource` (Sparkplug B codec). The core and UI need no changes.
+3. **State & history** — swap in-memory ring buffers for a time-series store
+   (e.g. TimescaleDB / InfluxDB) behind the same accessors; add a historian
+   backfill connector (OSIsoft/AVEVA PI).
+4. **Horizontal scale** — the transport layer is stateless per request; the
+   simulation/agent loops move to a dedicated worker (or per-site edge node)
+   publishing frames over a broker (MQTT/Redis) that API nodes fan out via
+   WebSocket. Per-plant isolation maps naturally to per-site edge deployments.
+5. **Models** — replace/augment the rule engine and deterministic RUL with
+   trained models (with uncertainty), served at the edge for data residency.
+
+Because the agent already reasons over the generic telemetry contract, none of the
+above touches the reasoning layer.
+
+## 5. Security & data-handling (for real deployment)
+
+Current state is a **demo** (open CORS, no auth, in-memory state — appropriate for
+a public simulation). For a real industrial deployment, the intended posture:
+
+- **OT segmentation & standards** — align with **IEC 62443** (incl. `-4-1` secure
+  development); treat the app as a Level-3/edge component, never exposed directly to
+  Level-0/1 devices. OPC-UA with certificate-based security; MQTT over TLS.
+- **On-prem / air-gapped option** — the rule engine + local LLM (Ollama) mean the
+  full product can run with **no external egress**, which many energy/defense-
+  adjacent operators require. Docker image is self-contained.
+- **AuthN/AuthZ** — add OIDC/SSO + role-based access before any multi-tenant or
+  internet-facing deployment (not in the demo).
+- **Input validation** — already enforced at the edge via Pydantic models
+  (`schemas.py`); the WebSocket has a connection cap; a global handler prevents
+  internal error leakage.
+- **Data residency** — per-site edge deployment keeps plant data local; the
+  MENA go-to-market explicitly plans in-region data residency.
+- **PII** — the system handles machine telemetry, not personal data; the only
+  personal field is the marketing contact form, which is logged server-side with no
+  third-party egress (wire to your own CRM).
+- **Compliance-ready outputs** — the energy/impact model is designed to export
+  auditable, asset-level energy data aligned with ISO 50001 / EU EED reporting.
+
+## 6. Testing, quality & operability
+
+- **53 tests** (`pytest`) covering physics (degradation monotonicity, failure
+  signatures, RUL, estimate-vs-truth tracking, seed determinism), the maintenance
+  queue, agent decision logic, the business-impact model, integrations, and the API
+  (validation, error paths, WebSocket).
+- **Static analysis** — `ruff` (lint + format) and `mypy` on all core modules.
+- **CI** — GitHub Actions on Python 3.11 & 3.12: lint, format-check, type-check, test.
+- **Ops** — env-driven config, structured logs (JSON in prod), a `/health` probe,
+  graceful shutdown of background loops, and a Docker `HEALTHCHECK`.
+
+## 7. Key design decisions & trade-offs
+
+| Decision | Rationale | Trade-off |
+|---|---|---|
+| Single latent-health source of truth | Coherence: badge/bar/RUL/agent never disagree | Slightly more physics code than a naïve model |
+| Rules-first, LLM-optional | Works air-gapped; deterministic + testable; honest fallback | LLM narrative is a bonus, not the backbone |
+| Two decoupled loops | LLM latency can't stall telemetry | Agent reasons on a near-live (not perfectly synchronous) snapshot |
+| `TelemetrySource` abstraction now | Real connectors become drop-ins | Upfront interface design before it's strictly needed |
+| In-memory state | Zero-dependency demo, trivial to run | Not durable/scaled — explicitly a roadmap item |
+| Self-contained frontend (no CDN) | Works offline in Docker; no CSP/availability risk | Hand-rolled charts instead of a charting lib |
+
+---
+
+*This document reflects the codebase as built. Planned items are labelled; nothing
+here implies real-world validation, which is the stated next milestone.*
