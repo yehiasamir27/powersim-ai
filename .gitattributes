@@ -1,0 +1,27 @@
+# Normalise line endings — text files stored LF in the repo.
+* text=auto eol=lf
+
+# Explicit text types
+*.py    text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.toml  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+*.html  text eol=lf
+*.css   text eol=lf
+*.js    text eol=lf
+*.cfg   text eol=lf
+Dockerfile text eol=lf
+.env.example text eol=lf
+
+# Binary assets — never normalise
+*.webp  binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.mp4   binary
+*.pdf   binary

@@ -8,7 +8,6 @@ work orders based on asset health and AI agent recommendations.
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Optional
 from uuid import uuid4
 
 
@@ -64,7 +63,7 @@ class WorkOrder:
     description: str = ""
     reason: str = ""
     created_at: datetime = field(default_factory=datetime.now)
-    scheduled_at: Optional[datetime] = None
+    scheduled_at: datetime | None = None
     estimated_duration: float = 2.0
     strategic_recommendation: str = ""
 
@@ -111,7 +110,7 @@ class MaintenanceManager:
     """
 
     # Priority sort order for queue
-    PRIORITY_ORDER: Dict[WorkOrderPriority, int] = {
+    PRIORITY_ORDER: dict[WorkOrderPriority, int] = {
         WorkOrderPriority.CRITICAL: 0,
         WorkOrderPriority.HIGH: 1,
         WorkOrderPriority.MEDIUM: 2,
@@ -120,8 +119,8 @@ class MaintenanceManager:
 
     def __init__(self):
         """Initialize the maintenance manager."""
-        self.work_orders: Dict[str, WorkOrder] = {}
-        self.completed_history: List[WorkOrder] = []
+        self.work_orders: dict[str, WorkOrder] = {}
+        self.completed_history: list[WorkOrder] = []
         self._maintenance_in_progress: set = set()
 
     def create_work_order(
@@ -173,11 +172,11 @@ class MaintenanceManager:
         self.work_orders[work_order.id] = work_order
         return work_order
 
-    def get_work_order(self, work_order_id: str) -> Optional[WorkOrder]:
+    def get_work_order(self, work_order_id: str) -> WorkOrder | None:
         """Get a specific work order by ID."""
         return self.work_orders.get(work_order_id)
 
-    def get_queue(self, include_completed: bool = False) -> List[WorkOrder]:
+    def get_queue(self, include_completed: bool = False) -> list[WorkOrder]:
         """
         Get the maintenance queue sorted by priority.
 
@@ -197,7 +196,7 @@ class MaintenanceManager:
 
         return orders
 
-    def get_pending_orders(self, asset_id: Optional[str] = None) -> List[WorkOrder]:
+    def get_pending_orders(self, asset_id: str | None = None) -> list[WorkOrder]:
         """
         Get pending work orders, optionally filtered by asset.
 
