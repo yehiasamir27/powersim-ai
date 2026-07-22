@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PowerSim AI — Live Operations Dashboard</title>
+  <meta name="description" content="Live agentic predictive-maintenance dashboard: watch the sense → think → act loop, business impact, and the agent's reasoning in real time." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070a0f'/%3E%3Cpath d='M17.5 5 8 18h6l-1.5 9L23 13h-6z' fill='%23ffb020'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/static/assets/design-system.css" />
+  <style>
+    body { background: var(--bg-0); }
+    .top {
+      position: sticky; top: 0; z-index: 40; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--s-5); background: rgba(7,10,15,0.92); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; color: var(--text-0); font-size: 1rem; }
+    .brand svg { width: 24px; height: 24px; }
+    .top-stats { display: flex; align-items: center; gap: var(--s-5); }
+    .tstat { display: flex; flex-direction: column; align-items: flex-end; }
+    .tstat .l { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-2); }
+    .tstat .v { font-family: var(--font-mono); font-size: 0.9rem; color: var(--cyan); font-weight: 600; }
+    .top-actions { display: flex; align-items: center; gap: var(--s-3); }
+    .top-actions a, .top-actions button { font-size: var(--fs-sm); }
+
+    .wrap { max-width: 1440px; margin-inline: auto; padding: var(--s-5); }
+    .layout { display: grid; grid-template-columns: 1fr 360px; gap: var(--s-5); align-items: start; }
+    .panel { background: linear-gradient(180deg, var(--surface), var(--bg-1)); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--s-5); }
+    .panel-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s-4); }
+    .panel-h h3 { font-size: var(--fs-base); color: var(--text-0); }
+    .panel-sub { font-size: var(--fs-xs); color: var(--text-2); }
+
+    /* Asset cards */
+    .assets { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-4); }
+    .acard { background: var(--bg-2); border: 1px solid var(--border); border-left: 3px solid var(--ok); border-radius: var(--r-md); padding: var(--s-4); transition: border-color 0.3s; }
+    .acard.warn { border-left-color: var(--warn); }
+    .acard.crit { border-left-color: var(--crit); }
+    .acard.info { border-left-color: var(--cyan); }
+    .acard-h { display: flex; justify-content: space-between; align-items: flex-start; }
+    .acard .aid { font-weight: 800; color: var(--text-0); }
+    .acard .anm { font-size: 0.66rem; color: var(--text-2); }
+    .acard .spark { width: 100%; height: 34px; margin: var(--s-3) 0; }
+    .ametrics { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .amet { background: var(--bg-1); border-radius: var(--r-sm); padding: 5px 8px; }
+    .amet .mv { font-family: var(--font-mono); font-size: 0.82rem; color: var(--cyan); }
+    .amet .ml { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2); }
+    .healthbar { height: 5px; background: var(--bg-1); border-radius: 3px; overflow: hidden; margin-top: var(--s-3); }
+    .healthbar > span { display: block; height: 100%; background: var(--ok); transition: width 0.5s var(--ease), background 0.3s; }
+    .acard .dec { margin-top: 8px; font-size: 0.62rem; }
+
+    /* Business impact */
+    .bi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+    .bi { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-3) var(--s-4); position: relative; }
+    .bi .v { font-family: var(--font-mono); font-size: 1.25rem; color: var(--accent); font-weight: 700; }
+    .bi .k { font-size: 0.62rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+    .bi.big { grid-column: 1 / -1; }
+    .bi.big .v { font-size: 1.7rem; }
+    .assum { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2); margin-top: var(--s-3); }
+    .assum label { font-size: 0.58rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 3px; }
+    .assum input { width: 100%; background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--r-sm); color: var(--text-0); padding: 5px 7px; font-family: var(--font-mono); font-size: 0.78rem; }
+    .assum input:focus { outline: none; border-color: var(--accent); }
+
+    /* Agent why-trail */
+    .trail { display: flex; flex-direction: column; gap: var(--s-3); max-height: 420px; overflow-y: auto; }
+    .tevent { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-3) var(--s-4); background: var(--bg-2); animation: slideIn 0.4s var(--ease); }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .tevent-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .tevent-h .who { font-weight: 700; color: var(--text-0); font-size: var(--fs-sm); }
+    .tevent .step { font-size: 0.74rem; color: var(--text-1); padding-left: 14px; position: relative; margin-top: 4px; line-height: 1.45; }
+    .tevent .step::before { content: ""; position: absolute; left: 3px; top: 7px; width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
+    .tevent .src { font-family: var(--font-mono); font-size: 0.58rem; color: var(--text-2); margin-top: 6px; }
+    .fleet-summary { font-size: var(--fs-sm); color: var(--text-1); background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-3) var(--s-4); margin-bottom: var(--s-4); }
+
+    /* Controls */
+    .ctl-row { display: flex; gap: var(--s-2); margin-bottom: var(--s-3); flex-wrap: wrap; }
+    select.sel, .ctl-row select { flex: 1; min-width: 0; background: var(--bg-1); color: var(--text-0); border: 1px solid var(--border-strong); border-radius: var(--r-sm); padding: 7px 8px; font-size: var(--fs-sm); }
+    select.sel:focus { outline: none; border-color: var(--accent); }
+    .btn-sm { padding: 0.5em 0.9em; font-size: var(--fs-xs); border-radius: var(--r-sm); }
+
+    /* Integrations chips */
+    .ichips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* Queue */
+    .qitem { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-2); margin-bottom: 8px; }
+    .qitem .qi { font-size: var(--fs-xs); color: var(--text-1); }
+    .qitem .qi b { color: var(--text-0); }
+
+    /* States */
+    .skeleton { background: linear-gradient(90deg, var(--bg-2), var(--surface-2), var(--bg-2)); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--r-sm); }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+    .empty { text-align: center; color: var(--text-2); font-size: var(--fs-sm); padding: var(--s-6) var(--s-4); }
+    .disc-banner { display: none; position: fixed; top: 58px; left: 0; right: 0; z-index: 60; text-align: center; padding: 8px; background: var(--crit-dim); color: var(--crit); font-size: var(--fs-sm); border-bottom: 1px solid var(--crit); }
+    .disc-banner.show { display: block; }
+
+    /* Tooltip */
+    .info-i { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; border: 1px solid var(--border-strong); color: var(--text-2); font-size: 0.6rem; cursor: help; position: relative; }
+    .info-i:hover .tip { display: block; }
+    .tip { display: none; position: absolute; bottom: 130%; right: 0; width: 260px; background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: var(--r-sm); padding: 10px; font-size: 0.68rem; color: var(--text-1); line-height: 1.5; z-index: 30; box-shadow: var(--shadow-md); text-transform: none; letter-spacing: normal; font-weight: 400; }
+
+    /* Guided tour */
+    .tour-mask { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(4,6,10,0.72); }
+    .tour-mask.show { display: block; }
+    .tour-pop { position: fixed; z-index: 101; max-width: 340px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: var(--r-lg); padding: var(--s-5); box-shadow: var(--shadow-lg); }
+    .tour-pop h4 { font-size: var(--fs-base); margin-bottom: 8px; }
+    .tour-pop p { font-size: var(--fs-sm); color: var(--text-1); margin-bottom: var(--s-4); }
+    .tour-nav { display: flex; justify-content: space-between; align-items: center; }
+    .tour-dots { display: flex; gap: 5px; }
+    .tour-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); }
+    .tour-dots i.on { background: var(--accent); }
+    .tour-highlight { position: fixed; z-index: 100; border: 2px solid var(--accent); border-radius: var(--r-md); box-shadow: 0 0 0 4px var(--accent-dim), 0 0 40px rgba(255,176,32,0.3); pointer-events: none; transition: all 0.3s var(--ease); }
+
+    @media (max-width: 1080px) {
+      .layout { grid-template-columns: 1fr; }
+      .assets { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) { .assets { grid-template-columns: 1fr; } .top-stats { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <a class="brand" href="/">
+      <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#111823"/><path d="M17.5 5 8 18h6l-1.5 9L23 13h-6z" fill="#ffb020"/></svg>
+      PowerSim<span style="color:var(--accent)">&nbsp;AI</span>
+      <span class="badge badge--info" style="margin-left:6px">LIVE DEMO</span>
+    </a>
+    <div class="top-stats" id="top-stats">
+      <div class="tstat"><span class="l">Tick</span><span class="v" id="s-tick">—</span></div>
+      <div class="tstat"><span class="l">Uptime</span><span class="v" id="s-uptime">—</span></div>
+      <div class="tstat"><span class="l">Fleet health</span><span class="v" id="s-health">—</span></div>
+      <div class="tstat"><span class="l">Agent</span><span class="v" id="s-agent">—</span></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn btn-ghost btn-sm" id="tour-btn">Take the tour</button>
+      <a class="btn btn-ghost btn-sm" href="/">Site</a>
+      <a class="btn btn-primary btn-sm" href="/pitch">Investors</a>
+    </div>
+  </div>
+
+  <div class="disc-banner" id="disc">● Disconnected — attempting to reconnect…</div>
+
+  <div class="wrap">
+    <div class="layout">
+      <!-- ===== MAIN COLUMN ===== -->
+      <div class="stack gap-4" style="gap:var(--s-5)">
+        <!-- Assets -->
+        <div class="panel" id="assets-panel">
+          <div class="panel-h">
+            <div><h3>Fleet · digital twin</h3><div class="panel-sub">Sensor-estimated health, live from the simulation</div></div>
+            <span class="sim-tag">SIMULATED</span>
+          </div>
+          <div class="assets" id="assets"></div>
+        </div>
+
+        <!-- Agent reasoning -->
+        <div class="panel" id="trail-panel">
+          <div class="panel-h">
+            <div><h3>Agent reasoning · the "why" trail</h3><div class="panel-sub">Every recommendation, explained — sense → think → act</div></div>
+            <span class="chip" id="agent-mode-chip"><span class="dot"></span><span id="agent-mode">rules</span></span>
+          </div>
+          <div class="fleet-summary" id="fleet-summary">Agent initialising…</div>
+          <div class="trail" id="trail"><div class="empty">Waiting for the agent's first decisions…</div></div>
+        </div>
+      </div>
+
+      <!-- ===== SIDEBAR ===== -->
+      <div class="stack" style="gap:var(--s-5)">
+        <!-- Business impact -->
+        <div class="panel" id="impact-panel">
+          <div class="panel-h">
+            <div><h3>Business impact</h3><div class="panel-sub">Simulated ROI</div></div>
+            <span class="info-i">i<span class="tip" id="methodology-tip">Loading methodology…</span></span>
+          </div>
+          <div class="bi-grid">
+            <div class="bi big"><div class="v" id="bi-value">$0</div><div class="k">Value protected (downtime avoided)</div></div>
+            <div class="bi"><div class="v" id="bi-failures">0</div><div class="k">Failures prevented</div></div>
+            <div class="bi"><div class="v" id="bi-downtime">0h</div><div class="k">Downtime avoided</div></div>
+            <div class="bi"><div class="v" id="bi-energy">0</div><div class="k">kWh wasted to wear</div></div>
+            <div class="bi"><div class="v" id="bi-co2">0</div><div class="k">kg CO₂e wasted</div></div>
+          </div>
+          <div style="margin-top:var(--s-4)">
+            <div class="panel-sub" style="margin-bottom:6px">Your economics (recompute live):</div>
+            <div class="assum">
+              <div><label>Downtime $/hr</label><input id="a-downtime" type="number" min="0" step="1000" /></div>
+              <div><label>Energy $/kWh</label><input id="a-energy" type="number" min="0" step="0.01" /></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="apply-assum" style="width:100%; margin-top:8px">Apply</button>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="panel" id="controls-panel">
+          <div class="panel-h"><h3>Controls</h3></div>
+          <div class="panel-sub" style="margin-bottom:6px">Inject a developing fault:</div>
+          <div class="ctl-row">
+            <select class="sel" id="fail-asset"><option value="T1">T1 Transformer</option><option value="M1" selected>M1 Motor</option><option value="G1">G1 Generator</option><option value="P1">P1 Pump</option></select>
+            <select class="sel" id="fail-type"><option value="bearing_wear">Bearing wear</option><option value="overload">Overload</option><option value="oil_degradation">Oil degradation</option><option value="misalignment">Misalignment</option><option value="insulation_breakdown">Insulation</option></select>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btn-inject" style="width:100%; color:var(--crit); border-color:var(--crit-dim)">Inject fault</button>
+          <div class="panel-sub" style="margin:var(--s-4) 0 6px">Perform maintenance:</div>
+          <div class="ctl-row">
+            <select class="sel" id="maint-asset"><option value="T1">T1 Transformer</option><option value="M1">M1 Motor</option><option value="G1">G1 Generator</option><option value="P1">P1 Pump</option></select>
+            <button class="btn btn-primary btn-sm" id="btn-maint">Maintain</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btn-reset" style="width:100%; margin-top:var(--s-3)">Reset simulation</button>
+        </div>
+
+        <!-- Integrations roadmap -->
+        <div class="panel" id="integ-panel">
+          <div class="panel-h"><div><h3>Deployment integrations</h3><div class="panel-sub">Connect real plant telemetry</div></div></div>
+          <div class="ichips" id="integ-chips"><span class="chip chip--planned"><span class="dot"></span>loading…</span></div>
+        </div>
+
+        <!-- Work orders -->
+        <div class="panel" id="queue-panel">
+          <div class="panel-h"><div><h3>Work orders</h3><div class="panel-sub">Auto-generated by the agent</div></div><span class="badge badge--info" id="q-count">0</span></div>
+          <div id="queue"><div class="empty">No open work orders.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guided tour -->
+  <div class="tour-mask" id="tour-mask"></div>
+  <div class="tour-highlight" id="tour-hl" style="display:none"></div>
+  <div class="tour-pop" id="tour-pop" style="display:none">
+    <h4 id="tour-title"></h4>
+    <p id="tour-body"></p>
+    <div class="tour-nav">
+      <div class="tour-dots" id="tour-dots"></div>
+      <div class="row gap-2">
+        <button class="btn btn-ghost btn-sm" id="tour-skip">Skip</button>
+        <button class="btn btn-primary btn-sm" id="tour-next">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/assets/app.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      const ASSETS = ["T1", "M1", "G1", "P1"];
+      const NAMES = { T1: "Main Transformer", M1: "Induction Motor A", G1: "Backup Generator", P1: "Coolant Pump" };
+      const history = { T1: [], M1: [], G1: [], P1: [] };
+      const MAXPTS = 40;
+      let latestDecisions = {};
+
+      // ---- Render initial asset cards (skeleton -> live) ----
+      const assetsEl = document.getElementById("assets");
+      assetsEl.innerHTML = ASSETS.map((id) => `
+        <div class="acard" id="ac-${id}">
+          <div class="acard-h">
+            <div><div class="aid">${id}</div><div class="anm">${NAMES[id]}</div></div>
+            <span class="badge badge--ok" id="ac-badge-${id}">—</span>
+          </div>
+          <svg class="spark" id="spark-${id}" viewBox="0 0 120 34" preserveAspectRatio="none"></svg>
+          <div class="ametrics">
+            <div class="amet"><div class="mv" id="m-temp-${id}">—</div><div class="ml">Temp °C</div></div>
+            <div class="amet"><div class="mv" id="m-vib-${id}">—</div><div class="ml">Vib mm/s</div></div>
+            <div class="amet"><div class="mv" id="m-rul-${id}">—</div><div class="ml">RUL h</div></div>
+            <div class="amet"><div class="mv" id="m-anom-${id}">—</div><div class="ml">Anomaly</div></div>
+          </div>
+          <div class="healthbar"><span id="hb-${id}" style="width:100%"></span></div>
+          <div class="dec muted" id="dec-${id}">—</div>
+        </div>`).join("");
+
+      // ---- Self-contained sparkline ----
+      function drawSpark(id, data, color) {
+        const svg = document.getElementById("spark-" + id);
+        if (!svg || data.length < 2) return;
+        const w = 120, h = 34, min = 0, max = 100;
+        const step = w / (MAXPTS - 1);
+        const pts = data.map((v, i) => {
+          const x = i * step;
+          const y = h - ((v - min) / (max - min)) * (h - 4) - 2;
+          return x.toFixed(1) + "," + y.toFixed(1);
+        });
+        const line = `<polyline fill="none" stroke="${color}" stroke-width="1.6" points="${pts.join(" ")}"/>`;
+        const area = `<polyline fill="${color}" opacity="0.10" points="0,${h} ${pts.join(" ")} ${((data.length-1)*step).toFixed(1)},${h}"/>`;
+        svg.innerHTML = area + line;
+      }
+
+      function statusClass(state) {
+        if (state === "degraded") return "warn";
+        if (state === "critical" || state === "failed") return "crit";
+        if (state === "under_maintenance") return "info";
+        return "ok";
+      }
+      function badgeClass(state) {
+        return { warn: "badge--warn", crit: "badge--crit", info: "badge--info", ok: "badge--ok" }[statusClass(state)];
+      }
+
+      function fmt(n, d) { return (n === undefined || n === null) ? "—" : Number(n).toFixed(d === undefined ? 0 : d); }
+      function money(n) {
+        if (n >= 1e6) return "$" + (n / 1e6).toFixed(2) + "M";
+        if (n >= 1e3) return "$" + (n / 1e3).toFixed(1) + "k";
+        return "$" + Math.round(n);
+      }
+
+      // ---- Apply a tick frame ----
+      function applyTick(d) {
+        const state = d.state, tel = d.telemetry, impact = d.impact;
+        if (state) {
+          document.getElementById("s-tick").textContent = "#" + state.tick_count;
+          document.getElementById("s-uptime").textContent = state.uptime_hours.toFixed(1) + "h";
+          document.getElementById("s-health").textContent = state.overall_health.toFixed(0) + "%";
+          (state.assets || []).forEach((a) => {
+            const id = a.asset_id, cls = statusClass(a.operating_state);
+            const card = document.getElementById("ac-" + id);
+            if (card) card.className = "acard " + cls;
+            const badge = document.getElementById("ac-badge-" + id);
+            if (badge) { badge.className = "badge " + badgeClass(a.operating_state); badge.textContent = a.operating_state.replace("_", " "); }
+            const hb = document.getElementById("hb-" + id);
+            if (hb) { hb.style.width = a.health + "%"; hb.style.background = cls === "ok" ? "var(--ok)" : cls === "warn" ? "var(--warn)" : cls === "crit" ? "var(--crit)" : "var(--cyan)"; }
+            history[id].push(a.health);
+            if (history[id].length > MAXPTS) history[id].shift();
+            drawSpark(id, history[id], cls === "ok" ? "#2fd58a" : cls === "warn" ? "#ffab2e" : cls === "crit" ? "#ff5c72" : "#34d3ee");
+          });
+        }
+        if (tel) ASSETS.forEach((id) => {
+          const t = tel[id]; if (!t) return;
+          document.getElementById("m-temp-" + id).textContent = fmt(t.temperature, 1);
+          document.getElementById("m-vib-" + id).textContent = fmt(t.vibration, 2);
+          document.getElementById("m-rul-" + id).textContent = fmt(t.rul_hours, 0);
+          document.getElementById("m-anom-" + id).textContent = fmt(t.anomaly_score, 0);
+        });
+        if (impact) applyImpact(impact);
+      }
+
+      function applyImpact(i) {
+        document.getElementById("bi-value").textContent = money(i.value_protected_usd);
+        document.getElementById("bi-failures").textContent = i.failures_prevented;
+        document.getElementById("bi-downtime").textContent = i.downtime_hours_avoided.toFixed(0) + "h";
+        document.getElementById("bi-energy").textContent = i.energy_wasted_kwh.toFixed(0);
+        document.getElementById("bi-co2").textContent = i.co2_wasted_kg.toFixed(0);
+      }
+
+      // ---- Apply an agent frame (decisions + events) ----
+      const trailEl = document.getElementById("trail");
+      function applyAgent(d) {
+        if (d.fleet_summary) document.getElementById("fleet-summary").textContent = d.fleet_summary;
+        if (d.agent_status) {
+          const mode = d.agent_status.last_mode || "rules";
+          document.getElementById("agent-mode").textContent = mode;
+          document.getElementById("s-agent").textContent = mode.startsWith("llm") && mode === "llm" ? "LLM" : "rules";
+        }
+        if (d.decisions) { latestDecisions = d.decisions; updateDecisionChips(); }
+        (d.events || []).forEach(addEvent);
+      }
+
+      function updateDecisionChips() {
+        ASSETS.forEach((id) => {
+          const dec = latestDecisions[id]; if (!dec) return;
+          const el = document.getElementById("dec-" + id);
+          if (!el) return;
+          const map = { monitor: "muted", inspect: "text-cyan", maintain: "text-accent", repair: "text-accent", emergency: "" };
+          el.className = "dec " + (map[dec.decision_type] || "muted");
+          el.textContent = "▸ " + dec.decision_type.toUpperCase() + " · " + Math.round(dec.confidence) + "%";
+        });
+      }
+
+      function addEvent(ev) {
+        const empty = trailEl.querySelector(".empty");
+        if (empty) empty.remove();
+        const prio = { emergency: "badge--crit", repair: "badge--crit", maintain: "badge--warn", inspect: "badge--info", monitor: "badge--ok" }[ev.decision_type] || "badge--info";
+        const div = document.createElement("div");
+        div.className = "tevent";
+        div.innerHTML = `
+          <div class="tevent-h">
+            <span class="who">${ev.asset_id} · ${ev.asset_name}</span>
+            <span class="badge ${prio}">${ev.decision_type}</span>
+          </div>
+          ${(ev.reasoning_trail || []).map((s) => `<div class="step">${s}</div>`).join("")}
+          <div class="src">source: ${ev.source} · tick #${ev.tick}${ev.work_order ? " · work order " + ev.work_order.work_order_id : ""}</div>`;
+        trailEl.prepend(div);
+        while (trailEl.children.length > 24) trailEl.lastChild.remove();
+      }
+
+      // ---- WebSocket ----
+      let ws;
+      function connect() {
+        const proto = location.protocol === "https:" ? "wss:" : "ws:";
+        ws = new WebSocket(proto + "//" + location.host + "/ws/live");
+        ws.onopen = () => document.getElementById("disc").classList.remove("show");
+        ws.onclose = () => { document.getElementById("disc").classList.add("show"); setTimeout(connect, 2500); };
+        ws.onmessage = (e) => {
+          let d; try { d = JSON.parse(e.data); } catch { return; }
+          if (d.type === "tick" || d.type === "initial_state") applyTick(d);
+          if (d.type === "agent") applyAgent(d);
+        };
+      }
+      connect();
+
+      // ---- Static fetches: integrations, methodology, queue ----
+      fetch("/api/integrations").then((r) => r.json()).then((d) => {
+        document.getElementById("integ-chips").innerHTML = d.integrations.map((i) =>
+          `<span class="chip ${i.status === "available" ? "chip--live" : "chip--planned"}" title="${i.description}"><span class="dot"></span>${i.name}${i.status === "planned" ? " · planned" : ""}</span>`
+        ).join("");
+      }).catch(() => {});
+
+      fetch("/api/impact").then((r) => r.json()).then((d) => {
+        const a = d.methodology.assumptions;
+        document.getElementById("a-downtime").value = a.downtime_cost_per_hour;
+        document.getElementById("a-energy").value = a.energy_tariff_per_kwh;
+        const f = d.methodology.formulas;
+        document.getElementById("methodology-tip").innerHTML =
+          "<b>How these are computed (all simulated):</b><br>" +
+          "• Value protected = " + f.downtime_cost_avoided_usd + "<br>" +
+          "• Energy wasted = " + f.energy_wasted_kwh + "<br>" +
+          "<i>" + d.methodology.disclaimer + "</i>";
+      }).catch(() => {});
+
+      function refreshQueue() {
+        fetch("/api/queue").then((r) => r.json()).then((d) => {
+          const q = d.work_orders || [];
+          document.getElementById("q-count").textContent = q.length;
+          const el = document.getElementById("queue");
+          if (!q.length) { el.innerHTML = '<div class="empty">No open work orders.</div>'; return; }
+          el.innerHTML = q.slice(0, 8).map((w) =>
+            `<div class="qitem"><div class="qi"><b>${w.asset_id}</b> · ${w.work_type} <span class="badge ${{critical:"badge--crit",high:"badge--crit",medium:"badge--warn",low:"badge--info"}[w.priority]}" style="margin-left:4px">${w.priority}</span></div>
+             <button class="btn btn-ghost btn-sm" data-done="${w.id}">Done</button></div>`
+          ).join("");
+          el.querySelectorAll("[data-done]").forEach((b) => b.addEventListener("click", () => {
+            fetch("/api/queue/" + b.dataset.done + "/complete", { method: "POST" }).then(refreshQueue);
+          }));
+        }).catch(() => {});
+      }
+      refreshQueue();
+      setInterval(refreshQueue, 4000);
+
+      // ---- Controls ----
+      function post(url, body) {
+        return fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+      }
+      document.getElementById("btn-inject").addEventListener("click", () =>
+        post("/api/inject-failure", { asset_id: document.getElementById("fail-asset").value, failure_type: document.getElementById("fail-type").value }));
+      document.getElementById("btn-maint").addEventListener("click", () =>
+        post("/api/maintenance", { asset_id: document.getElementById("maint-asset").value }).then(refreshQueue));
+      document.getElementById("btn-reset").addEventListener("click", () => {
+        if (confirm("Reset the simulation to its initial state?")) post("/api/reset").then(() => { ASSETS.forEach((id) => history[id] = []); refreshQueue(); });
+      });
+      document.getElementById("apply-assum").addEventListener("click", () =>
+        post("/api/impact/assumptions", {
+          downtime_cost_per_hour: parseFloat(document.getElementById("a-downtime").value),
+          energy_tariff_per_kwh: parseFloat(document.getElementById("a-energy").value),
+        }).then((r) => r.json()).then((d) => applyImpact(d.snapshot)));
+
+      // ---- Guided tour ----
+      const TOUR = [
+        { el: "assets-panel", t: "The digital twin", b: "Each asset carries a physics-based health model. What you see is the sensor-estimated health — exactly what a real condition-monitoring system infers, not a hidden ground truth." },
+        { el: "trail-panel", t: "Sense → Think → Act", b: "The agent evaluates every asset continuously and shows its reasoning. Each entry traces what it sensed, what it flagged, and what it decided — the explainable 'why'." },
+        { el: "impact-panel", t: "Business impact", b: "Prevented failures become downtime and cost avoided; degradation becomes wasted energy and CO₂. Plug in your own $/hr and $/kWh — nothing here is hard-coded." },
+        { el: "controls-panel", t: "Drive the demo", b: "Inject a developing fault and watch the twin's sensors react, the agent catch it, and a work order appear. Then perform maintenance to restore the asset." },
+        { el: "integ-panel", t: "Built for real plants", b: "The simulator is one telemetry source behind a clean interface; OPC-UA and MQTT connectors are on the roadmap so this becomes a connector, not a rewrite." },
+      ];
+      let ti = 0;
+      const mask = document.getElementById("tour-mask"), pop = document.getElementById("tour-pop"), hl = document.getElementById("tour-hl");
+      document.getElementById("tour-dots").innerHTML = TOUR.map(() => "<i></i>").join("");
+      function showTour(i) {
+        ti = i; const s = TOUR[i]; const target = document.getElementById(s.el);
+        if (!target) return endTour();
+        mask.classList.add("show"); pop.style.display = "block"; hl.style.display = "block";
+        const r = target.getBoundingClientRect();
+        hl.style.top = (r.top - 4) + "px"; hl.style.left = (r.left - 4) + "px"; hl.style.width = (r.width + 8) + "px"; hl.style.height = (r.height + 8) + "px";
+        document.getElementById("tour-title").textContent = s.t;
+        document.getElementById("tour-body").textContent = s.b;
+        document.querySelectorAll("#tour-dots i").forEach((d, k) => d.classList.toggle("on", k === i));
+        document.getElementById("tour-next").textContent = i === TOUR.length - 1 ? "Done" : "Next";
+        // Position popover
+        let top = r.bottom + 12; if (top + 200 > window.innerHeight) top = Math.max(70, r.top - 210);
+        let left = Math.min(r.left, window.innerWidth - 360);
+        pop.style.top = top + "px"; pop.style.left = Math.max(16, left) + "px";
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      function endTour() { mask.classList.remove("show"); pop.style.display = "none"; hl.style.display = "none"; try { localStorage.setItem("powersim_tour_done", "1"); } catch (e) {} }
+      document.getElementById("tour-next").addEventListener("click", () => ti < TOUR.length - 1 ? showTour(ti + 1) : endTour());
+      document.getElementById("tour-skip").addEventListener("click", endTour);
+      mask.addEventListener("click", endTour);
+      document.getElementById("tour-btn").addEventListener("click", () => showTour(0));
+      try { if (!localStorage.getItem("powersim_tour_done")) setTimeout(() => showTour(0), 1200); } catch (e) {}
+    })();
+  </script>
+</body>
+</html>
