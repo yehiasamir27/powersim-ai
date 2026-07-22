@@ -131,7 +131,9 @@ async def _agent_loop() -> None:
 @contextlib.asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     logger.info(
-        "Starting %s v%s", settings.app_name, settings.app_version,
+        "Starting %s v%s",
+        settings.app_name,
+        settings.app_version,
         extra={"environment": settings.environment, "ollama": settings.ollama_url},
     )
     tasks = [asyncio.create_task(_telemetry_loop()), asyncio.create_task(_agent_loop())]

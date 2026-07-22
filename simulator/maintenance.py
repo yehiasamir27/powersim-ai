@@ -13,6 +13,7 @@ from uuid import uuid4
 
 class WorkOrderPriority(Enum):
     """Priority levels for maintenance work orders."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -21,6 +22,7 @@ class WorkOrderPriority(Enum):
 
 class WorkOrderStatus(Enum):
     """Status of a work order."""
+
     PENDING = "pending"
     SCHEDULED = "scheduled"
     IN_PROGRESS = "in_progress"
@@ -31,6 +33,7 @@ class WorkOrderStatus(Enum):
 
 class WorkOrderType(Enum):
     """Types of maintenance work orders."""
+
     INSPECTION = "inspection"
     PREVENTIVE = "preventive"
     CORRECTIVE = "corrective"
@@ -55,6 +58,7 @@ class WorkOrder:
         estimated_duration: Expected duration in hours
         strategic_recommendation: Long-term policy suggestions
     """
+
     id: str = field(default_factory=lambda: str(uuid4())[:8])
     asset_id: str = ""
     work_type: WorkOrderType = WorkOrderType.INSPECTION
@@ -94,8 +98,12 @@ class WorkOrder:
             status=WorkOrderStatus(data.get("status", "pending")),
             description=data.get("description", ""),
             reason=data.get("reason", ""),
-            created_at=datetime.fromisoformat(data["created_at"]) if "created_at" in data else datetime.now(),
-            scheduled_at=datetime.fromisoformat(data["scheduled_at"]) if data.get("scheduled_at") else None,
+            created_at=datetime.fromisoformat(data["created_at"])
+            if "created_at" in data
+            else datetime.now(),
+            scheduled_at=datetime.fromisoformat(data["scheduled_at"])
+            if data.get("scheduled_at")
+            else None,
             estimated_duration=data.get("estimated_duration", 2.0),
             strategic_recommendation=data.get("strategic_recommendation", ""),
         )
@@ -209,7 +217,9 @@ class MaintenanceManager:
         orders = self.get_queue()
         if asset_id:
             orders = [o for o in orders if o.asset_id == asset_id]
-        return [o for o in orders if o.status in (WorkOrderStatus.PENDING, WorkOrderStatus.SCHEDULED)]
+        return [
+            o for o in orders if o.status in (WorkOrderStatus.PENDING, WorkOrderStatus.SCHEDULED)
+        ]
 
     def start_work(self, work_order_id: str) -> bool:
         """
@@ -222,7 +232,10 @@ class MaintenanceManager:
             True if work was started successfully
         """
         work_order = self.work_orders.get(work_order_id)
-        if not work_order or work_order.status not in (WorkOrderStatus.PENDING, WorkOrderStatus.SCHEDULED):
+        if not work_order or work_order.status not in (
+            WorkOrderStatus.PENDING,
+            WorkOrderStatus.SCHEDULED,
+        ):
             return False
 
         work_order.status = WorkOrderStatus.IN_PROGRESS
@@ -264,7 +277,10 @@ class MaintenanceManager:
             True if work was deferred successfully
         """
         work_order = self.work_orders.get(work_order_id)
-        if not work_order or work_order.status in (WorkOrderStatus.COMPLETED, WorkOrderStatus.CANCELLED):
+        if not work_order or work_order.status in (
+            WorkOrderStatus.COMPLETED,
+            WorkOrderStatus.CANCELLED,
+        ):
             return False
 
         work_order.status = WorkOrderStatus.DEFERRED
@@ -284,7 +300,10 @@ class MaintenanceManager:
             True if work was cancelled successfully
         """
         work_order = self.work_orders.get(work_order_id)
-        if not work_order or work_order.status in (WorkOrderStatus.COMPLETED, WorkOrderStatus.CANCELLED):
+        if not work_order or work_order.status in (
+            WorkOrderStatus.COMPLETED,
+            WorkOrderStatus.CANCELLED,
+        ):
             return False
 
         work_order.status = WorkOrderStatus.CANCELLED
@@ -298,11 +317,15 @@ class MaintenanceManager:
         """Get maintenance statistics."""
         total = len(self.work_orders)
         pending = sum(1 for o in self.work_orders.values() if o.status == WorkOrderStatus.PENDING)
-        in_progress = sum(1 for o in self.work_orders.values() if o.status == WorkOrderStatus.IN_PROGRESS)
+        in_progress = sum(
+            1 for o in self.work_orders.values() if o.status == WorkOrderStatus.IN_PROGRESS
+        )
         completed = len(self.completed_history)
 
         # Priority breakdown
-        critical = sum(1 for o in self.work_orders.values() if o.priority == WorkOrderPriority.CRITICAL)
+        critical = sum(
+            1 for o in self.work_orders.values() if o.priority == WorkOrderPriority.CRITICAL
+        )
         high = sum(1 for o in self.work_orders.values() if o.priority == WorkOrderPriority.HIGH)
 
         return {
@@ -318,11 +341,17 @@ class MaintenanceManager:
         """Get maintenance recommendations based on current work orders."""
         recommendations = []
         for order in self.get_queue():
-            recommendations.append({
-                "asset_id": order.asset_id,
-                "work_type": order.work_type.value,
-                "priority": order.priority.value,
-                "description": order.description,
-                "urgency": "immediate" if order.priority == WorkOrderPriority.CRITICAL else "soon" if order.priority == WorkOrderPriority.HIGH else "scheduled",
-            })
+            recommendations.append(
+                {
+                    "asset_id": order.asset_id,
+                    "work_type": order.work_type.value,
+                    "priority": order.priority.value,
+                    "description": order.description,
+                    "urgency": "immediate"
+                    if order.priority == WorkOrderPriority.CRITICAL
+                    else "soon"
+                    if order.priority == WorkOrderPriority.HIGH
+                    else "scheduled",
+                }
+            )
         return recommendations

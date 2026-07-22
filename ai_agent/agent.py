@@ -27,10 +27,10 @@ logger = get_logger("powersim.agent")
 class DecisionType(Enum):
     """Types of decisions the agent can make."""
 
-    MONITOR = "monitor"      # continue monitoring, no action
-    INSPECT = "inspect"      # schedule inspection
-    MAINTAIN = "maintain"    # schedule preventive maintenance
-    REPAIR = "repair"        # schedule corrective maintenance
+    MONITOR = "monitor"  # continue monitoring, no action
+    INSPECT = "inspect"  # schedule inspection
+    MAINTAIN = "maintain"  # schedule preventive maintenance
+    REPAIR = "repair"  # schedule corrective maintenance
     EMERGENCY = "emergency"  # immediate response required
 
 
@@ -40,8 +40,8 @@ class AgentMode(str, Enum):
     LLM = "llm"
     RULES = "rules"
     LLM_UNAVAILABLE = "llm_unavailable"  # rules used: Ollama unreachable
-    LLM_ERROR = "llm_error"              # rules used: Ollama call failed
-    LLM_DISABLED = "llm_disabled"        # rules used: LLM disabled by config
+    LLM_ERROR = "llm_error"  # rules used: Ollama call failed
+    LLM_DISABLED = "llm_disabled"  # rules used: LLM disabled by config
 
 
 @dataclass
@@ -84,7 +84,7 @@ class AgentDecision:
     strategic_recommendation: str
     requires_maintenance: bool = False
     priority: str = "medium"
-    source: str = AgentMode.RULES.value        # "llm" | "rules"
+    source: str = AgentMode.RULES.value  # "llm" | "rules"
     reasoning_trail: list[str] = field(default_factory=list)
     detected_factors: list[str] = field(default_factory=list)
     rul_hours: float = 0.0
@@ -466,7 +466,9 @@ Be concise and actionable."""
         if risk >= 30.0 and not recs:
             recs.append("Re-evaluate maintenance interval for current operating conditions.")
         if not recs:
-            recs.append("Current maintenance strategy is effective; continue scheduled inspections.")
+            recs.append(
+                "Current maintenance strategy is effective; continue scheduled inspections."
+            )
         return " ".join(recs)
 
     # -- act --------------------------------------------------------------

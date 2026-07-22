@@ -56,6 +56,7 @@ class AssetOperationalState(Enum):
 # Failure modes
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class FailureSignature:
     """How a developing fault biases sensors and accelerates degradation.
@@ -66,14 +67,14 @@ class FailureSignature:
     """
 
     label: str
-    health_impact: float          # immediate one-off health loss (percent)
+    health_impact: float  # immediate one-off health loss (percent)
     degradation_multiplier: float  # ongoing wear-rate multiplier
-    temp_bias: float = 0.0         # +C
-    vibration_bias: float = 0.0    # +mm/s
-    bearing_bias: float = 0.0      # +percentage points
-    oil_bias: float = 0.0          # +bar (usually negative)
+    temp_bias: float = 0.0  # +C
+    vibration_bias: float = 0.0  # +mm/s
+    bearing_bias: float = 0.0  # +percentage points
+    oil_bias: float = 0.0  # +bar (usually negative)
     power_factor_bias: float = 0.0
-    current_bias: float = 0.0      # fractional, e.g. 0.2 = +20% current
+    current_bias: float = 0.0  # fractional, e.g. 0.2 = +20% current
 
 
 FAILURE_SIGNATURES: dict[str, FailureSignature] = {
@@ -121,6 +122,7 @@ FAILURE_SIGNATURES: dict[str, FailureSignature] = {
 # Sensor / asset configuration
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class SensorProfile:
     """Physical anchor points mapping health to sensor readings.
@@ -165,18 +167,18 @@ class TelemetryData:
     """A single set of sensor readings for an asset at one tick."""
 
     timestamp: datetime
-    temperature: float       # Celsius
-    vibration: float         # mm/s RMS
-    voltage: float           # Volts
-    current: float           # Amps
-    bearing_wear: float      # 0-100 %
-    oil_pressure: float      # bar
-    health_score: float      # 0-100 %, sensor-estimated health (displayed)
-    power_factor: float      # 0-1
-    rul_hours: float         # estimated remaining useful life (hours)
-    anomaly_score: float     # 0-100, higher = more anomalous
-    load: float              # % of rated capacity
-    efficiency: float        # 0-1
+    temperature: float  # Celsius
+    vibration: float  # mm/s RMS
+    voltage: float  # Volts
+    current: float  # Amps
+    bearing_wear: float  # 0-100 %
+    oil_pressure: float  # bar
+    health_score: float  # 0-100 %, sensor-estimated health (displayed)
+    power_factor: float  # 0-1
+    rul_hours: float  # estimated remaining useful life (hours)
+    anomaly_score: float  # 0-100, higher = more anomalous
+    load: float  # % of rated capacity
+    efficiency: float  # 0-1
 
     def to_dict(self) -> dict:
         """Serialise telemetry for JSON transport."""
@@ -209,8 +211,8 @@ class AssetData:
     """
 
     config: AssetConfig
-    true_health: float = 100.0        # latent ground truth (physics driver)
-    estimated_health: float = 100.0   # observed estimate (displayed / reasoned on)
+    true_health: float = 100.0  # latent ground truth (physics driver)
+    estimated_health: float = 100.0  # observed estimate (displayed / reasoned on)
     operating_state: AssetOperationalState = AssetOperationalState.NORMAL
     total_operating_hours: float = 0.0
     last_maintenance: datetime | None = None
@@ -289,12 +291,18 @@ class PowerSystem:
                 name="Main Transformer",
                 rated_capacity=1000.0,
                 sensors=SensorProfile(
-                    nominal_temp=58.0, failure_temp=115.0,
-                    nominal_vibration=0.8, failure_vibration=6.0,
-                    nominal_oil_pressure=5.5, failure_oil_pressure=1.8,
-                    nominal_power_factor=0.97, failure_power_factor=0.80,
-                    nominal_voltage=11000.0, nominal_current=52.0,
-                    temp_noise=1.0, vibration_noise=0.12,
+                    nominal_temp=58.0,
+                    failure_temp=115.0,
+                    nominal_vibration=0.8,
+                    failure_vibration=6.0,
+                    nominal_oil_pressure=5.5,
+                    failure_oil_pressure=1.8,
+                    nominal_power_factor=0.97,
+                    failure_power_factor=0.80,
+                    nominal_voltage=11000.0,
+                    nominal_current=52.0,
+                    temp_noise=1.0,
+                    vibration_noise=0.12,
                 ),
                 normal_temp_range=(40.0, 75.0),
                 normal_vibration_range=(0.5, 2.0),
@@ -309,12 +317,18 @@ class PowerSystem:
                 name="Induction Motor A",
                 rated_capacity=500.0,
                 sensors=SensorProfile(
-                    nominal_temp=62.0, failure_temp=120.0,
-                    nominal_vibration=1.6, failure_vibration=9.0,
-                    nominal_oil_pressure=4.5, failure_oil_pressure=1.2,
-                    nominal_power_factor=0.90, failure_power_factor=0.72,
-                    nominal_voltage=415.0, nominal_current=720.0,
-                    temp_noise=1.4, vibration_noise=0.22,
+                    nominal_temp=62.0,
+                    failure_temp=120.0,
+                    nominal_vibration=1.6,
+                    failure_vibration=9.0,
+                    nominal_oil_pressure=4.5,
+                    failure_oil_pressure=1.2,
+                    nominal_power_factor=0.90,
+                    failure_power_factor=0.72,
+                    nominal_voltage=415.0,
+                    nominal_current=720.0,
+                    temp_noise=1.4,
+                    vibration_noise=0.22,
                 ),
                 normal_temp_range=(50.0, 85.0),
                 normal_vibration_range=(1.0, 3.5),
@@ -329,12 +343,18 @@ class PowerSystem:
                 name="Backup Generator",
                 rated_capacity=750.0,
                 sensors=SensorProfile(
-                    nominal_temp=60.0, failure_temp=118.0,
-                    nominal_vibration=1.2, failure_vibration=7.5,
-                    nominal_oil_pressure=5.0, failure_oil_pressure=1.5,
-                    nominal_power_factor=0.92, failure_power_factor=0.75,
-                    nominal_voltage=400.0, nominal_current=1082.0,
-                    temp_noise=1.3, vibration_noise=0.18,
+                    nominal_temp=60.0,
+                    failure_temp=118.0,
+                    nominal_vibration=1.2,
+                    failure_vibration=7.5,
+                    nominal_oil_pressure=5.0,
+                    failure_oil_pressure=1.5,
+                    nominal_power_factor=0.92,
+                    failure_power_factor=0.75,
+                    nominal_voltage=400.0,
+                    nominal_current=1082.0,
+                    temp_noise=1.3,
+                    vibration_noise=0.18,
                 ),
                 normal_temp_range=(45.0, 80.0),
                 normal_vibration_range=(0.8, 2.5),
@@ -349,12 +369,18 @@ class PowerSystem:
                 name="Coolant Pump",
                 rated_capacity=50.0,
                 sensors=SensorProfile(
-                    nominal_temp=45.0, failure_temp=95.0,
-                    nominal_vibration=2.0, failure_vibration=10.0,
-                    nominal_oil_pressure=4.0, failure_oil_pressure=1.0,
-                    nominal_power_factor=0.88, failure_power_factor=0.70,
-                    nominal_voltage=415.0, nominal_current=85.0,
-                    temp_noise=1.6, vibration_noise=0.28,
+                    nominal_temp=45.0,
+                    failure_temp=95.0,
+                    nominal_vibration=2.0,
+                    failure_vibration=10.0,
+                    nominal_oil_pressure=4.0,
+                    failure_oil_pressure=1.0,
+                    nominal_power_factor=0.88,
+                    failure_power_factor=0.70,
+                    nominal_voltage=415.0,
+                    nominal_current=85.0,
+                    temp_noise=1.6,
+                    vibration_noise=0.28,
                 ),
                 normal_temp_range=(35.0, 65.0),
                 normal_vibration_range=(1.5, 4.0),
@@ -379,9 +405,7 @@ class PowerSystem:
         """Return all assets."""
         return list(self.assets.values())
 
-    def get_telemetry_history(
-        self, asset_id: str, max_points: int = 100
-    ) -> list[TelemetryData]:
+    def get_telemetry_history(self, asset_id: str, max_points: int = 100) -> list[TelemetryData]:
         """Return recent telemetry history for an asset (most recent last)."""
         history = self.telemetry_history.get(asset_id, [])
         return history[-max_points:]
@@ -480,9 +504,7 @@ class PowerSystem:
         telemetry: dict[str, TelemetryData] = {}
 
         for asset_id, asset in self.assets.items():
-            under_maintenance = (
-                asset.operating_state == AssetOperationalState.UNDER_MAINTENANCE
-            )
+            under_maintenance = asset.operating_state == AssetOperationalState.UNDER_MAINTENANCE
             if not under_maintenance:
                 self._degrade(asset)
 
@@ -543,13 +565,17 @@ class PowerSystem:
 
         temperature = (
             _lerp(s.nominal_temp, s.failure_temp, stress)
-            + load_thermal + temp_bias
-            + float(self.rng.normal(0, s.temp_noise)) + spike_temp
+            + load_thermal
+            + temp_bias
+            + float(self.rng.normal(0, s.temp_noise))
+            + spike_temp
         )
         vibration = max(
             0.05,
             _lerp(s.nominal_vibration, s.failure_vibration, stress)
-            + vib_bias + float(self.rng.normal(0, s.vibration_noise)) + spike_vib,
+            + vib_bias
+            + float(self.rng.normal(0, s.vibration_noise))
+            + spike_vib,
         )
         bearing_wear = float(
             np.clip(stress * 80.0 + bearing_bias + self.rng.normal(0, 1.5), 0.0, 100.0)
@@ -557,20 +583,27 @@ class PowerSystem:
         oil_pressure = float(
             np.clip(
                 _lerp(s.nominal_oil_pressure, s.failure_oil_pressure, stress)
-                + oil_bias + self.rng.normal(0, 0.12),
-                0.2, 10.0,
+                + oil_bias
+                + self.rng.normal(0, 0.12),
+                0.2,
+                10.0,
             )
         )
         power_factor = float(
             np.clip(
                 _lerp(s.nominal_power_factor, s.failure_power_factor, stress)
-                + pf_bias + self.rng.normal(0, 0.008),
-                0.5, 1.0,
+                + pf_bias
+                + self.rng.normal(0, 0.008),
+                0.5,
+                1.0,
             )
         )
         voltage = s.nominal_voltage * (1.0 + float(self.rng.normal(0, 0.005)))
-        current = s.nominal_current * load_frac * (1.0 + current_bias) * (
-            1.0 + float(self.rng.normal(0, 0.02))
+        current = (
+            s.nominal_current
+            * load_frac
+            * (1.0 + current_bias)
+            * (1.0 + float(self.rng.normal(0, 0.02)))
         )
 
         # Inverse mapping: estimate health from the sensor values (fusion).

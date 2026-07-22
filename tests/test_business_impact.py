@@ -41,7 +41,9 @@ def test_waste_accrues_when_degraded(model):
     snap = model.snapshot()
     assert snap["energy_wasted_kwh"] > 0
     # cost and CO2 follow the tariff / factor (abs tolerance covers field rounding).
-    assert snap["energy_cost_wasted_usd"] == pytest.approx(snap["energy_wasted_kwh"] * 0.10, abs=0.05)
+    assert snap["energy_cost_wasted_usd"] == pytest.approx(
+        snap["energy_wasted_kwh"] * 0.10, abs=0.05
+    )
     assert snap["co2_wasted_kg"] == pytest.approx(snap["energy_wasted_kwh"] * 0.5, abs=0.05)
 
 

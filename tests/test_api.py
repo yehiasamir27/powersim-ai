@@ -20,17 +20,18 @@ def test_state_has_expected_shape(client):
 
 def test_inject_failure_validation(client):
     # Unknown failure type -> 422 (schema validation).
-    assert client.post(
-        "/api/inject-failure", json={"asset_id": "M1", "failure_type": "boom"}
-    ).status_code == 422
+    assert (
+        client.post(
+            "/api/inject-failure", json={"asset_id": "M1", "failure_type": "boom"}
+        ).status_code
+        == 422
+    )
     # Missing field -> 422.
     assert client.post("/api/inject-failure", json={"asset_id": "M1"}).status_code == 422
 
 
 def test_inject_failure_and_unknown_asset(client):
-    ok = client.post(
-        "/api/inject-failure", json={"asset_id": "M1", "failure_type": "bearing_wear"}
-    )
+    ok = client.post("/api/inject-failure", json={"asset_id": "M1", "failure_type": "bearing_wear"})
     assert ok.status_code == 200
     assert ok.json()["success"] is True
     missing = client.post(
@@ -55,9 +56,7 @@ def test_impact_endpoint_has_methodology(client):
 
 
 def test_impact_assumptions_update(client):
-    resp = client.post(
-        "/api/impact/assumptions", json={"downtime_cost_per_hour": 50000}
-    ).json()
+    resp = client.post("/api/impact/assumptions", json={"downtime_cost_per_hour": 50000}).json()
     assert resp["methodology"]["assumptions"]["downtime_cost_per_hour"] == 50000.0
 
 

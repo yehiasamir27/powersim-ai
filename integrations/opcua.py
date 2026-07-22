@@ -25,9 +25,7 @@ class OpcUaTelemetrySource(TelemetrySource):
         name="OPC-UA",
         protocol="OPC-UA",
         status="planned",
-        description=(
-            "Vendor-independent OPC-UA client for PLCs, SCADA and edge gateways."
-        ),
+        description=("Vendor-independent OPC-UA client for PLCs, SCADA and edge gateways."),
         standards=("OPC-UA", "IEC 62541"),
     )
 

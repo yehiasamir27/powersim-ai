@@ -14,7 +14,6 @@ Usage:
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import List
 
 from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -81,7 +80,7 @@ class Settings(BaseSettings):
     )
 
     # -- API hardening -----------------------------------------------------
-    cors_allow_origins: List[str] = Field(default_factory=lambda: ["*"])
+    cors_allow_origins: list[str] = Field(default_factory=lambda: ["*"])
     max_ws_connections: int = Field(default=200, ge=1)
 
     @field_validator("log_level")

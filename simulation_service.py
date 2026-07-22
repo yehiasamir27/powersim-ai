@@ -144,9 +144,7 @@ class SimulationService:
             return "Agent initialising — awaiting first telemetry."
         rank = {"emergency": 4, "repair": 3, "maintain": 2, "inspect": 1, "monitor": 0}
         worst = max(decisions.values(), key=lambda d: rank.get(d["decision_type"], 0))
-        action_needed = [
-            d for d in decisions.values() if d["decision_type"] != "monitor"
-        ]
+        action_needed = [d for d in decisions.values() if d["decision_type"] != "monitor"]
         if not action_needed:
             return (
                 f"Fleet nominal — all {len(decisions)} assets within normal parameters. "
@@ -165,9 +163,7 @@ class SimulationService:
             raise KeyError(asset_id)
         if not self.power_system.inject_failure(asset_id, failure_type):
             raise ValueError(f"Cannot inject {failure_type}")
-        logger.info(
-            "Failure injected", extra={"asset_id": asset_id, "failure_type": failure_type}
-        )
+        logger.info("Failure injected", extra={"asset_id": asset_id, "failure_type": failure_type})
         return {
             "success": True,
             "asset_id": asset_id,

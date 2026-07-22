@@ -47,11 +47,11 @@ class ImpactAssumptions:
     overridden with ``POWERSIM_IMPACT_*`` environment variables.
     """
 
-    downtime_cost_per_hour: float = 25_000.0        # USD / hour of unplanned downtime
-    energy_tariff_per_kwh: float = 0.12             # USD / kWh
-    grid_emission_factor_kg_per_kwh: float = 0.45   # kg CO2e / kWh (grid average)
-    unplanned_downtime_hours_per_failure: float = 8.0   # avg unplanned outage per failure
-    planned_maintenance_hours: float = 2.0          # planned intervention duration
+    downtime_cost_per_hour: float = 25_000.0  # USD / hour of unplanned downtime
+    energy_tariff_per_kwh: float = 0.12  # USD / kWh
+    grid_emission_factor_kg_per_kwh: float = 0.45  # kg CO2e / kWh (grid average)
+    unplanned_downtime_hours_per_failure: float = 8.0  # avg unplanned outage per failure
+    planned_maintenance_hours: float = 2.0  # planned intervention duration
 
     @classmethod
     def from_env(cls) -> ImpactAssumptions:
