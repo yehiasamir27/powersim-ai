@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PowerSim AI — Investor Summary</title>
+  <meta name="description" content="PowerSim AI investor summary: problem, solution, why now, market, business model, moat, roadmap, and the ask." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070a0f'/%3E%3Cpath d='M17.5 5 8 18h6l-1.5 9L23 13h-6z' fill='%23ffb020'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/static/assets/design-system.css" />
+  <style>
+    .top { position: sticky; top: 0; z-index: 40; height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--s-5); background: rgba(7,10,15,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; color: var(--text-0); }
+    .brand svg { width: 24px; height: 24px; }
+    .p-hero { text-align: center; padding: var(--s-8) var(--s-5) var(--s-6); position: relative; }
+    .p-hero h1 { font-size: var(--fs-2xl); max-width: 20ch; margin-inline: auto; }
+    .p-hero p { margin: var(--s-4) auto 0; max-width: 60ch; font-size: var(--fs-md); color: var(--text-1); }
+    .slide { border: 1px solid var(--border); border-radius: var(--r-lg); background: linear-gradient(180deg, var(--surface), var(--bg-1)); padding: var(--s-6); }
+    .slide h2 { font-size: var(--fs-lg); margin-bottom: var(--s-4); display: flex; align-items: center; gap: 10px; }
+    .slide h2 .n { font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--accent); }
+    .slide p, .slide li { font-size: var(--fs-sm); color: var(--text-1); line-height: 1.6; }
+    .slide ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: var(--s-2); }
+    .slide li { display: flex; gap: 10px; }
+    .slide li::before { content: "▸"; color: var(--accent); flex: none; }
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+    .kpi { text-align: center; }
+    .kpi .v { font-family: var(--font-mono); font-size: var(--fs-xl); color: var(--text-0); font-weight: 700; }
+    .kpi .k { font-size: var(--fs-xs); color: var(--text-2); margin-top: 4px; }
+    .todo { border-left: 2px solid var(--accent); background: var(--accent-dim); padding: 10px 14px; border-radius: var(--r-sm); font-size: var(--fs-xs); color: var(--text-1); font-style: italic; }
+    .tam { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+    .tam .t { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); text-align: center; }
+    .tam .t .lbl { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.1em; color: var(--accent); }
+    .tam .t .val { font-size: var(--fs-md); color: var(--text-0); font-weight: 700; margin: 6px 0; }
+    .tam .t .d { font-size: var(--fs-xs); color: var(--text-2); }
+    @media (max-width: 800px) { .kpis, .tam { grid-template-columns: 1fr; } }
+    @media print { .top, .cta-print { display: none; } body { background: #fff; } }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <a class="brand" href="/"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#111823"/><path d="M17.5 5 8 18h6l-1.5 9L23 13h-6z" fill="#ffb020"/></svg>PowerSim<span style="color:var(--accent)">&nbsp;AI</span> <span class="badge badge--info" style="margin-left:6px">INVESTOR SUMMARY</span></a>
+    <div class="row gap-2">
+      <a class="btn btn-ghost btn-sm" href="/dashboard">Live demo</a>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">Save as PDF</button>
+    </div>
+  </div>
+
+  <div class="p-hero">
+    <div class="grid-bg"></div>
+    <span class="chip chip--live" style="position:relative"><span class="dot"></span>Working product · live demo</span>
+    <h1 style="margin-top:var(--s-4)">Agentic predictive maintenance for the world's industrial power assets.</h1>
+    <p>PowerSim AI catches equipment failures before they happen — an autonomous agent that senses, reasons, and acts on asset health, with an explainable "why" and provable ROI. Deployment-ready architecture, MENA-native wedge, honest simulation-first approach.</p>
+  </div>
+
+  <div class="container" style="max-width:920px">
+    <div class="stack" style="gap:var(--s-5); padding-bottom:var(--s-8)">
+
+      <div class="slide reveal">
+        <h2><span class="n">01</span> Problem</h2>
+        <p>Industrial plants lose enormous value to <strong>unplanned downtime</strong>, while the <strong>reliability experts</strong> who prevent it are retiring (~1.9M US manufacturing jobs may go unfilled by 2033, per Deloitte). Legacy monitoring drowns operators in <strong>false alarms</strong>, so maintenance stays reactive. Most predictive-maintenance programs stall in "pilot purgatory" — the blocker is integration and trust, not algorithms.</p>
+      </div>
+
+      <div class="slide reveal">
+        <h2><span class="n">02</span> Solution</h2>
+        <p>A continuous <strong>sense → think → act</strong> agent over a physics-based digital twin. It estimates each asset's health and remaining useful life from sensor fusion, decides what to do, generates the work order, and <strong>shows its reasoning</strong> at every step — then translates prevented failures into downtime, cost, energy and CO₂ saved against the operator's own numbers.</p>
+        <ul>
+          <li><strong>Closes the loop</strong> (acts) — not just alerts or a Q&amp;A copilot.</li>
+          <li><strong>Explainable</strong> "why" trail — directly counters buyer distrust of black-box scores.</li>
+          <li><strong>Buyer-supplied ROI</strong> — no hard-coded headline numbers.</li>
+        </ul>
+      </div>
+
+      <div class="slide reveal">
+        <h2><span class="n">03</span> Why now</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="v">$3.1B</div><div class="k">Schneider's 2026 acquisition of Cognite — "AI executing operations"</div></div>
+          <div class="kpi"><div class="v">$53B</div><div class="k">Gartner's 2030 forecast: SCM software with agentic AI</div></div>
+          <div class="kpi"><div class="v">2026–27</div><div class="k">EU EED audits &amp; ISO 50001 mandates force auditable energy data</div></div>
+        </div>
+        <p style="margin-top:var(--s-4)">The agentic thesis is validated by both strategic M&amp;A and incumbent roadmaps — yet few have <em>scaled deployment</em>. The opening is a trusted, transparent, fast-to-deploy entrant. Regulation (EU EED, CBAM) and Egypt's 2025 industrial-tariff reform turn efficiency from optional to mandatory.</p>
+      </div>
+
+      <div class="slide reveal">
+        <h2><span class="n">04</span> Market</h2>
+        <div class="tam">
+          <div class="t"><div class="lbl">TAM</div><div class="val">$13–14B → ~$97B</div><div class="d">Global predictive-maintenance software, 2025 → early-2030s (~25%+ CAGR, directional)</div></div>
+          <div class="t"><div class="lbl">SAM</div><div class="val">TODO</div><div class="d">Mid-market industrial + MENA energy/manufacturing digitization</div></div>
+          <div class="t"><div class="lbl">SOM</div><div class="val">TODO</div><div class="d">Beachhead: design-partner plants in Egypt/GCC</div></div>
+        </div>
+        <div class="todo" style="margin-top:var(--s-4)"><strong>Founder TODO:</strong> replace SAM/SOM with defensible bottom-up numbers (# target plants × ACV). TAM figures are analyst estimates that vary widely — cite the specific report you rely on.</div>
+      </div>
+
+      <div class="slide reveal">
+        <h2><span class="n">05</span> Product &amp; moat</h2>
+        <ul>
+          <li><strong>Working product today:</strong> tested core, CI, one-command Docker, live agentic demo.</li>
+          <li><strong>Architecture built for real telemetry:</strong> clean TelemetrySource seam — swapping the simulator for OPC-UA / MQTT is a connector, not a rewrite.</li>
+          <li><strong>Trust as a moat:</strong> explainable, simulation-first, honestly labelled — the opposite of inflated-accuracy incumbents.</li>
+          <li><strong>MENA-native wedge:</strong> local presence, Arabic UI roadmap, data residency — no incumbent is MENA-native.</li>
+        </ul>
+      </div>
+
+      <div class="slide reveal">
+        <h2><span class="n">06</span> Business model</h2>
+        <p>Software-first SaaS priced by fleet: <strong>Pilot</strong> (prove the loop, instrumented ROI) → <strong>Plant/Core</strong> (whole-plant coverage, OPC-UA/MQTT ingest, ISO 50001 reporting) → <strong>Edge/On-prem</strong> (air-gap-friendly for data-sensitive operators). Land with a low-friction pilot, expand across sites.</p>
+        <div class="todo" style="margin-top:var(--s-3)"><strong>Founder TODO:</strong> validate price points and ACV with design-partner conversations.</div>
+      </div>
+
+      <div class="slide reveal">
+        <h2><span class="n">07</span> Traction &amp; roadmap</h2>
+        <ul>
+          <li><strong>Now:</strong> working, tested product + live explainable demo (this page links to it).</li>
+          <li><strong>Next:</strong> OPC-UA / MQTT connectors; 2–3 design-partner pilots on real assets.</li>
+          <li><strong>Later:</strong> ISO 50001 energy reporting, IEC 62443-aligned edge, learned RUL with uncertainty.</li>
+        </ul>
+        <div class="todo" style="margin-top:var(--s-3)"><strong>Founder TODO:</strong> add real traction — LOIs, pilots, waitlist, or design-partner conversations as they land. Do not fabricate.</div>
+      </div>
+
+      <div class="slide reveal">
+        <h2><span class="n">08</span> Team</h2>
+        <p><strong>Yahia Samir</strong> — Founder &amp; Engineer. Built the digital-twin physics, the agentic reasoning loop, and the full-stack live demo. Based in Egypt, targeting the underserved MENA industrial base.</p>
+        <div class="todo" style="margin-top:var(--s-3)"><strong>Founder TODO:</strong> add background, relevant experience, and any advisors. Investors verify — be accurate.</div>
+      </div>
+
+      <div class="slide reveal" style="border-color:var(--accent-dim); box-shadow:var(--glow-accent)">
+        <h2><span class="n">09</span> The ask</h2>
+        <p>Raising a <strong>[TODO: amount]</strong> pre-seed/seed round to convert the working demo into validated pilots: hire [roles], ship the OPC-UA/MQTT connectors, and land [N] design-partner plants over [timeframe].</p>
+        <div class="todo" style="margin-top:var(--s-3)"><strong>Founder TODO:</strong> set the amount, use of funds, milestones, and target investors. Keep it specific and grounded.</div>
+        <div class="row gap-3 cta-print" style="margin-top:var(--s-5); flex-wrap:wrap">
+          <a class="btn btn-primary" href="/dashboard">See the live demo →</a>
+          <a class="btn btn-ghost" href="/#contact">Talk to us</a>
+        </div>
+      </div>
+
+      <p class="note" style="text-align:center">All in-product metrics are simulated projections; real-world validation is the next milestone. Market figures are cited in <a href="https://github.com/yehiasamir27/powersim-ai/blob/main/docs/MARKET_RESEARCH.md" class="text-cyan">docs/MARKET_RESEARCH.md</a>.</p>
+    </div>
+  </div>
+
+  <script src="/static/assets/app.js"></script>
+</body>
+</html>
