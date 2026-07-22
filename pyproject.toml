@@ -1,0 +1,38 @@
+[project]
+name = "powersim-ai"
+version = "2.0.0"
+description = "Agentic AI + digital-twin predictive maintenance for industrial power systems"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Yahia Samir" }]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["static", ".venv", "venv"]
+
+[tool.ruff.lint]
+# pycodestyle, Pyflakes, isort, pep8-naming, pyupgrade, bugbear, comprehensions
+select = ["E", "F", "I", "N", "UP", "B", "C4", "W"]
+ignore = [
+    "E501",  # line length is handled by the formatter
+    "B008",  # FastAPI uses function calls (Depends/Query) in argument defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["N802", "N803"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_ignores = true
+warn_redundant_casts = true
+ignore_missing_imports = true
+disallow_untyped_defs = false
+exclude = ["tests/", "static/"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]
