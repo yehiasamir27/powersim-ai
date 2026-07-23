@@ -44,33 +44,50 @@ Meanwhile the money has arrived and it's **agentic**: Schneider Electric acquire
 - **Think** — an agent weighs the evidence and produces a decision with a transparent **reasoning trail**. It uses a local LLM (via Ollama) when available and a deterministic rule engine otherwise — and **never degrades silently** (the active mode is always reported).
 - **Act** — actionable decisions become prioritized work orders, and every prevented failure is translated into downtime avoided, energy saved, cost and CO₂ — against **your** economics, which you plug in live.
 
-## Screenshots
+### Two pillars, one agent
 
-> _Drop real captures in `static/assets/` and they'll render here._
+The same reasoning engine runs a second pillar: **AI-driven industrial waste management**. Degrading equipment doesn't only risk downtime — it produces more scrap, more contamination and more regulatory exposure, so both are modelled together.
 
-| Live dashboard | Reasoning "why" trail |
+| Layer | What it does |
 |---|---|
-| `static/assets/shot-dashboard.png` | `static/assets/shot-reasoning.png` |
+| **1 · Collect** | Per-source waste telemetry: weight, volume, composition, contamination, moisture — generated from process load *and upstream asset health*. |
+| **2 · Process** | Rule-based classification (recyclable / hazardous / general / reusable by-product) + statistical anomaly detection (volume spike, composition drift). |
+| **3 · Decide** | A fully-implemented **expert-system compliance rule base** and a **4R recommender** (reduce / reuse / recycle / recover), each with a visible why-trail. |
+| **4 · Report** | Diversion, disposal cost avoided, compliance incidents caught and CO₂e — into the same business-impact model, plus a rolled-up sustainability score. |
 
-Or just run it (below) and see the marketing site (`/`), the live dashboard (`/dashboard`), and the investor summary (`/pitch`).
+> The waste classifier is **rule-based, not a trained ML model** — it stands in for the CNN visual sorting and RF/XGBoost ensembles a production deployment would run on real camera/sensor data. See [`docs/TECHNICAL_OVERVIEW.md`](docs/TECHNICAL_OVERVIEW.md) for the full production upgrade path.
+
+## Research foundation
+
+PowerSim AI operationalizes empirically-validated research rather than narrative. Its design is grounded in **"Artificial Intelligence Adoption Intention in Egypt: Effects on Energy Efficiency and Environmental Sustainability"** (Khaled Mohamed, AASTMT, June 2026) — a quantitative survey of **120 professionals** across Egypt's energy, manufacturing and logistics sectors, analysed in SPSS, alongside a literature review covering AI in smart grids, predictive maintenance, renewable-energy forecasting, industrial waste management and Egypt-specific renewable adoption.
+
+| Hypothesis | Result |
+|---|---|
+| **H1** — AI adoption → energy efficiency | **Supported.** β = 0.761, R² = 0.579, p < 0.05 |
+| **H2** — AI adoption → environmental sustainability | **Supported.** β = 0.636, R² = 0.404, p < 0.05 |
+| Scale reliability | Cronbach's Alpha **0.868–0.925** across both scales |
+
+The waste pillar's four-layer architecture and its expert-system compliance layer derive directly from that review. *The study establishes adoption-intention relationships among surveyed professionals; it does not measure PowerSim AI's own field performance.*
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    subgraph Sources["Telemetry sources"]
+    subgraph Sources["Data sources"]
       SIM["Digital-twin simulator<br/>(available)"]
-      OPC["OPC-UA<br/>(planned)"]
-      MQTT["MQTT / Sparkplug B<br/>(planned)"]
+      OPC["OPC-UA · MQTT<br/>(planned)"]
+      WIOT["IoT waste sensors · vision<br/>ERP/MES (planned)"]
     end
-    SIM & OPC & MQTT --> SVC
+    SIM & OPC & WIOT --> SVC
     subgraph Core["SimulationService (framework-agnostic core)"]
       SVC["Orchestrator<br/>(telemetry + agent loops)"]
       TWIN["Digital twin<br/>health · RUL · anomaly"]
-      AGENT["AI agent<br/>sense → think → act"]
+      WASTE["Waste engine<br/>classify · comply · 4R"]
+      AGENT["AI agents<br/>sense → think → act"]
       MAINT["Maintenance queue"]
-      IMPACT["Business-impact model<br/>(simulated ROI)"]
+      IMPACT["Business impact<br/>ROI · ESG score"]
       SVC --> TWIN --> AGENT --> MAINT
+      SVC --> WASTE --> AGENT
       SVC --> IMPACT
     end
     SVC --> API["FastAPI<br/>REST + WebSocket"]
@@ -110,9 +127,11 @@ Then: open the **dashboard**, inject a fault, and watch the agent detect it, exp
 - 🧠 **Continuous agentic loop** — every asset evaluated each cycle; decisions streamed live with a reasoning trail.
 - 🔎 **Explainable by default** — a "why" behind every recommendation; honest LLM-vs-rules status (never a silent fallback).
 - 💰 **Buyer-supplied ROI** — business-impact model with editable economics and visible methodology; nothing hard-coded.
-- 🔌 **Deployment-aware** — `TelemetrySource` interface + OPC-UA / MQTT / historian / ISO 50001 roadmap stubs and UI indicators.
+- ♻️ **Waste & compliance pillar** — classification, anomaly detection, an expert-system compliance rule base and 4R routing, feeding diversion/cost/CO₂e into the same impact model.
+- 📊 **Sustainability scorecard** — reliability, energy, diversion and compliance rolled into one auditable score with visible weights.
+- 🔌 **Deployment-aware** — `TelemetrySource` / `WasteEventSource` interfaces + OPC-UA, MQTT, historian, IoT-sensor, conveyor-vision, ERP/MES and ISO 50001 roadmap stubs with UI indicators.
 - 🎛️ **Premium UI** — original design system, live dashboard with guided tour, animated marketing site, investor pitch page.
-- ✅ **Engineering credibility** — 53 tests, ruff + mypy, GitHub Actions CI, one-command Docker.
+- ✅ **Engineering credibility** — 91 tests, ruff + mypy, GitHub Actions CI, one-command Docker.
 
 ## API
 
@@ -125,6 +144,7 @@ Interactive docs at **`/docs`** (Swagger UI) when running. Key endpoints:
 | `GET` | `/api/state` | Current fleet state, telemetry, queue, impact |
 | `GET` | `/api/analysis` | Latest agent decisions + reasoning feed |
 | `GET` | `/api/impact` | Business-impact snapshot + methodology |
+| `GET` | `/api/waste` | Waste summary + recent classified/compliance-checked consignments |
 | `POST` | `/api/impact/assumptions` | Update ROI economics (buyer-supplied) |
 | `GET` | `/api/integrations` | Integration catalog (available/planned) |
 | `GET` | `/api/agent/status` | Honest agent/LLM status |
@@ -152,7 +172,7 @@ All configuration is environment-driven — no hard-coded hosts, ports, or model
 ```bash
 pip install -r requirements-dev.txt
 
-pytest                 # 53 tests
+pytest                 # 91 tests
 ruff check .           # lint
 ruff format --check .  # format
 mypy config.py logging_config.py schemas.py simulation_service.py main.py simulator/ ai_agent/ integrations/
@@ -186,6 +206,13 @@ docs/                   Market research, pitch, technical overview
 
 Using the demo's default assumptions ($25k/hr downtime, $0.12/kWh, 0.45 kg CO₂e/kWh), a single **predictive catch** on a degraded asset avoids ~6h of unplanned downtime ≈ **$150k value protected** — a figure the product computes transparently against *your* inputs. These are **simulated projections**; the honest pitch is the working, explainable loop and the deployment-ready architecture — not a headline ROI number.
 
+## Team
+
+Two engineers from the **Arab Academy for Science, Technology and Maritime Transport (AASTMT)** — combining technical build capability with empirical energy-sector research grounding, from the same institution and rooted in the Egyptian industrial market we target first.
+
+- **Yehia Samir** — Computer Engineering, AASTMT Alexandria (2025). Builder of PowerSim AI: the digital-twin physics, the agentic reasoning loop, the waste-classification pipeline, and the full-stack live demo.
+- **Khaled Mohamed** — Oil & Gas Supply Chain Management Engineering, AASTMT College of International Transport & Logistics. Author of the empirical study underpinning the product thesis and architect of the AI waste-management pipeline.
+
 ## License
 
-[MIT](LICENSE) © 2026 Yahia Samir
+[MIT](LICENSE) © 2026 Yehia Samir & Khaled Mohamed

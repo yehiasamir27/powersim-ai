@@ -603,7 +603,14 @@
       document.getElementById("tour-skip").addEventListener("click", endTour);
       mask.addEventListener("click", endTour);
       document.getElementById("tour-btn").addEventListener("click", () => showTour(0));
-      try { if (!localStorage.getItem("powersim_tour_done")) setTimeout(() => showTour(0), 1200); } catch (e) {}
+      // Embedded on the marketing page (?embed=1): never auto-open the tour.
+      const embedded = new URLSearchParams(location.search).get("embed") === "1";
+      if (embedded) document.body.classList.add("embedded");
+      try {
+        if (!embedded && !localStorage.getItem("powersim_tour_done")) {
+          setTimeout(() => showTour(0), 1200);
+        }
+      } catch (e) {}
     })();
   </script>
 </body>

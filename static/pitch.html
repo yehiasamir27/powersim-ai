@@ -25,7 +25,6 @@
     .kpi { text-align: center; }
     .kpi .v { font-family: var(--font-mono); font-size: var(--fs-xl); color: var(--text-0); font-weight: 700; }
     .kpi .k { font-size: var(--fs-xs); color: var(--text-2); margin-top: 4px; }
-    .todo { border-left: 2px solid var(--accent); background: var(--accent-dim); padding: 10px 14px; border-radius: var(--r-sm); font-size: var(--fs-xs); color: var(--text-1); font-style: italic; }
     .tam { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
     .tam .t { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); text-align: center; }
     .tam .t .lbl { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.1em; color: var(--accent); }
@@ -66,6 +65,7 @@
           <li><strong>Closes the loop</strong> (acts) — not just alerts or a Q&amp;A copilot.</li>
           <li><strong>Explainable</strong> "why" trail — directly counters buyer distrust of black-box scores.</li>
           <li><strong>Buyer-supplied ROI</strong> — no hard-coded headline numbers.</li>
+          <li><strong>Two pillars, one agent</strong> — the same engine also classifies waste streams, runs expert-system compliance checks and routes them by a 4R recommender, because degrading equipment produces more contaminated scrap and more regulatory exposure.</li>
         </ul>
       </div>
 
@@ -80,51 +80,71 @@
       </div>
 
       <div class="slide reveal">
-        <h2><span class="n">04</span> Market</h2>
-        <div class="tam">
-          <div class="t"><div class="lbl">TAM</div><div class="val">$13–14B → ~$97B</div><div class="d">Global predictive-maintenance software, 2025 → early-2030s (~25%+ CAGR, directional)</div></div>
-          <div class="t"><div class="lbl">SAM</div><div class="val">TODO</div><div class="d">Mid-market industrial + MENA energy/manufacturing digitization</div></div>
-          <div class="t"><div class="lbl">SOM</div><div class="val">TODO</div><div class="d">Beachhead: design-partner plants in Egypt/GCC</div></div>
+        <h2><span class="n">04</span> Research foundation</h2>
+        <p>Our thesis is measured, not asserted. PowerSim AI's design is grounded in <strong>"Artificial Intelligence Adoption Intention in Egypt: Effects on Energy Efficiency and Environmental Sustainability"</strong> (Khaled Mohamed, AASTMT, June 2026) — a quantitative survey of <strong>120 professionals</strong> across Egypt's energy, manufacturing and logistics sectors, analysed in SPSS.</p>
+        <div class="kpis" style="margin-top:var(--s-4)">
+          <div class="kpi"><div class="v">β = 0.761</div><div class="k">H1 supported — AI adoption → energy efficiency (R² = 0.579, p &lt; 0.05)</div></div>
+          <div class="kpi"><div class="v">β = 0.636</div><div class="k">H2 supported — AI adoption → environmental sustainability (R² = 0.404, p &lt; 0.05)</div></div>
+          <div class="kpi"><div class="v">α = 0.868–0.925</div><div class="k">Cronbach's Alpha across both scales — strong reliability</div></div>
         </div>
-        <div class="todo" style="margin-top:var(--s-4)"><strong>Founder TODO:</strong> replace SAM/SOM with defensible bottom-up numbers (# target plants × ACV). TAM figures are analyst estimates that vary widely — cite the specific report you rely on.</div>
+        <p style="margin-top:var(--s-4)">The accompanying literature review — AI in smart grids, predictive maintenance, renewable forecasting, industrial waste management, and Egypt-specific renewable adoption — is the direct source of the waste pillar's four-layer architecture and its expert-system compliance layer. <strong>This product operationalizes empirically-validated research</strong>, which is a genuine differentiator against AI-energy startups pitching on narrative alone.</p>
+        <p style="margin-top:var(--s-3); font-size:var(--fs-xs); color:var(--text-2)">The study establishes adoption-intention relationships among surveyed professionals; it does not measure PowerSim AI's own field performance.</p>
       </div>
 
       <div class="slide reveal">
-        <h2><span class="n">05</span> Product &amp; moat</h2>
+        <h2><span class="n">05</span> Market</h2>
+        <div class="tam">
+          <div class="t"><div class="lbl">TAM</div><div class="val">$13–14B → ~$97B</div><div class="d">Global predictive-maintenance software, 2025 → early-2030s (~25%+ CAGR, analyst estimates vary)</div></div>
+          <div class="t"><div class="lbl">BEACHHEAD</div><div class="val">Egypt &amp; GCC</div><div class="d">Mid-market industrial plants where no incumbent is MENA-native, reached via design-partner pilots</div></div>
+          <div class="t"><div class="lbl">EXPANSION</div><div class="val">Mid-market, global</div><div class="d">Software-first pricing for plants the enterprise incumbents don't serve</div></div>
+        </div>
+        <p style="margin-top:var(--s-4)">Regulation compounds the pull: EU Energy Efficiency Directive audits (2026) and ISO 50001 (2027), CBAM live since January 2026, and Egypt's July 2025 removal of subsidised industrial electricity tariffs — all of which require exactly the auditable, asset-level energy and waste data this product produces.</p>
+      </div>
+
+      <div class="slide reveal">
+        <h2><span class="n">06</span> Product &amp; moat</h2>
         <ul>
-          <li><strong>Working product today:</strong> tested core, CI, one-command Docker, live agentic demo.</li>
-          <li><strong>Architecture built for real telemetry:</strong> clean TelemetrySource seam — swapping the simulator for OPC-UA / MQTT is a connector, not a rewrite.</li>
+          <li><strong>Working product today:</strong> tested core, CI, one-command Docker, live agentic demo across both pillars.</li>
+          <li><strong>Architecture built for real telemetry:</strong> clean TelemetrySource / WasteEventSource seams — swapping the simulator for OPC-UA, MQTT or IoT waste sensors is a connector, not a rewrite.</li>
+          <li><strong>Research-grounded:</strong> the waste pipeline and compliance layer derive from a published empirical study, not a guess about the market.</li>
           <li><strong>Trust as a moat:</strong> explainable, simulation-first, honestly labelled — the opposite of inflated-accuracy incumbents.</li>
           <li><strong>MENA-native wedge:</strong> local presence, Arabic UI roadmap, data residency — no incumbent is MENA-native.</li>
         </ul>
       </div>
 
       <div class="slide reveal">
-        <h2><span class="n">06</span> Business model</h2>
-        <p>Software-first SaaS priced by fleet: <strong>Pilot</strong> (prove the loop, instrumented ROI) → <strong>Plant/Core</strong> (whole-plant coverage, OPC-UA/MQTT ingest, ISO 50001 reporting) → <strong>Edge/On-prem</strong> (air-gap-friendly for data-sensitive operators). Land with a low-friction pilot, expand across sites.</p>
-        <div class="todo" style="margin-top:var(--s-3)"><strong>Founder TODO:</strong> validate price points and ACV with design-partner conversations.</div>
+        <h2><span class="n">07</span> Business model</h2>
+        <p>Software-first SaaS priced by fleet: <strong>Pilot</strong> (prove the loop, instrumented ROI) → <strong>Plant/Core</strong> (whole-plant coverage, OPC-UA/MQTT ingest, ISO 50001 reporting) → <strong>Edge/On-prem</strong> (air-gap-friendly for data-sensitive operators). Land with a low-friction pilot, expand across sites; final pricing is set with each design partner during that pilot.</p>
       </div>
 
       <div class="slide reveal">
-        <h2><span class="n">07</span> Traction &amp; roadmap</h2>
+        <h2><span class="n">08</span> Traction &amp; roadmap</h2>
         <ul>
-          <li><strong>Now:</strong> working, tested product + live explainable demo (this page links to it).</li>
-          <li><strong>Next:</strong> OPC-UA / MQTT connectors; 2–3 design-partner pilots on real assets.</li>
-          <li><strong>Later:</strong> ISO 50001 energy reporting, IEC 62443-aligned edge, learned RUL with uncertainty.</li>
+          <li><strong>Now:</strong> working, tested product with a live explainable demo across predictive maintenance and waste/compliance — plus the empirical study underpinning the thesis.</li>
+          <li><strong>Short term:</strong> single-facility Egyptian pilot with basic sensors and ML classification; OPC-UA / MQTT connectors.</li>
+          <li><strong>Medium term:</strong> multi-site scaling with predictive maintenance and waste running together.</li>
+          <li><strong>Long term:</strong> full AIHIF-style waste optimisation aligned with Egypt Vision 2030 and national waste-tracking frameworks; ISO 50001 reporting; IEC 62443-aligned edge.</li>
         </ul>
-        <div class="todo" style="margin-top:var(--s-3)"><strong>Founder TODO:</strong> add real traction — LOIs, pilots, waitlist, or design-partner conversations as they land. Do not fabricate.</div>
       </div>
 
       <div class="slide reveal">
-        <h2><span class="n">08</span> Team</h2>
-        <p><strong>Yahia Samir</strong> — Founder &amp; Engineer. Built the digital-twin physics, the agentic reasoning loop, and the full-stack live demo. Based in Egypt, targeting the underserved MENA industrial base.</p>
-        <div class="todo" style="margin-top:var(--s-3)"><strong>Founder TODO:</strong> add background, relevant experience, and any advisors. Investors verify — be accurate.</div>
+        <h2><span class="n">09</span> Team</h2>
+        <p>Two engineers from the Arab Academy for Science, Technology and Maritime Transport (AASTMT) — combining technical build capability with empirical energy-sector research grounding, from the same institution and rooted in the Egyptian market we target first.</p>
+        <ul>
+          <li><strong>Yehia Samir</strong> — Computer Engineering, AASTMT Alexandria (2025). Builder of PowerSim AI: digital-twin physics, the agentic reasoning loop, the waste-classification pipeline, and the full-stack live demo.</li>
+          <li><strong>Khaled Mohamed</strong> — Oil &amp; Gas Supply Chain Management Engineering, AASTMT College of International Transport &amp; Logistics. Author of the empirical study underpinning the product thesis and architect of the AI waste-management pipeline.</li>
+        </ul>
       </div>
 
       <div class="slide reveal" style="border-color:var(--accent-dim); box-shadow:var(--glow-accent)">
-        <h2><span class="n">09</span> The ask</h2>
-        <p>Raising a <strong>[TODO: amount]</strong> pre-seed/seed round to convert the working demo into validated pilots: hire [roles], ship the OPC-UA/MQTT connectors, and land [N] design-partner plants over [timeframe].</p>
-        <div class="todo" style="margin-top:var(--s-3)"><strong>Founder TODO:</strong> set the amount, use of funds, milestones, and target investors. Keep it specific and grounded.</div>
+        <h2><span class="n">10</span> The ask</h2>
+        <p>We're raising a pre-seed round to convert a working demo into validated pilots. Use of funds:</p>
+        <ul>
+          <li>Ship the OPC-UA / MQTT and IoT waste-sensor connectors for live plant data.</li>
+          <li>Run design-partner pilots on real assets in Egypt and the GCC.</li>
+          <li>Replace the simulation-grade classifiers with models trained on real labelled plant data.</li>
+        </ul>
+        <p style="margin-top:var(--s-4)">Get in touch for the round details, the full deck, and a walkthrough on your own use case.</p>
         <div class="row gap-3 cta-print" style="margin-top:var(--s-5); flex-wrap:wrap">
           <a class="btn btn-primary" href="/dashboard">See the live demo →</a>
           <a class="btn btn-ghost" href="/#contact">Talk to us</a>

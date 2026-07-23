@@ -85,8 +85,22 @@
     .shot { border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; background: var(--bg-2); position: relative; }
     .shot-ph { aspect-ratio: 16/9; display: grid; place-items: center; color: var(--text-2); font-size: var(--fs-sm); text-align: center; padding: var(--s-5);
       background: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 12px, transparent 12px 24px); }
-    .browser-bar { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--bg-1); }
-    .browser-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); display: block; }
+    .browser-bar { display: flex; gap: 6px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--bg-1); }
+    .browser-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); display: block; flex: none; }
+    .demo-frame { width: 100%; height: 620px; border: 0; display: block; background: var(--bg-0); }
+    @media (max-width: 900px) { .demo-frame { height: 460px; } }
+
+    /* Research foundation */
+    .finding { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
+    .finding .h { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--cyan); letter-spacing: 0.08em; }
+    .finding .stat { font-family: var(--font-mono); font-size: 1.35rem; color: var(--text-0); font-weight: 700; margin: 6px 0 2px; }
+    .finding .d { font-size: var(--fs-sm); color: var(--text-1); }
+    .pillar { display: flex; flex-direction: column; height: 100%; }
+    .pillar .pnum { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--accent); letter-spacing: 0.14em; }
+    .layers { list-style: none; counter-reset: l; display: flex; flex-direction: column; gap: 10px; margin-top: var(--s-3); }
+    .layers li { counter-increment: l; display: flex; gap: 10px; font-size: var(--fs-sm); color: var(--text-1); }
+    .layers li::before { content: counter(l); font-family: var(--font-mono); font-size: 0.62rem; color: var(--accent);
+      border: 1px solid var(--accent-dim); border-radius: 50%; width: 18px; height: 18px; display: grid; place-items: center; flex: none; margin-top: 2px; }
 
     /* Impact */
     .impact-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-4); }
@@ -165,6 +179,7 @@
         <a class="link" href="#problem">Problem</a>
         <a class="link" href="#solution">Solution</a>
         <a class="link" href="#how">How it works</a>
+        <a class="link" href="#research">Research</a>
         <a class="link" href="#market">Market</a>
         <a class="link" href="#roadmap">Roadmap</a>
         <a class="link" href="/pitch">For investors</a>
@@ -185,7 +200,7 @@
       <div class="reveal">
         <span class="chip chip--live"><span class="dot"></span>Live agentic demo running</span>
         <h1 style="margin-top:var(--s-4)">The autonomous <span class="grad">reliability engineer</span> for industrial power.</h1>
-        <p class="lead">PowerSim AI is an agentic digital twin that continuously <strong>senses</strong> asset telemetry, <strong>reasons</strong> about failure risk, and <strong>acts</strong> — generating work orders before equipment fails, with an explainable "why" behind every call and the ROI computed against your own numbers.</p>
+        <p class="lead">PowerSim AI is an agentic digital twin that continuously <strong>senses</strong> asset telemetry, <strong>reasons</strong> about failure risk, and <strong>acts</strong> — generating work orders before equipment fails and routing every waste stream for compliance and recovery, with an explainable "why" behind every call and the ROI computed against your own numbers.</p>
         <div class="hero-cta">
           <a class="btn btn-primary btn-lg" href="/dashboard">Watch the agent work →</a>
           <a class="btn btn-ghost btn-lg" href="#contact">Talk to us</a>
@@ -193,6 +208,7 @@
         <div class="hero-meta">
           <span class="chip"><span class="dot" style="background:var(--cyan)"></span>Sense → Think → Act</span>
           <span class="chip"><span class="dot" style="background:var(--indigo)"></span>Explainable reasoning</span>
+          <span class="chip"><span class="dot" style="background:var(--ok)"></span>Waste &amp; compliance</span>
           <span class="chip"><span class="dot" style="background:var(--accent)"></span>Edge / on-prem ready</span>
         </div>
       </div>
@@ -299,6 +315,38 @@
     </div>
   </section>
 
+  <!-- ===================== TWO PILLARS ===================== -->
+  <section class="section" id="pillars">
+    <div class="container">
+      <p class="eyebrow reveal">Two pillars, one agent</p>
+      <h2 class="section-title reveal">Uptime and compliance run on the same reasoning engine.</h2>
+      <p class="section-lead reveal">Degrading equipment doesn't just risk downtime — it produces more scrap, more contamination, and more regulatory exposure. PowerSim models both, so a single agent reasons across asset health <em>and</em> the waste it generates.</p>
+      <div class="grid grid-2" style="margin-top:var(--s-6)">
+        <div class="card pillar reveal">
+          <div class="pnum">PILLAR 01</div>
+          <h3 style="font-size:var(--fs-md); margin:6px 0">Predictive maintenance</h3>
+          <p style="font-size:var(--fs-sm)">A physics-based digital twin estimates each asset's health and remaining useful life from sensor fusion, then the agent decides whether to monitor, inspect, maintain, repair or escalate — and opens the work order.</p>
+          <div class="row wrap gap-2" style="margin-top:var(--s-4)">
+            <span class="chip"><span class="dot" style="background:var(--cyan)"></span>Health &amp; RUL</span>
+            <span class="chip"><span class="dot" style="background:var(--accent)"></span>Work orders</span>
+            <span class="chip"><span class="dot" style="background:var(--ok)"></span>Downtime avoided</span>
+          </div>
+        </div>
+        <div class="card pillar reveal d1">
+          <div class="pnum">PILLAR 02</div>
+          <h3 style="font-size:var(--fs-md); margin:6px 0">AI waste &amp; compliance</h3>
+          <p style="font-size:var(--fs-sm)">Every consignment is classified, checked against an expert-system compliance rule base, and routed by a 4R recommender — turning waste from a cost centre into measurable diversion, avoided penalties and reported CO₂e.</p>
+          <ol class="layers">
+            <li><strong>Collect</strong> — weight, volume, composition, contamination, moisture per stream.</li>
+            <li><strong>Process</strong> — classification (recyclable / hazardous / general / reusable by-product) + anomaly detection.</li>
+            <li><strong>Decide</strong> — expert-system compliance checks and 4R routing, with a visible why-trail.</li>
+            <li><strong>Report</strong> — diversion, disposal cost avoided, incidents caught, CO₂e — into the same impact model.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================== HOW IT WORKS ===================== -->
   <section class="section" id="how">
     <div class="container">
@@ -372,17 +420,53 @@
         </div>
         <a class="btn btn-primary reveal" href="/dashboard">Open the live dashboard →</a>
       </div>
-      <div class="grid grid-2" style="margin-top:var(--s-6)">
-        <div class="shot reveal">
-          <div class="browser-bar"><i></i><i></i><i></i></div>
-          <div class="shot-ph">Dashboard screenshot placeholder — drop a real capture at<br /><code class="mono">static/assets/shot-dashboard.png</code></div>
+      <div class="shot reveal" style="margin-top:var(--s-6)">
+        <div class="browser-bar">
+          <i></i><i></i><i></i>
+          <span class="mono" style="margin-left:10px;font-size:0.68rem;color:var(--text-2)">powersim-ai — live operations dashboard</span>
         </div>
-        <div class="shot reveal d1">
-          <div class="browser-bar"><i></i><i></i><i></i></div>
-          <div class="shot-ph">Reasoning "why-trail" placeholder — drop a real capture at<br /><code class="mono">static/assets/shot-reasoning.png</code></div>
+        <iframe class="demo-frame" src="/dashboard?embed=1" title="PowerSim AI live dashboard" loading="lazy"></iframe>
+      </div>
+      <p class="note reveal" style="margin-top:var(--s-4)">This is the real product running live, embedded. Open it full-screen to inject a fault and watch the agent detect it, explain its reasoning, and open a work order.</p>
+    </div>
+  </section>
+
+  <!-- ===================== RESEARCH FOUNDATION ===================== -->
+  <section class="section" id="research">
+    <div class="container">
+      <p class="eyebrow reveal">Research foundation</p>
+      <h2 class="section-title reveal">This product operationalizes empirically-validated research.</h2>
+      <p class="section-lead reveal">Most AI-energy startups pitch on narrative. Our thesis is measured. PowerSim AI's design is grounded in <strong>"Artificial Intelligence Adoption Intention in Egypt: Effects on Energy Efficiency and Environmental Sustainability"</strong> (Khaled Mohamed, AASTMT, June 2026) — a quantitative study surveying <strong>120 professionals</strong> across Egypt's energy, manufacturing and logistics sectors, analysed in SPSS.</p>
+
+      <div class="grid grid-3" style="margin-top:var(--s-6)">
+        <div class="finding reveal">
+          <div class="h">H1 · SUPPORTED</div>
+          <div class="stat">β = 0.761</div>
+          <div class="d">AI adoption → <strong>energy efficiency</strong>. R² = 0.579, p &lt; 0.05.</div>
+        </div>
+        <div class="finding reveal d1">
+          <div class="h">H2 · SUPPORTED</div>
+          <div class="stat">β = 0.636</div>
+          <div class="d">AI adoption → <strong>environmental sustainability</strong>. R² = 0.404, p &lt; 0.05.</div>
+        </div>
+        <div class="finding reveal d2">
+          <div class="h">SCALE RELIABILITY</div>
+          <div class="stat">α = 0.868–0.925</div>
+          <div class="d">Cronbach's Alpha across both scales — strong internal consistency.</div>
         </div>
       </div>
-      <p class="note reveal" style="margin-top:var(--s-4)">The live demo above is fully interactive — inject a fault and watch the agent detect it, explain its reasoning, and open a work order.</p>
+
+      <div class="grid grid-2" style="margin-top:var(--s-5); align-items:start">
+        <div class="card reveal">
+          <h3 style="font-size:var(--fs-md); margin-bottom:var(--s-3)">What the study establishes</h3>
+          <p style="font-size:var(--fs-sm)">In an Egyptian industrial context, intention to adopt AI is a statistically significant predictor of both energy-efficiency and environmental-sustainability outcomes — with energy efficiency the stronger relationship. That is the empirical basis for building an agent that targets <em>both</em> uptime and environmental performance, and for treating MENA industry as a receptive market rather than an assumption.</p>
+        </div>
+        <div class="card reveal d1">
+          <h3 style="font-size:var(--fs-md); margin-bottom:var(--s-3)">Literature grounding</h3>
+          <p style="font-size:var(--fs-sm)">The accompanying review covers AI in smart grids, predictive maintenance, renewable-energy forecasting, industrial waste management, and Egypt-specific renewable-adoption studies. The waste pillar's four-layer architecture and its expert-system compliance layer come directly from that review.</p>
+        </div>
+      </div>
+      <p class="note reveal" style="margin-top:var(--s-4)">Findings are reported as measured. The study establishes adoption-intention relationships among surveyed professionals; it does not measure PowerSim AI's own field performance, which remains the next milestone.</p>
     </div>
   </section>
 
@@ -455,7 +539,7 @@
           <ul><li>Fully on-prem / edge</li><li>IEC 62443-aligned roadmap</li><li>Private model hosting</li><li>SLA &amp; support</li></ul>
         </div>
       </div>
-      <p class="note reveal" style="margin-top:var(--s-4)">Pricing is illustrative of the intended packaging — <strong>TODO for founder:</strong> validate tiers and price points with design-partner conversations.</p>
+      <p class="note reveal" style="margin-top:var(--s-4)">Packaging shown reflects our intended structure; final pricing is set with each design partner during the pilot.</p>
     </div>
   </section>
 
@@ -471,43 +555,66 @@
             <li><span class="b"></span>Physics-based digital twin (health, RUL, anomaly)</li>
             <li><span class="b"></span>Continuous sense→think→act agent</li>
             <li><span class="b"></span>Explainable reasoning "why" trail</li>
-            <li><span class="b"></span>Business-impact model (buyer-supplied ROI)</li>
+            <li><span class="b"></span>Waste classification, compliance rules &amp; 4R routing</li>
+            <li><span class="b"></span>Business-impact model + sustainability score</li>
             <li><span class="b"></span>Tested core + CI + one-command Docker</li>
           </ul>
         </div>
         <div class="road-col next card">
-          <h4><span class="badge badge--warn">Next</span></h4>
+          <h4><span class="badge badge--warn">Short — medium term</span></h4>
           <ul>
+            <li><span class="b"></span>Single-facility Egyptian pilot: basic sensors + ML classification</li>
             <li><span class="b"></span>OPC-UA connector (live PLC/SCADA ingest)</li>
             <li><span class="b"></span>MQTT / Sparkplug B edge streaming</li>
-            <li><span class="b"></span>Historian backfill (OSIsoft/AVEVA PI)</li>
-            <li><span class="b"></span>Design-partner pilots on real assets</li>
+            <li><span class="b"></span>IoT waste sensors &amp; conveyor vision ingest</li>
+            <li><span class="b"></span>Multi-site scaling with predictive maintenance integrated</li>
           </ul>
         </div>
         <div class="road-col card">
-          <h4><span class="badge badge--info">Later</span></h4>
+          <h4><span class="badge badge--info">Long term</span></h4>
           <ul>
+            <li><span class="b"></span>Full AIHIF-style waste optimisation across facilities</li>
+            <li><span class="b"></span>Alignment with Egypt Vision 2030 &amp; national waste tracking</li>
             <li><span class="b"></span>ISO 50001 / EU EED energy reporting export</li>
             <li><span class="b"></span>IEC 62443-aligned on-prem/edge hardening</li>
-            <li><span class="b"></span>Learned RUL models with uncertainty</li>
-            <li><span class="b"></span>Arabic UI &amp; MENA data residency</li>
+            <li><span class="b"></span>Trained CV/ensemble classifiers &amp; uncertainty-aware RUL</li>
           </ul>
+        </div>
+      </div>
+      <div class="card reveal" style="margin-top:var(--s-5)">
+        <h3 style="font-size:var(--fs-md); margin-bottom:var(--s-3)">How we address the adoption barriers our research identified</h3>
+        <div class="grid grid-4">
+          <div><div class="mono" style="font-size:var(--fs-xs);color:var(--accent)">LIMITED EXPERTISE</div><p style="font-size:var(--fs-sm);margin-top:4px">Cloud-based pre-trained models — no in-house data-science team required.</p></div>
+          <div><div class="mono" style="font-size:var(--fs-xs);color:var(--accent)">HIGH COSTS</div><p style="font-size:var(--fs-sm);margin-top:4px">Modular single-use-case rollout — start with one line, expand on proven ROI.</p></div>
+          <div><div class="mono" style="font-size:var(--fs-xs);color:var(--accent)">INCONSISTENT REGULATION</div><p style="font-size:var(--fs-sm);margin-top:4px">Expert-system compliance checks encode the rules explicitly and auditably.</p></div>
+          <div><div class="mono" style="font-size:var(--fs-xs);color:var(--accent)">DATA SCARCITY</div><p style="font-size:var(--fs-sm);margin-top:4px">Transfer learning from global datasets with local fine-tuning.</p></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== FOUNDER ===================== -->
+  <!-- ===================== TEAM ===================== -->
   <section class="section" id="team">
     <div class="container">
       <p class="eyebrow reveal">Team</p>
-      <h2 class="section-title reveal">Founder-led, engineering-first.</h2>
-      <div class="card founder reveal" style="margin-top:var(--s-6)">
-        <div class="avatar">YS</div>
-        <div>
-          <h3 style="font-size:var(--fs-md)">Yahia Samir <span class="muted" style="font-weight:400">· Founder &amp; Engineer</span></h3>
-          <p style="font-size:var(--fs-sm); color:var(--text-1); margin-top:6px; max-width:60ch">Building PowerSim AI from the ground up — digital-twin physics, the agentic reasoning loop, and the full-stack live demo. Based in Egypt, targeting the underserved MENA industrial base as a differentiated wedge into a global market.</p>
-          <p class="note" style="margin-top:8px"><strong>TODO for founder:</strong> add bio, background, relevant credentials, and any advisors/collaborators. Do not overstate — investors verify.</p>
+      <h2 class="section-title reveal">Two AASTMT engineers: one builds it, one proved the need.</h2>
+      <p class="section-lead reveal">PowerSim AI pairs technical build capability with empirical energy-sector research — both from the Arab Academy for Science, Technology and Maritime Transport, and both rooted in the Egyptian industrial market we're targeting first.</p>
+      <div class="grid grid-2" style="margin-top:var(--s-6)">
+        <div class="card founder reveal">
+          <div class="avatar">YS</div>
+          <div>
+            <h3 style="font-size:var(--fs-md)">Yehia Samir</h3>
+            <div class="muted" style="font-size:var(--fs-sm)">Computer Engineering, AASTMT Alexandria (2025)</div>
+            <p style="font-size:var(--fs-sm); color:var(--text-1); margin-top:8px">Builder of PowerSim AI — the digital-twin physics, the agentic reasoning loop, the waste-classification pipeline, and the full-stack live demo.</p>
+          </div>
+        </div>
+        <div class="card founder reveal d1">
+          <div class="avatar">KM</div>
+          <div>
+            <h3 style="font-size:var(--fs-md)">Khaled Mohamed</h3>
+            <div class="muted" style="font-size:var(--fs-sm)">Oil &amp; Gas Supply Chain Management Engineering, AASTMT — College of International Transport &amp; Logistics</div>
+            <p style="font-size:var(--fs-sm); color:var(--text-1); margin-top:8px">Author of the empirical study underpinning the product's thesis, and architect of the AI waste-management pipeline grounded in that research.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -570,7 +677,7 @@
       </div>
     </div>
     <div class="container" style="margin-top:var(--s-5)">
-      <p class="note">© 2026 PowerSim AI · Yahia Samir. Built for demonstration and evaluation.</p>
+      <p class="note">© 2026 PowerSim AI · Yehia Samir &amp; Khaled Mohamed. Built for demonstration and evaluation.</p>
     </div>
   </footer>
 

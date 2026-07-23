@@ -29,6 +29,24 @@ A continuous **sense → think → act** agent over a physics-based digital twin
 
 **What makes it different:** it *closes the loop* (acts), it's *explainable by default*, and its ROI is *buyer-supplied* — the three places incumbents visibly disappoint.
 
+### Second pillar: AI waste & compliance
+
+The same agent also runs a four-layer waste pipeline — **collect** (weight, composition, contamination, moisture per stream) → **process** (classification + anomaly detection) → **decide** (expert-system compliance rules + 4R routing) → **report** (diversion, disposal cost avoided, incidents caught, CO₂e). Because degrading equipment produces more contaminated scrap, the two pillars are physically linked in the model, and both feed one sustainability scorecard.
+
+## 2b. Research foundation
+
+Our thesis is measured, not asserted. The product is grounded in **"Artificial Intelligence Adoption Intention in Egypt: Effects on Energy Efficiency and Environmental Sustainability"** (Khaled Mohamed, AASTMT, June 2026) — a quantitative survey of **120 professionals** across Egypt's energy, manufacturing and logistics sectors, analysed in SPSS.
+
+| Hypothesis | Result |
+|---|---|
+| **H1** — AI adoption → energy efficiency | **Supported.** β = 0.761, R² = 0.579, p < 0.05 |
+| **H2** — AI adoption → environmental sustainability | **Supported.** β = 0.636, R² = 0.404, p < 0.05 |
+| Scale reliability | Cronbach's Alpha **0.868–0.925** |
+
+The accompanying literature review (AI in smart grids, predictive maintenance, renewable forecasting, industrial waste management, Egypt-specific renewable adoption) is the direct source of the waste pillar's architecture and its expert-system compliance layer. **This product operationalizes empirically-validated research** — a genuine differentiator versus AI-energy startups pitching on narrative alone.
+
+*Scope note: the study establishes adoption-intention relationships among surveyed professionals; it does not measure PowerSim AI's own field performance.*
+
 ## 3. Why now
 
 - **$3.1B** — Schneider Electric's 2026 acquisition of industrial-AI firm Cognite, explicitly to make AI *execute* operations. (Cognite / Bloomberg)
@@ -51,7 +69,8 @@ Demo flow: inject a fault → the twin's sensors react → the agent catches it,
 
 ## 5. Technology moat
 
-- **Deployment-ready architecture.** A clean `TelemetrySource` seam means swapping the simulator for a real OPC-UA / MQTT feed is a *connector, not a rewrite*.
+- **Deployment-ready architecture.** Clean `TelemetrySource` / `WasteEventSource` seams mean swapping the simulator for a real OPC-UA / MQTT feed or IoT waste sensors is a *connector, not a rewrite*.
+- **Research-grounded product.** The waste pipeline and compliance layer derive from a published empirical study, not a guess about the market.
 - **Trust as a moat.** Explainable, simulation-first, honestly labelled — the opposite of inflated-accuracy incumbents, and exactly what conservative high-consequence operators want.
 - **Engineering credibility.** Tested core (53 tests), CI, one-command Docker — passes technical due diligence.
 - **MENA-native wedge.** Local presence, Arabic UI roadmap, data residency — no incumbent is MENA-native.
@@ -90,13 +109,23 @@ Motion: land with a low-friction pilot, expand across sites. **[TODO]** validate
 
 ## 9. Traction & roadmap
 
-- **Now:** working, tested product + live explainable demo.
-- **Next:** OPC-UA / MQTT connectors; 2–3 design-partner pilots on real assets.
-- **Later:** ISO 50001 energy reporting, IEC 62443-aligned edge, learned RUL with uncertainty, Arabic UI & MENA data residency.
+- **Now:** working, tested product + live explainable demo across both pillars, plus the empirical study underpinning the thesis.
+- **Short term:** single-facility Egyptian pilot with basic sensors + ML classification; OPC-UA / MQTT connectors.
+- **Medium term:** multi-site scaling with predictive maintenance and waste running together.
+- **Long term:** full AIHIF-style waste optimisation aligned with Egypt Vision 2030 and national waste-tracking frameworks; ISO 50001 energy reporting; IEC 62443-aligned edge; learned RUL with uncertainty; Arabic UI & MENA data residency.
 
 > **[TODO — founder]** Add real traction as it lands — LOIs, pilots, waitlist, design-partner conversations. Investors verify; do not fabricate.
 
-## 10. The ask
+## 10. Team
+
+Two engineers from the **Arab Academy for Science, Technology and Maritime Transport (AASTMT)** — combining technical build capability with empirical energy-sector research grounding, from the same institution and rooted in the Egyptian market we target first.
+
+- **Yehia Samir** — Computer Engineering, AASTMT Alexandria (2025). Builder of PowerSim AI: digital-twin physics, the agentic reasoning loop, the waste-classification pipeline, and the full-stack live demo.
+- **Khaled Mohamed** — Oil & Gas Supply Chain Management Engineering, AASTMT College of International Transport & Logistics. Author of the empirical study underpinning the product thesis and architect of the AI waste-management pipeline.
+
+> **[TODO — founders]** Add advisors and relevant industry experience as it accrues. Investors verify — be accurate.
+
+## 11. The ask
 
 Raising a **[TODO: amount]** pre-seed/seed round to convert the working demo into validated pilots:
 

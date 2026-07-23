@@ -5,7 +5,7 @@ description = "Agentic AI + digital-twin predictive maintenance for industrial p
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "Yahia Samir" }]
+authors = [{ name = "Yehia Samir" }, { name = "Khaled Mohamed" }]
 
 [tool.ruff]
 line-length = 100
