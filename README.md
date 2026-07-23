@@ -11,7 +11,9 @@ An **agentic digital twin** that continuously **senses** asset telemetry, **reas
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Code style: ruff](https://img.shields.io/badge/lint-ruff-261230)](https://github.com/astral-sh/ruff)
 
-[Live demo](#-quickstart-under-2-minutes) · [Market research](docs/MARKET_RESEARCH.md) · [Pitch](docs/PITCH.md) · [Technical overview](docs/TECHNICAL_OVERVIEW.md)
+**🔗 Live demo: _not yet deployed_** — run `python scripts/build_static.py && vercel deploy --prod` and paste the printed `*.vercel.app` URL here. See [deployment guide](docs/DEPLOYMENT.md).
+
+[Quickstart](#-quickstart-under-2-minutes) · [Market research](docs/MARKET_RESEARCH.md) · [Pitch](docs/PITCH.md) · [Technical overview](docs/TECHNICAL_OVERVIEW.md) · [Deployment](docs/DEPLOYMENT.md)
 
 </div>
 
@@ -205,6 +207,13 @@ docs/                   Market research, pitch, technical overview
 ## Business case (conservative, illustrative)
 
 Using the demo's default assumptions ($25k/hr downtime, $0.12/kWh, 0.45 kg CO₂e/kWh), a single **predictive catch** on a degraded asset avoids ~6h of unplanned downtime ≈ **$150k value protected** — a figure the product computes transparently against *your* inputs. These are **simulated projections**; the honest pitch is the working, explainable loop and the deployment-ready architecture — not a headline ROI number.
+
+## Deployment
+
+Two modes, both documented in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md):
+
+- **Production / on-prem** — the full Python · FastAPI · WebSocket · Ollama · Docker stack (`docker compose up --build`). This is the product.
+- **Public demo** — a static bundle where the *same pages* run the simulation client-side via `static/assets/sim-engine.js`, because Vercel's serverless model has no always-on process and caps WebSockets at the function duration. Build with `python scripts/build_static.py`, deploy with `vercel deploy --prod`.
 
 ## Team
 
