@@ -52,6 +52,10 @@ class ImpactAssumptions:
     grid_emission_factor_kg_per_kwh: float = 0.45  # kg CO2e / kWh (grid average)
     unplanned_downtime_hours_per_failure: float = 8.0  # avg unplanned outage per failure
     planned_maintenance_hours: float = 2.0  # planned intervention duration
+    # -- waste pillar ------------------------------------------------------
+    disposal_cost_per_tonne: float = 55.0  # USD / tonne landfill gate + haulage
+    co2e_avoided_per_tonne_diverted_kg: float = 380.0  # kg CO2e avoided per tonne diverted
+    compliance_penalty_avoided_usd: float = 2_500.0  # USD per incident caught pre-disposal
 
     @classmethod
     def from_env(cls) -> ImpactAssumptions:
@@ -73,6 +77,17 @@ class ImpactAssumptions:
             planned_maintenance_hours=_env_float(
                 "POWERSIM_IMPACT_PLANNED_MAINTENANCE_HOURS", cls.planned_maintenance_hours
             ),
+            disposal_cost_per_tonne=_env_float(
+                "POWERSIM_IMPACT_DISPOSAL_COST_PER_TONNE", cls.disposal_cost_per_tonne
+            ),
+            co2e_avoided_per_tonne_diverted_kg=_env_float(
+                "POWERSIM_IMPACT_CO2E_PER_TONNE_DIVERTED",
+                cls.co2e_avoided_per_tonne_diverted_kg,
+            ),
+            compliance_penalty_avoided_usd=_env_float(
+                "POWERSIM_IMPACT_COMPLIANCE_PENALTY_AVOIDED",
+                cls.compliance_penalty_avoided_usd,
+            ),
         )
 
     def to_dict(self) -> dict[str, float]:
@@ -88,6 +103,12 @@ class _Counters:
     energy_waste_kw_now: float = 0.0
     energy_recovered_kwh: float = 0.0
     baseline_energy_kwh: float = 0.0
+    # -- waste pillar --
+    waste_generated_kg: float = 0.0
+    waste_diverted_kg: float = 0.0
+    waste_events: int = 0
+    compliance_incidents_caught: int = 0
+    hazardous_events: int = 0
 
 
 class BusinessImpactModel:
@@ -155,7 +176,55 @@ class BusinessImpactModel:
         elif state == "failed":
             self._c.reactive_repairs += 1
 
+    def on_waste_event(self, event: Any) -> None:
+        """Accrue waste-pillar impact from one classified waste consignment.
+
+        Expects an object exposing ``weight_kg``, ``diverted_kg``,
+        ``compliance_status`` and ``category`` (a
+        :class:`simulator.waste_stream.WasteEvent`). A *compliance incident
+        caught* is a non-compliant consignment flagged by the expert system
+        **before** disposal — the penalty is avoided precisely because it was
+        caught.
+        """
+        self._c.waste_events += 1
+        self._c.waste_generated_kg += float(getattr(event, "weight_kg", 0.0))
+        self._c.waste_diverted_kg += float(getattr(event, "diverted_kg", 0.0))
+        status = getattr(getattr(event, "compliance_status", None), "value", "")
+        if status == "non_compliant":
+            self._c.compliance_incidents_caught += 1
+        category = getattr(getattr(event, "category", None), "value", "")
+        if category == "hazardous":
+            self._c.hazardous_events += 1
+
     # -- reporting --------------------------------------------------------
+
+    def _sustainability_scorecard(self, energy_waste_pct: float) -> dict[str, Any]:
+        """Roll the four pillars into one investor-legible 0-100 ESG-style score.
+
+        Weights are explicit and returned alongside the sub-scores so the number is
+        auditable rather than a black box.
+        """
+        c = self._c
+        interventions = c.failures_prevented + c.reactive_repairs
+        reliability = 100.0 * c.failures_prevented / interventions if interventions else 100.0
+        energy = max(0.0, 100.0 - energy_waste_pct)
+        diversion = (
+            100.0 * c.waste_diverted_kg / c.waste_generated_kg if c.waste_generated_kg > 0 else 0.0
+        )
+        compliance = (
+            100.0 * (1.0 - c.compliance_incidents_caught / c.waste_events)
+            if c.waste_events
+            else 100.0
+        )
+        weights = {"reliability": 0.30, "energy": 0.25, "waste_diversion": 0.25, "compliance": 0.20}
+        subscores = {
+            "reliability": round(reliability, 1),
+            "energy": round(energy, 1),
+            "waste_diversion": round(diversion, 1),
+            "compliance": round(compliance, 1),
+        }
+        score = sum(subscores[k] * w for k, w in weights.items())
+        return {"score": round(score, 1), "subscores": subscores, "weights": weights}
 
     def snapshot(self) -> dict[str, Any]:
         """Current impact metrics. All values are simulated projections."""
@@ -169,6 +238,16 @@ class BusinessImpactModel:
             if c.baseline_energy_kwh > 0
             else 0.0
         )
+        # -- waste pillar --
+        diverted_tonnes = c.waste_diverted_kg / 1000.0
+        disposal_cost_avoided = diverted_tonnes * a.disposal_cost_per_tonne
+        waste_co2e_avoided = diverted_tonnes * a.co2e_avoided_per_tonne_diverted_kg
+        compliance_value = c.compliance_incidents_caught * a.compliance_penalty_avoided_usd
+        diversion_rate = (
+            100.0 * c.waste_diverted_kg / c.waste_generated_kg if c.waste_generated_kg > 0 else 0.0
+        )
+        total_value = downtime_cost_avoided + disposal_cost_avoided + compliance_value
+
         return {
             "simulated": True,
             "failures_prevented": c.failures_prevented,
@@ -180,7 +259,19 @@ class BusinessImpactModel:
             "energy_waste_pct": round(waste_pct, 2),
             "energy_cost_wasted_usd": round(energy_cost_wasted, 2),
             "co2_wasted_kg": round(co2_wasted_kg, 1),
-            "value_protected_usd": round(downtime_cost_avoided, 2),
+            # -- waste pillar --
+            "waste_events": c.waste_events,
+            "waste_generated_kg": round(c.waste_generated_kg, 1),
+            "waste_diverted_kg": round(c.waste_diverted_kg, 1),
+            "waste_diversion_rate_pct": round(diversion_rate, 1),
+            "disposal_cost_avoided_usd": round(disposal_cost_avoided, 2),
+            "waste_co2e_avoided_kg": round(waste_co2e_avoided, 1),
+            "compliance_incidents_caught": c.compliance_incidents_caught,
+            "hazardous_events": c.hazardous_events,
+            "compliance_value_usd": round(compliance_value, 2),
+            # -- rolled up --
+            "value_protected_usd": round(total_value, 2),
+            "sustainability": self._sustainability_scorecard(waste_pct),
         }
 
     def methodology(self) -> dict[str, Any]:
@@ -206,6 +297,31 @@ class BusinessImpactModel:
                 ),
                 "energy_cost_wasted_usd": "energy_wasted_kwh x energy_tariff_per_kwh",
                 "co2_wasted_kg": "energy_wasted_kwh x grid_emission_factor_kg_per_kwh",
+                "waste_diverted_kg": (
+                    "Sum over waste events of weight_kg x the diversion rate of the "
+                    "recommended 4R action (reuse 0.95, recycle 0.85, recover 0.60, "
+                    "reduce 0.30, dispose 0.0)."
+                ),
+                "disposal_cost_avoided_usd": (
+                    "(waste_diverted_kg / 1000) x disposal_cost_per_tonne"
+                ),
+                "waste_co2e_avoided_kg": (
+                    "(waste_diverted_kg / 1000) x co2e_avoided_per_tonne_diverted_kg"
+                ),
+                "compliance_value_usd": (
+                    "compliance_incidents_caught x compliance_penalty_avoided_usd. An "
+                    "incident is 'caught' when the expert system flags a non-compliant "
+                    "consignment before disposal."
+                ),
+                "value_protected_usd": (
+                    "downtime_cost_avoided_usd + disposal_cost_avoided_usd + compliance_value_usd"
+                ),
+                "sustainability.score": (
+                    "Weighted mean of four 0-100 sub-scores — reliability 30% "
+                    "(predictive share of interventions), energy 25% (100 - energy "
+                    "waste %), waste diversion 25% (diverted / generated), compliance "
+                    "20% (share of consignments with no non-compliance)."
+                ),
             },
             "nominal_efficiency": NOMINAL_EFFICIENCY,
         }

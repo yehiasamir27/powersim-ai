@@ -132,16 +132,22 @@ PLANNED_INTEGRATIONS: tuple[IntegrationInfo, ...] = (
 )
 
 
+def info_to_dict(info: IntegrationInfo) -> dict:
+    """Serialise one catalog entry for the API/UI."""
+    return {
+        "key": info.key,
+        "name": info.name,
+        "protocol": info.protocol,
+        "status": info.status,
+        "description": info.description,
+        "standards": list(info.standards),
+    }
+
+
 def get_integration_catalog() -> list[dict]:
-    """Return the integration catalog as a list of plain dicts (for the API/UI)."""
-    return [
-        {
-            "key": i.key,
-            "name": i.name,
-            "protocol": i.protocol,
-            "status": i.status,
-            "description": i.description,
-            "standards": list(i.standards),
-        }
-        for i in PLANNED_INTEGRATIONS
-    ]
+    """Return the power-pillar integration catalog as plain dicts.
+
+    The package-level ``integrations.get_integration_catalog`` composes this with
+    the waste-pillar entries.
+    """
+    return [info_to_dict(i) for i in PLANNED_INTEGRATIONS]

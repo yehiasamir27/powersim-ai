@@ -14,12 +14,14 @@ from datetime import datetime
 from typing import Any
 
 from ai_agent.agent import AIAgent
+from ai_agent.waste_agent import WasteAgent
 from config import Settings
 from integrations import SimulatedTelemetrySource, get_integration_catalog
 from logging_config import get_logger
 from simulator.business_impact import BusinessImpactModel, ImpactAssumptions
 from simulator.maintenance import MaintenanceManager
 from simulator.power_system import PowerSystem
+from simulator.waste_stream import WasteStreamSystem
 
 logger = get_logger("powersim.service")
 
@@ -50,6 +52,9 @@ class SimulationService:
             simulated_hours_per_tick=PowerSystem.TICK_DURATION_SECONDS / 3600.0,
         )
         self.source = SimulatedTelemetrySource(self.power_system)
+        # -- waste pillar --
+        self.waste_system = WasteStreamSystem(seed=s.simulation_seed)
+        self.waste_agent = WasteAgent()
         self.latest_telemetry = {}
         self.latest_decisions = {}
         self._agent_events.clear()
@@ -68,6 +73,7 @@ class SimulationService:
         telemetry = await self.source.read()
         self.latest_telemetry = telemetry
         self.impact.on_tick(self.power_system.get_all_assets(), telemetry)
+        waste_events = self._advance_waste()
         return {
             "type": "tick",
             "tick_count": self.power_system.tick_count,
@@ -76,7 +82,43 @@ class SimulationService:
             "telemetry": telemetry,
             "impact": self.impact.snapshot(),
             "queue_stats": self.maintenance.get_statistics(),
+            "waste": self.waste_system.get_summary(),
+            "waste_events": waste_events,
         }
+
+    def _advance_waste(self) -> list[dict]:
+        """Tick the waste pillar: generate, classify, reason, accrue, and log.
+
+        Waste reasoning is deterministic and cheap, so it runs with the telemetry
+        loop and its events join the *same* why-trail as maintenance decisions.
+        """
+        asset_health = {
+            a.config.asset_id: a.estimated_health for a in self.power_system.get_all_assets()
+        }
+        emitted: list[dict] = []
+        for event in self.waste_system.tick(asset_health):
+            decision = self.waste_agent.evaluate(event)
+            self.impact.on_waste_event(event)
+            payload = {
+                "kind": "waste",
+                "timestamp": event.timestamp.isoformat(),
+                "tick": event.tick,
+                "asset_id": event.source_id,
+                "asset_name": event.source_name,
+                "decision_type": decision.decision_type.value,
+                "priority": decision.priority,
+                "source": decision.source,
+                "summary": decision.recommended_action,
+                "reasoning_trail": decision.reasoning_trail,
+                "work_order": None,
+                "waste": event.to_dict(),
+            }
+            # Only surface events that warrant attention on the live feed, so the
+            # trail stays legible rather than scrolling with routine consignments.
+            if decision.decision_type.value != "monitor":
+                self._agent_events.appendleft(payload)
+            emitted.append(payload)
+        return emitted
 
     # -- agent loop (think -> act) ---------------------------------------
 
@@ -121,6 +163,7 @@ class SimulationService:
 
     def _make_event(self, asset: Any, decision: dict, action: dict | None) -> dict:
         return {
+            "kind": "maintenance",
             "timestamp": datetime.now().isoformat(),
             "tick": self.power_system.tick_count,
             "asset_id": asset.config.asset_id,
@@ -203,6 +246,7 @@ class SimulationService:
             "queue_stats": self.maintenance.get_statistics(),
             "impact": self.impact.snapshot(),
             "agent_status": self.agent.get_status(),
+            "waste": self.waste_system.get_summary(),
         }
 
     def get_analysis(self) -> dict:
@@ -218,6 +262,13 @@ class SimulationService:
         return {
             "snapshot": self.impact.snapshot(),
             "methodology": self.impact.methodology(),
+        }
+
+    def get_waste(self, limit: int = 20) -> dict:
+        """Waste-pillar read model: fleet summary + recent classified consignments."""
+        return {
+            "summary": self.waste_system.get_summary(),
+            "events": self.waste_system.get_recent_events(limit),
         }
 
     def update_impact_assumptions(self, updates: dict[str, float]) -> dict:

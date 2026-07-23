@@ -247,6 +247,12 @@ async def update_impact(update: ImpactAssumptionsUpdate) -> dict:
     return service.update_impact_assumptions(update.model_dump())
 
 
+@app.get("/api/waste")
+async def get_waste(limit: int = 20) -> dict:
+    """Waste-pillar summary + recent classified/compliance-checked consignments."""
+    return service.get_waste(max(1, min(limit, 60)))
+
+
 @app.get("/api/integrations")
 async def get_integrations() -> dict:
     return {"integrations": service.get_integrations()}
@@ -385,6 +391,8 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             "decisions": service.latest_decisions,
             "impact": service.impact.snapshot(),
             "queue": [wo.to_dict() for wo in service.maintenance.get_queue()],
+            "waste": service.waste_system.get_summary(),
+            "waste_recent": service.waste_system.get_recent_events(12),
         },
     )
     try:
