@@ -61,6 +61,36 @@
     .assum input { width: 100%; background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--r-sm); color: var(--text-0); padding: 5px 7px; font-family: var(--font-mono); font-size: 0.78rem; }
     .assum input:focus { outline: none; border-color: var(--accent); }
 
+    /* Waste & compliance */
+    .waste-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); margin-bottom: var(--s-3); }
+    .wstat { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-3); text-align: center; }
+    .wstat .v { font-family: var(--font-mono); font-size: 1.1rem; color: var(--ok); font-weight: 700; }
+    .wstat .k { font-size: 0.56rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+    .wmix { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: var(--s-3); background: var(--bg-1); }
+    .wmix i { display: block; height: 100%; transition: width 0.5s var(--ease); }
+    .wmix-legend { display: flex; gap: var(--s-3); flex-wrap: wrap; font-size: 0.6rem; color: var(--text-2); margin-bottom: var(--s-3); }
+    .wmix-legend span { display: flex; align-items: center; gap: 4px; }
+    .wmix-legend i { width: 8px; height: 8px; border-radius: 2px; }
+    .wfeed { display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; }
+    .wrow { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-2); animation: slideIn 0.35s var(--ease); }
+    .wrow .wl { font-size: 0.72rem; color: var(--text-1); }
+    .wrow .wl b { color: var(--text-0); }
+    .wrow .wmeta { font-size: 0.6rem; color: var(--text-2); margin-top: 2px; }
+    .cat { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
+    .cat-recyclable { color: var(--ok); background: var(--ok-dim); }
+    .cat-hazardous { color: var(--crit); background: var(--crit-dim); }
+    .cat-general { color: var(--text-1); background: rgba(255,255,255,0.06); }
+    .cat-reusable_byproduct { color: var(--cyan); background: var(--cyan-dim); }
+
+    /* ESG scorecard */
+    .esg { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); margin-top: var(--s-3); }
+    .esg-top { display: flex; align-items: baseline; justify-content: space-between; }
+    .esg-score { font-family: var(--font-mono); font-size: 2rem; font-weight: 700; color: var(--ok); }
+    .esg-bars { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }
+    .esg-bar { display: grid; grid-template-columns: 78px 1fr 34px; gap: 6px; align-items: center; font-size: 0.58rem; color: var(--text-2); }
+    .esg-bar .track { height: 5px; background: var(--bg-1); border-radius: 3px; overflow: hidden; }
+    .esg-bar .fill { height: 100%; background: var(--cyan); border-radius: 3px; transition: width 0.5s var(--ease); }
+
     /* Agent why-trail */
     .trail { display: flex; flex-direction: column; gap: var(--s-3); max-height: 420px; overflow-y: auto; }
     .tevent { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-3) var(--s-4); background: var(--bg-2); animation: slideIn 0.4s var(--ease); }
@@ -152,10 +182,26 @@
           <div class="assets" id="assets"></div>
         </div>
 
+        <!-- Waste & compliance -->
+        <div class="panel" id="waste-panel">
+          <div class="panel-h">
+            <div><h3>Waste &amp; compliance</h3><div class="panel-sub">Classification · anomaly · expert-system compliance · 4R</div></div>
+            <span class="sim-tag">SIMULATED</span>
+          </div>
+          <div class="waste-stats">
+            <div class="wstat"><div class="v" id="w-generated">0</div><div class="k">kg generated</div></div>
+            <div class="wstat"><div class="v" id="w-diverted">0</div><div class="k">kg diverted</div></div>
+            <div class="wstat"><div class="v" id="w-rate">0%</div><div class="k">diversion rate</div></div>
+            <div class="wstat"><div class="v" id="w-flags">0</div><div class="k">compliance flags</div></div>
+          </div>
+          <div class="wmix" id="w-mix"></div>
+          <div class="wfeed" id="w-feed"><div class="empty">Awaiting first waste consignment…</div></div>
+        </div>
+
         <!-- Agent reasoning -->
         <div class="panel" id="trail-panel">
           <div class="panel-h">
-            <div><h3>Agent reasoning · the "why" trail</h3><div class="panel-sub">Every recommendation, explained — sense → think → act</div></div>
+            <div><h3>Agent reasoning · the "why" trail</h3><div class="panel-sub">Maintenance &amp; waste decisions, explained — sense → think → act</div></div>
             <span class="chip" id="agent-mode-chip"><span class="dot"></span><span id="agent-mode">rules</span></span>
           </div>
           <div class="fleet-summary" id="fleet-summary">Agent initialising…</div>
@@ -177,6 +223,17 @@
             <div class="bi"><div class="v" id="bi-downtime">0h</div><div class="k">Downtime avoided</div></div>
             <div class="bi"><div class="v" id="bi-energy">0</div><div class="k">kWh wasted to wear</div></div>
             <div class="bi"><div class="v" id="bi-co2">0</div><div class="k">kg CO₂e wasted</div></div>
+            <div class="bi"><div class="v" id="bi-wdiv">0</div><div class="k">kg waste diverted</div></div>
+            <div class="bi"><div class="v" id="bi-wcost">$0</div><div class="k">disposal cost avoided</div></div>
+            <div class="bi"><div class="v" id="bi-wco2">0</div><div class="k">kg CO₂e avoided (waste)</div></div>
+            <div class="bi"><div class="v" id="bi-wflags">0</div><div class="k">compliance incidents caught</div></div>
+          </div>
+          <div class="esg">
+            <div class="esg-top">
+              <div><div class="panel-sub">Sustainability score</div><div class="esg-score" id="esg-score">—</div></div>
+              <span class="info-i">i<span class="tip">Weighted mean of four sub-scores: reliability 30% (predictive share of interventions), energy 25% (100 − energy waste %), waste diversion 25%, compliance 20% (share of consignments with no breach). Simulated.</span></span>
+            </div>
+            <div class="esg-bars" id="esg-bars"></div>
           </div>
           <div style="margin-top:var(--s-4)">
             <div class="panel-sub" style="margin-bottom:6px">Your economics (recompute live):</div>
@@ -325,6 +382,15 @@
           document.getElementById("m-anom-" + id).textContent = fmt(t.anomaly_score, 0);
         });
         if (impact) applyImpact(impact);
+        if (d.waste) applyWasteSummary(d.waste);
+        // Live tick frames carry newly-generated consignments; the initial frame
+        // carries a backfill of recent ones (oldest last).
+        (d.waste_events || []).forEach((e) => {
+          addWasteRow(e.waste);
+          // Only actionable waste decisions join the why-trail, so it stays legible.
+          if (e.decision_type !== "monitor") addEvent(e);
+        });
+        if (d.waste_recent) d.waste_recent.slice().reverse().forEach(addWasteRow);
       }
 
       function applyImpact(i) {
@@ -333,6 +399,59 @@
         document.getElementById("bi-downtime").textContent = i.downtime_hours_avoided.toFixed(0) + "h";
         document.getElementById("bi-energy").textContent = i.energy_wasted_kwh.toFixed(0);
         document.getElementById("bi-co2").textContent = i.co2_wasted_kg.toFixed(0);
+        // Waste pillar
+        document.getElementById("bi-wdiv").textContent = (i.waste_diverted_kg || 0).toFixed(0);
+        document.getElementById("bi-wcost").textContent = money(i.disposal_cost_avoided_usd || 0);
+        document.getElementById("bi-wco2").textContent = (i.waste_co2e_avoided_kg || 0).toFixed(0);
+        document.getElementById("bi-wflags").textContent = i.compliance_incidents_caught || 0;
+        if (i.sustainability) applyEsg(i.sustainability);
+      }
+
+      function applyEsg(s) {
+        const el = document.getElementById("esg-score");
+        el.textContent = s.score.toFixed(0);
+        el.style.color = s.score >= 75 ? "var(--ok)" : s.score >= 50 ? "var(--warn)" : "var(--crit)";
+        const labels = { reliability: "Reliability", energy: "Energy", waste_diversion: "Diversion", compliance: "Compliance" };
+        document.getElementById("esg-bars").innerHTML = Object.keys(labels).map((k) => {
+          const v = s.subscores[k] ?? 0;
+          return `<div class="esg-bar"><span>${labels[k]} ${Math.round((s.weights[k] || 0) * 100)}%</span>
+            <div class="track"><div class="fill" style="width:${v}%"></div></div><span>${v.toFixed(0)}</span></div>`;
+        }).join("");
+      }
+
+      // ---- Waste & compliance panel ----
+      const CAT_COLORS = { recyclable: "#2fd58a", hazardous: "#ff5c72", general: "#6b7a90", reusable_byproduct: "#34d3ee" };
+      const wfeed = document.getElementById("w-feed");
+
+      function applyWasteSummary(w) {
+        if (!w) return;
+        document.getElementById("w-generated").textContent = Math.round(w.generated_kg).toLocaleString();
+        document.getElementById("w-diverted").textContent = Math.round(w.diverted_kg).toLocaleString();
+        document.getElementById("w-rate").textContent = w.diversion_rate_pct.toFixed(0) + "%";
+        document.getElementById("w-flags").textContent = w.non_compliant_recent || 0;
+        const total = Object.values(w.by_category).reduce((a, b) => a + b, 0) || 1;
+        document.getElementById("w-mix").innerHTML = Object.entries(w.by_category)
+          .map(([k, v]) => `<i style="width:${(100 * v) / total}%;background:${CAT_COLORS[k] || "#6b7a90"}" title="${k}: ${v}"></i>`)
+          .join("");
+      }
+
+      function addWasteRow(ev) {
+        const empty = wfeed.querySelector(".empty");
+        if (empty) empty.remove();
+        const cs = ev.compliance_status;
+        const flag = cs === "non_compliant" ? '<span class="badge badge--crit">flagged</span>'
+          : cs === "advisory" ? '<span class="badge badge--warn">advisory</span>'
+          : '<span class="badge badge--ok">ok</span>';
+        const div = document.createElement("div");
+        div.className = "wrow";
+        div.innerHTML = `<div>
+            <div class="wl"><b>${ev.weight_kg.toFixed(0)} kg</b> from ${ev.source_name}
+              <span class="cat cat-${ev.category}">${ev.category.replace("_", " ")}</span></div>
+            <div class="wmeta">contamination ${ev.contamination_pct.toFixed(0)}% · severity ${ev.severity.toFixed(0)} ·
+              4R: ${ev.recommended_action} · ${ev.diverted_kg.toFixed(0)} kg diverted${ev.anomalies.length ? " · ⚠ " + ev.anomalies.length + " anomaly" : ""}</div>
+          </div><div>${flag}</div>`;
+        wfeed.prepend(div);
+        while (wfeed.children.length > 14) wfeed.lastChild.remove();
       }
 
       // ---- Apply an agent frame (decisions + events) ----
@@ -362,16 +481,22 @@
       function addEvent(ev) {
         const empty = trailEl.querySelector(".empty");
         if (empty) empty.remove();
-        const prio = { emergency: "badge--crit", repair: "badge--crit", maintain: "badge--warn", inspect: "badge--info", monitor: "badge--ok" }[ev.decision_type] || "badge--info";
+        // Both pillars render through this one path; only the badge map differs.
+        const prio = {
+          emergency: "badge--crit", repair: "badge--crit", maintain: "badge--warn",
+          inspect: "badge--info", monitor: "badge--ok",
+          escalate: "badge--crit", segregate: "badge--warn", treat: "badge--info",
+        }[ev.decision_type] || "badge--info";
+        const isWaste = ev.kind === "waste";
         const div = document.createElement("div");
         div.className = "tevent";
         div.innerHTML = `
           <div class="tevent-h">
-            <span class="who">${ev.asset_id} · ${ev.asset_name}</span>
+            <span class="who">${isWaste ? "♻ " : ""}${ev.asset_id} · ${ev.asset_name}</span>
             <span class="badge ${prio}">${ev.decision_type}</span>
           </div>
           ${(ev.reasoning_trail || []).map((s) => `<div class="step">${s}</div>`).join("")}
-          <div class="src">source: ${ev.source} · tick #${ev.tick}${ev.work_order ? " · work order " + ev.work_order.work_order_id : ""}</div>`;
+          <div class="src">${isWaste ? "waste" : "maintenance"} · source: ${ev.source} · tick #${ev.tick}${ev.work_order ? " · work order " + ev.work_order.work_order_id : ""}</div>`;
         trailEl.prepend(div);
         while (trailEl.children.length > 24) trailEl.lastChild.remove();
       }
@@ -448,7 +573,8 @@
       // ---- Guided tour ----
       const TOUR = [
         { el: "assets-panel", t: "The digital twin", b: "Each asset carries a physics-based health model. What you see is the sensor-estimated health — exactly what a real condition-monitoring system infers, not a hidden ground truth." },
-        { el: "trail-panel", t: "Sense → Think → Act", b: "The agent evaluates every asset continuously and shows its reasoning. Each entry traces what it sensed, what it flagged, and what it decided — the explainable 'why'." },
+        { el: "waste-panel", t: "The second pillar: waste & compliance", b: "Every consignment is classified, checked against an expert-system compliance rule base, and given a 4R recommendation. Degrading equipment upstream produces more contaminated scrap — the two pillars are linked." },
+        { el: "trail-panel", t: "Sense → Think → Act", b: "The agent evaluates assets and waste streams continuously and shows its reasoning. Each entry traces what it sensed, what it flagged, and what it decided — the explainable 'why'." },
         { el: "impact-panel", t: "Business impact", b: "Prevented failures become downtime and cost avoided; degradation becomes wasted energy and CO₂. Plug in your own $/hr and $/kWh — nothing here is hard-coded." },
         { el: "controls-panel", t: "Drive the demo", b: "Inject a developing fault and watch the twin's sensors react, the agent catch it, and a work order appear. Then perform maintenance to restore the asset." },
         { el: "integ-panel", t: "Built for real plants", b: "The simulator is one telemetry source behind a clean interface; OPC-UA and MQTT connectors are on the roadmap so this becomes a connector, not a rewrite." },
