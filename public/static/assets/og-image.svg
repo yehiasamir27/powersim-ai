@@ -1,28 +1,61 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0b0f17"/><stop offset="1" stop-color="#070a0f"/>
+      <stop offset="0" stop-color="#0b1b3f"/>
+      <stop offset="1" stop-color="#14328a"/>
     </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="18%" r="60%">
-      <stop offset="0" stop-color="#ffb020" stop-opacity="0.18"/><stop offset="1" stop-color="#ffb020" stop-opacity="0"/>
+    <radialGradient id="glow" cx="80%" cy="30%" r="60%">
+      <stop offset="0" stop-color="#4b7dff" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#4b7dff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#ffc65c"/><stop offset="1" stop-color="#34d3ee"/>
+    <linearGradient id="pulse" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4b7dff"/>
+      <stop offset="1" stop-color="#22d39a"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
-  <g opacity="0.10" stroke="#ffffff" stroke-width="1">
-    <path d="M0 90 H1200 M0 180 H1200 M0 270 H1200 M0 360 H1200 M0 450 H1200 M0 540 H1200"/>
-    <path d="M120 0 V630 M240 0 V630 M360 0 V630 M480 0 V630 M600 0 V630 M720 0 V630 M840 0 V630 M960 0 V630 M1080 0 V630"/>
+
+  <!-- rail -->
+  <g stroke-linecap="round">
+    <line x1="700" y1="630" x2="960" y2="330" stroke="#9fb3e6" stroke-width="2.5" opacity="0.8"/>
+    <line x1="1160" y1="630" x2="1010" y2="330" stroke="#9fb3e6" stroke-width="2.5" opacity="0.8"/>
+    <g stroke="#5d76b5" stroke-width="4" opacity="0.55">
+      <line x1="730" y1="596" x2="1142" y2="596"/>
+      <line x1="782" y1="540" x2="1114" y2="540"/>
+      <line x1="827" y1="491" x2="1090" y2="491"/>
+      <line x1="866" y1="450" x2="1070" y2="450"/>
+      <line x1="898" y1="414" x2="1053" y2="414"/>
+      <line x1="925" y1="385" x2="1040" y2="385"/>
+      <line x1="946" y1="361" x2="1029" y2="361"/>
+    </g>
+    <g stroke="#9fb3e6" stroke-width="4">
+      <line x1="1185" y1="630" x2="1185" y2="150"/>
+      <line x1="1185" y1="170" x2="1060" y2="170"/>
+      <line x1="1100" y1="470" x2="1100" y2="230"/>
+      <line x1="1100" y1="245" x2="1030" y2="245"/>
+    </g>
   </g>
-  <g transform="translate(96,150)">
-    <rect width="56" height="56" rx="13" fill="#141c28" stroke="rgba(255,255,255,0.14)"/>
-    <path d="M31 9 14 32h11l-3 16 18-25H29z" fill="#ffb020"/>
-    <text x="76" y="40" fill="#eef2f8" font-family="Inter, sans-serif" font-size="34" font-weight="800">PowerSim <tspan fill="#ffb020">AI</tspan></text>
+  <path d="M600 178 L1060 178" fill="none" stroke="#7f9bdc" stroke-width="2" opacity="0.7"/>
+  <path d="M700 178 L760 178 L778 128 L798 228 L818 150 L836 178 L960 178" fill="none" stroke="url(#pulse)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- logo -->
+  <g transform="translate(80 110)">
+    <rect width="72" height="72" rx="18" fill="#1f5eff"/>
+    <path d="M40 11 19 41h14l-4 21 23-31H37z" fill="#ffffff"/>
   </g>
-  <text x="96" y="330" fill="#eef2f8" font-family="Inter, sans-serif" font-size="72" font-weight="800" letter-spacing="-2">The autonomous</text>
-  <text x="96" y="410" font-family="Inter, sans-serif" font-size="72" font-weight="800" letter-spacing="-2"><tspan fill="url(#grad)">reliability engineer</tspan></text>
-  <text x="96" y="490" fill="#a4b1c4" font-family="Inter, sans-serif" font-size="34">for industrial power. Sense → think → act.</text>
-  <text x="96" y="560" fill="#6b7a90" font-family="monospace" font-size="22">Agentic digital twin · Explainable · Deployment-ready</text>
+  <text x="172" y="166" font-size="54" font-weight="800" fill="#ffffff" letter-spacing="-1">PowerSim AI</text>
+
+  <text x="80" y="300" font-size="50" font-weight="800" fill="#ffffff" letter-spacing="-1">An AI agent that keeps</text>
+  <text x="80" y="362" font-size="50" font-weight="800" fill="#8fb0ff" letter-spacing="-1">rail power running.</text>
+
+  <text x="80" y="432" font-size="25" fill="#c9d7f7">Finds problems early. Explains every decision.</text>
+  <text x="80" y="468" font-size="25" fill="#c9d7f7">Cuts waste and saves energy.</text>
+
+  <g transform="translate(80 520)">
+    <rect width="170" height="44" rx="22" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)"/>
+    <text x="85" y="29" text-anchor="middle" font-size="18" font-weight="600" fill="#dbe6ff">Live demo</text>
+    <rect x="184" width="230" height="44" rx="22" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)"/>
+    <text x="299" y="29" text-anchor="middle" font-size="18" font-weight="600" fill="#dbe6ff">powersim-ai.vercel.app</text>
+  </g>
 </svg>

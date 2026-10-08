@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 380" width="1000" height="380" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">How the PowerSim AI agent works</title>
+  <desc id="d">Rail assets feed a digital twin. The AI agent senses, thinks and acts, then repeats every 2 seconds. It outputs a work order, a waste plan and an impact report.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1f5eff"/>
+    </marker>
+    <marker id="arrg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#0c9a61"/>
+    </marker>
+    <style>
+      .lbl { font-size: 11px; font-weight: 700; letter-spacing: 1.6px; fill: #1f5eff; }
+      .pill { fill: #ffffff; stroke: #e2e7ef; }
+      .ptxt { font-size: 13.5px; font-weight: 600; fill: #0b1324; }
+      .title { font-size: 15px; font-weight: 700; fill: #0b1324; }
+      .cap { font-size: 11.5px; fill: #3d4a5c; }
+      .flow { fill: none; stroke: #9fb6ff; stroke-width: 2; stroke-dasharray: 5 6; animation: flow 1.2s linear infinite; }
+      .solid { fill: none; stroke: #1f5eff; stroke-width: 2; }
+      .loop { fill: none; stroke: #0c9a61; stroke-width: 2.2; stroke-dasharray: 6 6; animation: flow 1.2s linear infinite; }
+      .step { fill: #ffffff; stroke-width: 1.5; animation: glow 2s ease-in-out infinite; }
+      .s1 { stroke: #0b7a93; animation-delay: 0s; }
+      .s2 { stroke: #6a4cf5; animation-delay: 0.66s; }
+      .s3 { stroke: #0c9a61; animation-delay: 1.33s; }
+      .num { font-size: 12px; font-weight: 700; fill: #ffffff; }
+      .out { fill: #ffffff; stroke: #e2e7ef; }
+      .otitle { font-size: 13.5px; font-weight: 700; fill: #0b1324; }
+      .osub { font-size: 11px; fill: #6a7689; }
+      @keyframes flow { to { stroke-dashoffset: -22; } }
+      @keyframes glow {
+        0%, 40%, 100% { stroke-width: 1.5; }
+        12% { stroke-width: 4; }
+      }
+    </style>
+  </defs>
+
+  <!-- card -->
+  <rect x="1" y="1" width="998" height="378" rx="24" fill="#ffffff" stroke="#e2e7ef"/>
+
+  <!-- 1. rail assets -->
+  <text x="30" y="66" class="lbl">RAIL ASSETS</text>
+  <g>
+    <rect class="pill" x="30" y="81" width="184" height="38" rx="19"/>
+    <circle cx="52" cy="100" r="6" fill="#1f5eff"/>
+    <text x="66" y="105" class="ptxt">Traction transformer</text>
+
+    <rect class="pill" x="30" y="127" width="184" height="38" rx="19"/>
+    <circle cx="52" cy="146" r="6" fill="#6a4cf5"/>
+    <text x="66" y="151" class="ptxt">Traction motor</text>
+
+    <rect class="pill" x="30" y="173" width="184" height="38" rx="19"/>
+    <circle cx="52" cy="192" r="6" fill="#e0a100"/>
+    <text x="66" y="197" class="ptxt">Signalling power</text>
+
+    <rect class="pill" x="30" y="219" width="184" height="38" rx="19"/>
+    <circle cx="52" cy="238" r="6" fill="#0b7a93"/>
+    <text x="66" y="243" class="ptxt">Cooling pump</text>
+  </g>
+
+  <!-- assets to twin -->
+  <path class="flow" d="M214 100 C234 100 232 170 252 170"/>
+  <path class="flow" d="M214 146 C234 146 232 170 252 170"/>
+  <path class="flow" d="M214 192 C234 192 232 170 252 170"/>
+  <path class="flow" d="M214 238 C234 238 232 170 252 170"/>
+
+  <!-- 2. digital twin -->
+  <rect x="252" y="120" width="136" height="100" rx="16" fill="#e9efff" stroke="#c8d6ff"/>
+  <text x="320" y="160" text-anchor="middle" class="title">Digital twin</text>
+  <text x="320" y="182" text-anchor="middle" class="cap">a live copy of</text>
+  <text x="320" y="198" text-anchor="middle" class="cap">every asset</text>
+
+  <path class="solid" d="M388 170 L416 170" marker-end="url(#arr)"/>
+
+  <!-- 3. AI agent -->
+  <rect x="420" y="78" width="390" height="184" rx="20" fill="#f7f9ff" stroke="#c8d6ff" stroke-dasharray="6 5"/>
+  <text x="615" y="104" text-anchor="middle" class="lbl">AI AGENT</text>
+
+  <rect class="step s1" x="438" y="122" width="100" height="96" rx="14"/>
+  <circle cx="488" cy="144" r="12" fill="#0b7a93"/>
+  <text x="488" y="148" text-anchor="middle" class="num">1</text>
+  <text x="488" y="174" text-anchor="middle" class="title" style="fill:#0b7a93">Sense</text>
+  <text x="488" y="192" text-anchor="middle" class="cap">reads every</text>
+  <text x="488" y="207" text-anchor="middle" class="cap">sensor</text>
+
+  <path class="solid" d="M540 170 L561 170" marker-end="url(#arr)"/>
+
+  <rect class="step s2" x="563" y="122" width="100" height="96" rx="14"/>
+  <circle cx="613" cy="144" r="12" fill="#6a4cf5"/>
+  <text x="613" y="148" text-anchor="middle" class="num">2</text>
+  <text x="613" y="174" text-anchor="middle" class="title" style="fill:#6a4cf5">Think</text>
+  <text x="613" y="192" text-anchor="middle" class="cap">scores the risk</text>
+  <text x="613" y="207" text-anchor="middle" class="cap">and life left</text>
+
+  <path class="solid" d="M665 170 L686 170" marker-end="url(#arr)"/>
+
+  <rect class="step s3" x="688" y="122" width="100" height="96" rx="14"/>
+  <circle cx="738" cy="144" r="12" fill="#0c9a61"/>
+  <text x="738" y="148" text-anchor="middle" class="num">3</text>
+  <text x="738" y="174" text-anchor="middle" class="title" style="fill:#0c9a61">Act</text>
+  <text x="738" y="192" text-anchor="middle" class="cap">acts and</text>
+  <text x="738" y="207" text-anchor="middle" class="cap">explains why</text>
+
+  <!-- loop back -->
+  <path class="loop" d="M738 220 C738 300 488 300 488 224" marker-end="url(#arrg)"/>
+  <circle r="5" fill="#0c9a61">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M738 220 C738 300 488 300 488 224"/>
+  </circle>
+  <rect x="533" y="300" width="160" height="26" rx="13" fill="#e2f5ec"/>
+  <text x="613" y="318" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#0c9a61">repeats every 2 seconds</text>
+
+  <!-- agent to outputs -->
+  <path class="flow" d="M810 170 C828 170 828 120 846 120"/>
+  <path class="flow" d="M810 170 L846 170"/>
+  <path class="flow" d="M810 170 C828 170 828 220 846 220"/>
+
+  <!-- 4. outputs -->
+  <rect class="out" x="846" y="97" width="128" height="46" rx="12"/>
+  <rect x="846" y="97" width="5" height="46" rx="2.5" fill="#1f5eff"/>
+  <text x="862" y="116" class="otitle">Work order</text>
+  <text x="862" y="132" class="osub">repair or inspect</text>
+
+  <rect class="out" x="846" y="147" width="128" height="46" rx="12"/>
+  <rect x="846" y="147" width="5" height="46" rx="2.5" fill="#0c9a61"/>
+  <text x="862" y="166" class="otitle">Waste plan</text>
+  <text x="862" y="182" class="osub">reuse or recycle</text>
+
+  <rect class="out" x="846" y="197" width="128" height="46" rx="12"/>
+  <rect x="846" y="197" width="5" height="46" rx="2.5" fill="#e0a100"/>
+  <text x="862" y="216" class="otitle">Impact report</text>
+  <text x="862" y="232" class="osub">money, energy, CO₂</text>
+
+  <text x="500" y="356" text-anchor="middle" style="font-size:13px;fill:#6a7689">Every decision is written down in plain words, so people can see why the agent chose it.</text>
+</svg>

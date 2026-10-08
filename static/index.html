@@ -3,188 +3,153 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PowerSim AI — Autonomous predictive maintenance for industrial power</title>
-  <meta name="description" content="PowerSim AI is an agentic digital twin that continuously senses, reasons, and acts on industrial power-asset health — catching failures before they happen and proving the ROI. Live, explainable, deployment-ready." />
+  <title>PowerSim AI | AI agent for rail power assets</title>
+  <meta name="description" content="PowerSim AI is an AI agent and digital twin that finds problems in railway power equipment early, explains every decision, cuts waste and saves energy." />
 
-  <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="PowerSim AI — Autonomous predictive maintenance for industrial power" />
-  <meta property="og:description" content="An agentic digital twin that senses, reasons, and acts on industrial asset health — with an explainable why-trail and provable ROI." />
-  <meta property="og:image" content="/static/assets/og-image.svg" />
+  <meta property="og:url" content="https://powersim-ai.vercel.app/" />
+  <meta property="og:title" content="PowerSim AI | AI agent for rail power assets" />
+  <meta property="og:description" content="Finds problems early. Explains every decision. Cuts waste and saves energy." />
+  <meta property="og:image" content="https://powersim-ai.vercel.app/static/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="PowerSim AI — Autonomous predictive maintenance" />
-  <meta name="twitter:description" content="Agentic digital twin for industrial power. Sense → think → act, explainable, deployment-ready." />
+  <meta name="twitter:title" content="PowerSim AI | AI agent for rail power assets" />
+  <meta name="twitter:description" content="Finds problems early. Explains every decision. Cuts waste and saves energy." />
+  <meta name="twitter:image" content="https://powersim-ai.vercel.app/static/assets/og-image.png" />
 
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070a0f'/%3E%3Cpath d='M17.5 5 8 18h6l-1.5 9L23 13h-6z' fill='%23ffb020'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f5eff'/%3E%3Cpath d='M17.5 5 8 18h6l-1.5 9L23 13h-6z' fill='%23fff'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/assets/design-system.css" />
   <style>
-    /* ---- Page-specific ---- */
-    .nav {
-      position: sticky; top: 0; z-index: 50;
-      backdrop-filter: blur(12px);
-      background: rgba(7, 10, 15, 0.6);
-      border-bottom: 1px solid transparent;
-      transition: background 0.3s, border-color 0.3s;
-    }
-    .nav.scrolled { background: rgba(7, 10, 15, 0.9); border-bottom-color: var(--border); }
+    /* Nav */
+    .nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.82); backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: border-color .3s, box-shadow .3s; }
+    .nav.scrolled { border-bottom-color: var(--border); box-shadow: var(--shadow-sm); }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--text-0); letter-spacing: -0.02em; font-size: 1.05rem; }
-    .brand svg { width: 26px; height: 26px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.08rem; color: var(--text-0); letter-spacing: -0.02em; }
+    .brand svg { width: 30px; height: 30px; }
     .nav-links { display: flex; align-items: center; gap: var(--s-5); }
-    .nav-links a.link { font-size: var(--fs-sm); color: var(--text-1); transition: color 0.2s; }
-    .nav-links a.link:hover { color: var(--text-0); }
+    .nav-links a.link { font-size: var(--fs-sm); font-weight: 550; color: var(--text-1); }
+    .nav-links a.link:hover { color: var(--accent); }
     .nav-toggle { display: none; background: none; border: 0; color: var(--text-0); cursor: pointer; }
 
     /* Hero */
-    .hero { position: relative; overflow: hidden; padding-top: var(--s-8); padding-bottom: var(--s-9); }
-    .hero-glow { position: absolute; top: -20%; left: 50%; transform: translateX(-50%); width: 900px; height: 600px;
-      background: radial-gradient(circle, rgba(255,176,32,0.13), transparent 60%); pointer-events: none; }
+    .hero { position: relative; overflow: hidden; padding: var(--s-8) 0 var(--s-9); }
     .hero-inner { position: relative; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--s-7); align-items: center; }
-    .hero h1 { font-size: var(--fs-3xl); letter-spacing: -0.03em; }
-    .hero h1 .grad { background: linear-gradient(120deg, var(--accent-hi), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .hero p.lead { margin-top: var(--s-5); font-size: var(--fs-md); color: var(--text-1); max-width: 54ch; }
+    .hero h1 { font-size: var(--fs-3xl); letter-spacing: -0.035em; font-weight: 800; }
+    .hero h1 .blue { color: var(--accent); }
+    .hero .lead { margin-top: var(--s-4); font-size: 1.2rem; color: var(--text-1); max-width: 30ch; }
     .hero-cta { margin-top: var(--s-6); display: flex; gap: var(--s-3); flex-wrap: wrap; }
-    .hero-meta { margin-top: var(--s-6); display: flex; gap: var(--s-5); flex-wrap: wrap; align-items: center; }
+    .facts { margin-top: var(--s-6); display: flex; gap: var(--s-6); flex-wrap: wrap; }
+    .fact .v { font-size: 1.6rem; font-weight: 800; color: var(--text-0); letter-spacing: -0.02em; }
+    .fact .k { font-size: var(--fs-xs); color: var(--text-2); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
 
-    /* Hero panel — live telemetry mock */
-    .hero-panel { background: linear-gradient(180deg, var(--surface), var(--bg-1)); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--s-5); box-shadow: var(--shadow-lg); }
-    .hp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s-4); }
-    .hp-title { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); }
-    .hp-assets { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
-    .hp-asset { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-3) var(--s-4); border-left: 3px solid var(--ok); }
-    .hp-asset.warn { border-left-color: var(--warn); }
-    .hp-asset.crit { border-left-color: var(--crit); }
-    .hp-asset .id { font-weight: 700; color: var(--text-0); font-size: var(--fs-sm); }
-    .hp-asset .nm { font-size: var(--fs-xs); color: var(--text-2); }
-    .hp-asset .val { font-family: var(--font-mono); font-size: 1.3rem; color: var(--cyan); margin-top: 6px; }
-    .hp-asset .lbl { font-size: 0.62rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.08em; }
-    .hp-spark { height: 3px; border-radius: 2px; margin-top: 8px; background: linear-gradient(90deg, var(--ok), transparent); }
-    .hp-foot { margin-top: var(--s-4); display: flex; justify-content: space-between; align-items: center; font-size: var(--fs-xs); color: var(--text-2); }
+    /* Live card */
+    .live { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--s-5); box-shadow: var(--shadow-lg); }
+    .live-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s-4); }
+    .live-title { font-weight: 700; color: var(--text-0); }
+    .assets { display: flex; flex-direction: column; gap: 10px; }
+    .asset { display: grid; grid-template-columns: 1fr 120px 52px; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-2); }
+    .asset .nm { font-weight: 650; color: var(--text-0); font-size: var(--fs-sm); }
+    .asset .st { font-size: var(--fs-xs); color: var(--ok); font-weight: 600; }
+    .asset.warn .st { color: var(--warn); }
+    .asset.crit .st { color: var(--crit); }
+    .bar { height: 8px; border-radius: 4px; background: var(--surface-3); overflow: hidden; }
+    .bar span { display: block; height: 100%; width: 100%; background: var(--ok); border-radius: 4px; transition: width .6s var(--ease), background .3s; }
+    .asset.warn .bar span { background: var(--warn); }
+    .asset.crit .bar span { background: var(--crit); }
+    .asset .pct { font-family: var(--font-mono); font-weight: 600; color: var(--text-0); text-align: right; font-size: var(--fs-sm); }
+    .live-foot { margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--border); font-size: var(--fs-sm); color: var(--text-1); }
+    .live-foot b { color: var(--text-0); }
 
-    /* Stat strip */
-    .stat-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); }
-    .stat-strip .stat { text-align: left; }
-    .stat .num { font-family: var(--font-mono); font-size: var(--fs-xl); color: var(--text-0); font-weight: 700; letter-spacing: -0.02em; }
-    .stat .cap { font-size: var(--fs-sm); color: var(--text-1); margin-top: 4px; }
-    .stat .src { font-size: 0.7rem; color: var(--text-2); margin-top: 2px; }
-
-    /* Feature cards */
-    .feature .ic { width: 42px; height: 42px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--accent-dim); color: var(--accent); margin-bottom: var(--s-4); }
-    .feature h3 { font-size: var(--fs-md); margin-bottom: var(--s-2); }
-    .feature p { font-size: var(--fs-sm); color: var(--text-1); }
-
-    /* How it works / architecture */
-    .arch { background: linear-gradient(180deg, var(--surface), var(--bg-1)); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--s-6); }
-    .arch svg { width: 100%; height: auto; }
+    /* Diagram */
+    .diagram { margin-top: var(--s-6); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--s-4); box-shadow: var(--shadow-md); }
+    .diagram img { width: 100%; height: auto; }
     .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); margin-top: var(--s-6); }
-    .step .n { font-family: var(--font-mono); color: var(--accent); font-size: var(--fs-sm); }
-    .step h4 { font-size: var(--fs-base); margin: 6px 0; }
-    .step p { font-size: var(--fs-sm); color: var(--text-1); }
+    .step { display: flex; gap: var(--s-3); align-items: flex-start; }
+    .step .n { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; }
+    .step h3 { font-size: var(--fs-md); }
+    .step p { font-size: var(--fs-sm); margin-top: 2px; }
 
-    /* Product preview */
-    .shot { border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; background: var(--bg-2); position: relative; }
-    .shot-ph { aspect-ratio: 16/9; display: grid; place-items: center; color: var(--text-2); font-size: var(--fs-sm); text-align: center; padding: var(--s-5);
-      background: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 12px, transparent 12px 24px); }
-    .browser-bar { display: flex; gap: 6px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--bg-1); }
-    .browser-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); display: block; flex: none; }
-    .demo-frame { width: 100%; height: 620px; border: 0; display: block; background: var(--bg-0); }
-    @media (max-width: 900px) { .demo-frame { height: 460px; } }
+    /* Summit */
+    .summit-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--s-5); flex-wrap: wrap; }
+    .event { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: var(--r-md); background: var(--accent-dim); color: var(--navy); font-size: var(--fs-sm); font-weight: 600; }
+    .session { position: relative; overflow: hidden; }
+    .session .tag { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+    .session h3 { font-size: 1.3rem; margin: 8px 0 var(--s-4); max-width: 26ch; }
+    .session ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .session li { display: flex; gap: 10px; align-items: flex-start; font-size: var(--fs-sm); color: var(--text-1); }
+    .tick { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--ok-dim); color: var(--ok); font-size: 13px; font-weight: 800; margin-top: 1px; }
+    .session .icon { position: absolute; right: -10px; top: -10px; opacity: .08; width: 150px; height: 150px; }
 
-    /* Research foundation */
-    .finding { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
-    .finding .h { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--cyan); letter-spacing: 0.08em; }
-    .finding .stat { font-family: var(--font-mono); font-size: 1.35rem; color: var(--text-0); font-weight: 700; margin: 6px 0 2px; }
-    .finding .d { font-size: var(--fs-sm); color: var(--text-1); }
-    .pillar { display: flex; flex-direction: column; height: 100%; }
-    .pillar .pnum { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--accent); letter-spacing: 0.14em; }
-    .layers { list-style: none; counter-reset: l; display: flex; flex-direction: column; gap: 10px; margin-top: var(--s-3); }
-    .layers li { counter-increment: l; display: flex; gap: 10px; font-size: var(--fs-sm); color: var(--text-1); }
-    .layers li::before { content: counter(l); font-family: var(--font-mono); font-size: 0.62rem; color: var(--accent);
-      border: 1px solid var(--accent-dim); border-radius: 50%; width: 18px; height: 18px; display: grid; place-items: center; flex: none; margin-top: 2px; }
+    /* Features */
+    .feat .ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; margin-bottom: var(--s-4); }
+    .feat .ic svg { width: 24px; height: 24px; }
+    .feat h3 { font-size: var(--fs-md); margin-bottom: 4px; }
+    .feat p { font-size: var(--fs-sm); }
 
-    /* Impact */
-    .impact-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-4); }
-    .impact-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--s-5); }
-    .impact-card .v { font-family: var(--font-mono); font-size: 1.9rem; color: var(--accent); font-weight: 700; }
-    .impact-card .k { font-size: var(--fs-sm); color: var(--text-1); margin-top: 4px; }
+    /* Demo */
+    .frame { margin-top: var(--s-6); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; background: var(--bg-1); box-shadow: var(--shadow-lg); }
+    .frame-bar { display: flex; gap: 6px; align-items: center; padding: 11px 14px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+    .frame-bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--surface-3); display: block; }
+    .frame-bar span { margin-left: 10px; font-size: var(--fs-xs); color: var(--text-2); font-family: var(--font-mono); }
+    .frame iframe { width: 100%; height: 640px; border: 0; display: block; background: var(--bg-0); }
 
-    /* Market */
-    .market-list { display: flex; flex-direction: column; gap: var(--s-4); }
-    .market-item { display: flex; gap: var(--s-4); align-items: flex-start; }
-    .market-item .mk { font-family: var(--font-mono); color: var(--cyan); font-size: var(--fs-sm); min-width: 62px; }
-    .market-item p { font-size: var(--fs-sm); color: var(--text-1); }
+    /* Research */
+    .stat { padding: var(--s-5); border-radius: var(--r-lg); background: var(--bg-1); border: 1px solid var(--border); }
+    .stat .v { font-family: var(--font-mono); font-size: 1.7rem; font-weight: 600; color: var(--accent); }
+    .stat .k { font-size: var(--fs-sm); color: var(--text-1); margin-top: 4px; }
 
-    /* Pricing / business model */
-    .tier { display: flex; flex-direction: column; height: 100%; }
-    .tier .tname { font-size: var(--fs-md); color: var(--text-0); font-weight: 700; }
-    .tier .tdesc { font-size: var(--fs-sm); color: var(--text-2); margin: 6px 0 var(--s-4); }
-    .tier ul { list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: var(--fs-sm); }
-    .tier li { display: flex; gap: 8px; }
-    .tier li::before { content: "→"; color: var(--accent); }
-    .tier.featured { border-color: var(--accent-dim); box-shadow: var(--glow-accent); }
+    /* Stack */
+    .stack-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: var(--s-5); }
+    .stack-list span { padding: 9px 16px; border-radius: var(--r-pill); background: var(--bg-1); border: 1px solid var(--border); font-size: var(--fs-sm); font-weight: 600; color: var(--text-0); }
 
-    /* Roadmap */
-    .road { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); }
-    .road-col h4 { font-size: var(--fs-base); margin-bottom: var(--s-3); display: flex; align-items: center; gap: 8px; }
-    .road-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .road-col li { font-size: var(--fs-sm); color: var(--text-1); display: flex; gap: 8px; align-items: baseline; }
-    .road-col li .b { width: 6px; height: 6px; border-radius: 2px; background: var(--text-2); margin-top: 6px; flex: none; }
-    .road-col.now li .b { background: var(--ok); }
-    .road-col.next li .b { background: var(--accent); }
+    /* Team */
+    .person { display: flex; gap: var(--s-4); align-items: center; }
+    .avatar { flex: none; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1.3rem; color: #fff; }
+    .person h3 { font-size: var(--fs-md); }
+    .person .deg { font-size: var(--fs-sm); color: var(--text-1); }
+    .person .role { font-size: var(--fs-xs); font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
 
-    /* Founder */
-    .founder { display: flex; gap: var(--s-6); align-items: center; flex-wrap: wrap; }
-    .founder .avatar { width: 92px; height: 92px; border-radius: 50%; background: linear-gradient(135deg, var(--surface-3), var(--bg-2)); display: grid; place-items: center; font-size: 2rem; font-weight: 800; color: var(--accent); border: 1px solid var(--border-strong); flex: none; }
-
-    /* Contact */
-    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-7); align-items: start; }
-    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--s-4); }
-    .field label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-2); }
-    .field input, .field textarea {
-      background: var(--bg-2); border: 1px solid var(--border-strong); border-radius: var(--r-md);
-      padding: 0.7em 0.9em; color: var(--text-0); font-family: inherit; font-size: var(--fs-sm); resize: vertical;
-    }
-    .field input:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
-    .form-msg { font-size: var(--fs-sm); margin-top: var(--s-3); min-height: 1.2em; }
-
-    /* Footer */
-    .footer { border-top: 1px solid var(--border); padding-block: var(--s-7); }
-    .footer-grid { display: flex; justify-content: space-between; gap: var(--s-6); flex-wrap: wrap; }
-    .footer a { color: var(--text-1); font-size: var(--fs-sm); }
-    .footer a:hover { color: var(--text-0); }
-
-    .cta-band { text-align: center; background: linear-gradient(180deg, var(--surface), var(--bg-1)); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--s-8) var(--s-5); }
+    /* CTA + footer */
+    .cta { text-align: center; background: linear-gradient(135deg, var(--navy), #163a9c); color: #fff; border-radius: var(--r-xl); padding: var(--s-8) var(--s-5); }
+    .cta h2 { color: #fff; font-size: var(--fs-2xl); }
+    .cta p { color: #c9d7f7; margin-top: var(--s-3); }
+    .cta .btn-ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.4); }
+    .footer { padding: var(--s-7) 0; border-top: 1px solid var(--border); background: var(--bg-1); }
+    .footer-row { display: flex; justify-content: space-between; align-items: center; gap: var(--s-5); flex-wrap: wrap; }
+    .footer a { color: var(--text-1); font-size: var(--fs-sm); font-weight: 550; }
+    .footer a:hover { color: var(--accent); }
 
     @media (max-width: 900px) {
-      .hero-inner { grid-template-columns: 1fr; }
-      .stat-strip, .steps, .impact-grid, .road, .contact-grid { grid-template-columns: 1fr; }
-      .nav-links { position: fixed; inset: 66px 0 auto 0; flex-direction: column; align-items: stretch; gap: 0;
-        background: var(--bg-1); border-bottom: 1px solid var(--border); padding: var(--s-4); display: none; }
+      .hero-inner, .steps { grid-template-columns: 1fr; }
+      .nav-links { position: fixed; inset: 66px 0 auto 0; flex-direction: column; align-items: stretch; gap: 0; background: #fff; border-bottom: 1px solid var(--border); padding: var(--s-4); display: none; }
       .nav-links.open { display: flex; }
       .nav-links a.link { padding: 12px 4px; }
       .nav-toggle { display: block; }
-      .impact-grid { grid-template-columns: 1fr 1fr; }
+      .frame iframe { height: 520px; }
+      .asset { grid-template-columns: 1fr 80px 46px; }
     }
   </style>
 </head>
 <body>
-  <!-- ===================== NAV ===================== -->
+  <!-- NAV -->
   <nav class="nav" data-nav>
     <div class="container nav-inner">
       <a class="brand" href="/">
-        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#111823"/><path d="M17.5 5 8 18h6l-1.5 9L23 13h-6z" fill="#ffb020"/></svg>
-        PowerSim<span style="color:var(--accent)">&nbsp;AI</span>
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#1f5eff"/><path d="M17.5 5 8 18h6l-1.5 9L23 13h-6z" fill="#fff"/></svg>
+        PowerSim AI
       </a>
       <div class="nav-links" data-nav-links>
-        <a class="link" href="#problem">Problem</a>
-        <a class="link" href="#solution">Solution</a>
         <a class="link" href="#how">How it works</a>
-        <a class="link" href="#research">Research</a>
-        <a class="link" href="#market">Market</a>
-        <a class="link" href="#roadmap">Roadmap</a>
-        <a class="link" href="/pitch">For investors</a>
-        <a class="btn btn-ghost" href="/dashboard">Live demo</a>
-        <a class="btn btn-primary" href="#contact">Request a demo</a>
+        <a class="link" href="#rail">Rail</a>
+        <a class="link" href="#demo">Demo</a>
+        <a class="link" href="#team">Team</a>
+        <a class="link" href="/pitch">Project brief</a>
+        <a class="btn btn-ghost" href="https://github.com/yehiasamir27/powersim-ai" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn btn-primary" href="/dashboard">Open live demo</a>
       </div>
       <button class="nav-toggle" data-nav-toggle aria-label="Menu">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -192,580 +157,280 @@
     </div>
   </nav>
 
-  <!-- ===================== HERO ===================== -->
+  <!-- HERO -->
   <header class="hero">
-    <div class="hero-glow"></div>
     <div class="grid-bg"></div>
     <div class="container hero-inner">
       <div class="reveal">
-        <span class="chip chip--live"><span class="dot"></span>Live agentic demo running</span>
-        <h1 style="margin-top:var(--s-4)">The autonomous <span class="grad">reliability engineer</span> for industrial power.</h1>
-        <p class="lead">PowerSim AI is an agentic digital twin that continuously <strong>senses</strong> asset telemetry, <strong>reasons</strong> about failure risk, and <strong>acts</strong> — generating work orders before equipment fails and routing every waste stream for compliance and recovery, with an explainable "why" behind every call and the ROI computed against your own numbers.</p>
+        <span class="chip chip--live"><span class="dot"></span>Live demo running now</span>
+        <h1 style="margin-top:var(--s-4)">AI that keeps <span class="blue">rail power</span> running.</h1>
+        <p class="lead">An AI agent watches railway power equipment, spots problems before a breakdown, and explains every decision.</p>
         <div class="hero-cta">
-          <a class="btn btn-primary btn-lg" href="/dashboard">Watch the agent work →</a>
-          <a class="btn btn-ghost btn-lg" href="#contact">Talk to us</a>
+          <a class="btn btn-primary btn-lg" href="/dashboard">Open live demo</a>
+          <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
         </div>
-        <div class="hero-meta">
-          <span class="chip"><span class="dot" style="background:var(--cyan)"></span>Sense → Think → Act</span>
-          <span class="chip"><span class="dot" style="background:var(--indigo)"></span>Explainable reasoning</span>
-          <span class="chip"><span class="dot" style="background:var(--ok)"></span>Waste &amp; compliance</span>
-          <span class="chip"><span class="dot" style="background:var(--accent)"></span>Edge / on-prem ready</span>
+        <div class="facts">
+          <div class="fact"><div class="v">4</div><div class="k">rail assets</div></div>
+          <div class="fact"><div class="v">2 s</div><div class="k">per decision</div></div>
+          <div class="fact"><div class="v">91</div><div class="k">automated tests</div></div>
         </div>
       </div>
 
-      <!-- Live-style telemetry panel (fed by the real API when available) -->
-      <div class="hero-panel reveal d1" id="hero-panel">
-        <div class="hp-head">
-          <span class="hp-title">Fleet · live telemetry</span>
+      <div class="live reveal d1">
+        <div class="live-head">
+          <span class="live-title">Asset health, live</span>
           <span class="chip chip--live"><span class="dot"></span>streaming</span>
         </div>
-        <div class="hp-assets" id="hp-assets">
-          <div class="hp-asset"><div class="id">T1</div><div class="nm">Main Transformer</div><div class="val" data-metric="T1">—</div><div class="lbl">Health</div><div class="hp-spark"></div></div>
-          <div class="hp-asset"><div class="id">M1</div><div class="nm">Induction Motor A</div><div class="val" data-metric="M1">—</div><div class="lbl">Health</div><div class="hp-spark"></div></div>
-          <div class="hp-asset"><div class="id">G1</div><div class="nm">Backup Generator</div><div class="val" data-metric="G1">—</div><div class="lbl">Health</div><div class="hp-spark"></div></div>
-          <div class="hp-asset"><div class="id">P1</div><div class="nm">Coolant Pump</div><div class="val" data-metric="P1">—</div><div class="lbl">Health</div><div class="hp-spark"></div></div>
+        <div class="assets">
+          <div class="asset" data-asset="T1"><div><div class="nm">Traction transformer</div><div class="st">Healthy</div></div><div class="bar"><span></span></div><div class="pct">100%</div></div>
+          <div class="asset" data-asset="M1"><div><div class="nm">Traction motor</div><div class="st">Healthy</div></div><div class="bar"><span></span></div><div class="pct">100%</div></div>
+          <div class="asset" data-asset="G1"><div><div class="nm">Signalling backup power</div><div class="st">Healthy</div></div><div class="bar"><span></span></div><div class="pct">100%</div></div>
+          <div class="asset" data-asset="P1"><div><div class="nm">Cooling pump</div><div class="st">Healthy</div></div><div class="bar"><span></span></div><div class="pct">100%</div></div>
         </div>
-        <div class="hp-foot">
-          <span id="hp-status">Connecting to live demo…</span>
-          <span class="sim-tag">SIMULATED</span>
-        </div>
+        <div class="live-foot" id="live-foot"><b>Agent:</b> starting up</div>
       </div>
     </div>
   </header>
 
-  <!-- ===================== WHY NOW / STAT STRIP ===================== -->
-  <section class="section section--tight">
+  <!-- HOW IT WORKS -->
+  <section class="section section--white" id="how">
     <div class="container">
-      <p class="eyebrow reveal">Why now</p>
-      <div class="stat-strip">
-        <div class="stat card reveal">
-          <div class="num">$<span data-count="3.1" data-decimals="1">0</span>B</div>
-          <div class="cap">Schneider Electric's 2026 acquisition of industrial-AI firm Cognite — because "AI is shifting from analytics to <em>executing</em> operations."</div>
-          <div class="src">Source: Cognite / Bloomberg, Jun 2026</div>
-        </div>
-        <div class="stat card reveal d1">
-          <div class="num">$<span data-count="53" data-decimals="0">0</span>B</div>
-          <div class="cap">Gartner's forecast for supply-chain software <em>with agentic AI</em> by 2030 — up from under $2B in 2025.</div>
-          <div class="src">Source: Gartner, Apr 2026</div>
-        </div>
-        <div class="stat card reveal d2">
-          <div class="num"><span data-count="1.9" data-decimals="1">0</span>M</div>
-          <div class="cap">US manufacturing jobs that could go unfilled by 2033 — the workforce cliff PowerSim's encoded expertise answers.</div>
-          <div class="src">Source: Deloitte / Manufacturing Institute, 2024</div>
-        </div>
+      <div class="center-text" style="text-align:center">
+        <p class="eyebrow reveal">How it works</p>
+        <h2 class="section-title center-text reveal" style="max-width:32ch">Sense. Think. Act. Every 2 seconds.</h2>
       </div>
-      <p class="note" style="margin-top:var(--s-4)">Figures are third-party market context, cited in <a href="https://github.com/yehiasamir27/powersim-ai/blob/main/docs/MARKET_RESEARCH.md" class="text-cyan">our market research</a>. They describe the market, not PowerSim's own results.</p>
-    </div>
-  </section>
-
-  <!-- ===================== PROBLEM ===================== -->
-  <section class="section" id="problem">
-    <div class="container">
-      <p class="eyebrow reveal">The problem</p>
-      <h2 class="section-title reveal">Plants know predictive maintenance is better. Most still can't operationalize it.</h2>
-      <p class="section-lead reveal">Unplanned downtime is more expensive than ever, the reliability experts who prevent it are retiring, and legacy monitoring cries wolf so often that teams stop listening. The result: maintenance stays reactive, and value walks out the door.</p>
-      <div class="grid grid-4" style="margin-top:var(--s-6)">
-        <div class="card feature reveal">
-          <div class="ic">⚠</div>
-          <h3>Costly unplanned downtime</h3>
-          <p>A single unplanned outage can cost six figures per hour — and prevention economics have only improved as those costs rise.</p>
-        </div>
-        <div class="card feature reveal d1">
-          <div class="ic">👤</div>
-          <h3>The workforce cliff</h3>
-          <p>Scarce vibration and reliability expertise is retiring faster than it's replaced. Diagnostic knowledge needs to live in software.</p>
-        </div>
-        <div class="card feature reveal d2">
-          <div class="ic">🔔</div>
-          <h3>Alarm fatigue</h3>
-          <p>Threshold alerts without context erode trust. When operators find nothing wrong, they stop trusting alerts — and revert to reactive.</p>
-        </div>
-        <div class="card feature reveal d3">
-          <div class="ic">🧩</div>
-          <h3>Brownfield data silos</h3>
-          <p>Telemetry trapped in historians and legacy PLCs makes integration — not modeling — the real blocker, and pilots stall at scale.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== SOLUTION ===================== -->
-  <section class="section" id="solution" style="background:var(--bg-1)">
-    <div class="container">
-      <p class="eyebrow reveal">The solution</p>
-      <h2 class="section-title reveal">An agent that closes the loop — not another dashboard.</h2>
-      <p class="section-lead reveal">Most tools surface alerts or answer questions. PowerSim AI runs a continuous <strong>sense → think → act</strong> loop over a physics-based digital twin: it detects developing faults, projects remaining useful life, decides what to do, and creates the work order — while showing its reasoning at every step.</p>
-      <div class="grid grid-3" style="margin-top:var(--s-6)">
-        <div class="card feature reveal">
-          <div class="ic" style="background:var(--cyan-dim);color:var(--cyan)">◎</div>
-          <h3>Sense — a living digital twin</h3>
-          <p>Each asset carries a latent-health model. Sensor fusion estimates condition from temperature, vibration, bearing wear, oil pressure and power factor — with an anomaly score and estimated remaining useful life.</p>
-        </div>
-        <div class="card feature reveal d1">
-          <div class="ic" style="background:var(--indigo-dim);color:var(--indigo)">✦</div>
-          <h3>Think — explainable reasoning</h3>
-          <p>An LLM-or-rules agent weighs the evidence and produces a decision with a transparent "why" trail. When the model is offline, it never degrades silently — it falls back and says so.</p>
-        </div>
-        <div class="card feature reveal d2">
-          <div class="ic">⚡</div>
-          <h3>Act — work orders + ROI</h3>
-          <p>Actionable decisions become prioritized work orders, and every prevented failure is translated into downtime avoided, energy saved and cost protected — against <em>your</em> economics.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== TWO PILLARS ===================== -->
-  <section class="section" id="pillars">
-    <div class="container">
-      <p class="eyebrow reveal">Two pillars, one agent</p>
-      <h2 class="section-title reveal">Uptime and compliance run on the same reasoning engine.</h2>
-      <p class="section-lead reveal">Degrading equipment doesn't just risk downtime — it produces more scrap, more contamination, and more regulatory exposure. PowerSim models both, so a single agent reasons across asset health <em>and</em> the waste it generates.</p>
-      <div class="grid grid-2" style="margin-top:var(--s-6)">
-        <div class="card pillar reveal">
-          <div class="pnum">PILLAR 01</div>
-          <h3 style="font-size:var(--fs-md); margin:6px 0">Predictive maintenance</h3>
-          <p style="font-size:var(--fs-sm)">A physics-based digital twin estimates each asset's health and remaining useful life from sensor fusion, then the agent decides whether to monitor, inspect, maintain, repair or escalate — and opens the work order.</p>
-          <div class="row wrap gap-2" style="margin-top:var(--s-4)">
-            <span class="chip"><span class="dot" style="background:var(--cyan)"></span>Health &amp; RUL</span>
-            <span class="chip"><span class="dot" style="background:var(--accent)"></span>Work orders</span>
-            <span class="chip"><span class="dot" style="background:var(--ok)"></span>Downtime avoided</span>
-          </div>
-        </div>
-        <div class="card pillar reveal d1">
-          <div class="pnum">PILLAR 02</div>
-          <h3 style="font-size:var(--fs-md); margin:6px 0">AI waste &amp; compliance</h3>
-          <p style="font-size:var(--fs-sm)">Every consignment is classified, checked against an expert-system compliance rule base, and routed by a 4R recommender — turning waste from a cost centre into measurable diversion, avoided penalties and reported CO₂e.</p>
-          <ol class="layers">
-            <li><strong>Collect</strong> — weight, volume, composition, contamination, moisture per stream.</li>
-            <li><strong>Process</strong> — classification (recyclable / hazardous / general / reusable by-product) + anomaly detection.</li>
-            <li><strong>Decide</strong> — expert-system compliance checks and 4R routing, with a visible why-trail.</li>
-            <li><strong>Report</strong> — diversion, disposal cost avoided, incidents caught, CO₂e — into the same impact model.</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== HOW IT WORKS ===================== -->
-  <section class="section" id="how">
-    <div class="container">
-      <p class="eyebrow reveal">How it works</p>
-      <h2 class="section-title reveal">From plant floor to prioritized action.</h2>
-      <div class="arch reveal" style="margin-top:var(--s-6)">
-        <svg viewBox="0 0 900 240" role="img" aria-label="Architecture: sensors to ingestion to digital twin to agent to actions">
-          <defs>
-            <linearGradient id="flowg" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#34d3ee"/><stop offset="1" stop-color="#ffb020"/>
-            </linearGradient>
-            <style>
-              .node{fill:#141c28;stroke:rgba(255,255,255,0.12);}
-              .nt{fill:#eef2f8;font:600 13px var(--font-mono,monospace);}
-              .ns{fill:#6b7a90;font:11px var(--font-mono,monospace);}
-              .flowline{stroke:url(#flowg);stroke-width:2;fill:none;stroke-dasharray:6 6;animation:flow 1.1s linear infinite;}
-              .plan{stroke-dasharray:4 4;stroke:#6b7a90;fill:none;stroke-width:1.5;}
-            </style>
-          </defs>
-          <!-- connectors -->
-          <path class="flowline" d="M150 120 H235"/>
-          <path class="flowline" d="M355 120 H440"/>
-          <path class="flowline" d="M560 120 H645"/>
-          <path class="flowline" d="M765 120 H820" transform="translate(-5,0)"/>
-          <!-- nodes -->
-          <g>
-            <rect class="node" x="30" y="86" width="120" height="68" rx="12"/>
-            <text class="nt" x="90" y="118" text-anchor="middle">Assets / OT</text>
-            <text class="ns" x="90" y="136" text-anchor="middle">sensors · PLCs</text>
-          </g>
-          <g>
-            <rect class="node" x="235" y="86" width="120" height="68" rx="12"/>
-            <text class="nt" x="295" y="114" text-anchor="middle">Ingest</text>
-            <text class="ns" x="295" y="131" text-anchor="middle">OPC-UA · MQTT</text>
-            <text class="ns" x="295" y="145" text-anchor="middle" fill="#ffb020">planned</text>
-          </g>
-          <g>
-            <rect class="node" x="440" y="86" width="120" height="68" rx="12"/>
-            <text class="nt" x="500" y="118" text-anchor="middle">Digital Twin</text>
-            <text class="ns" x="500" y="136" text-anchor="middle">health · RUL</text>
-          </g>
-          <g>
-            <rect class="node" x="645" y="86" width="120" height="68" rx="12" stroke="#7c8cff"/>
-            <text class="nt" x="705" y="114" text-anchor="middle">AI Agent</text>
-            <text class="ns" x="705" y="131" text-anchor="middle">sense·think·act</text>
-            <text class="ns" x="705" y="145" text-anchor="middle" fill="#7c8cff">explainable</text>
-          </g>
-          <g>
-            <rect class="node" x="800" y="70" width="88" height="46" rx="10"/>
-            <text class="nt" x="844" y="97" text-anchor="middle" font-size="11">Work orders</text>
-            <rect class="node" x="800" y="126" width="88" height="46" rx="10"/>
-            <text class="nt" x="844" y="153" text-anchor="middle" font-size="11">ROI / ESG</text>
-          </g>
-        </svg>
+      <div class="diagram reveal">
+        <img src="/static/assets/agent-loop.svg" alt="Rail assets feed a digital twin. The AI agent senses, thinks and acts, then repeats every 2 seconds. It outputs a work order, a waste plan and an impact report." width="1000" height="380" />
       </div>
       <div class="steps">
-        <div class="step reveal"><div class="n">01</div><h4>Connect the fleet</h4><p>Stream telemetry from real assets over OPC-UA / MQTT (on the roadmap today), or run the built-in physics simulator to prove the loop end-to-end.</p></div>
-        <div class="step reveal d1"><div class="n">02</div><h4>Continuous reasoning</h4><p>The agent evaluates every asset each cycle, estimating health and RUL and deciding whether to monitor, inspect, maintain, repair, or escalate.</p></div>
-        <div class="step reveal d2"><div class="n">03</div><h4>Act &amp; prove value</h4><p>Decisions become prioritized work orders; the business-impact model turns prevented failures into downtime, cost, energy and emissions saved.</p></div>
+        <div class="step reveal"><div class="n" style="background:var(--cyan)">1</div><div><h3>Sense</h3><p>Reads temperature, vibration, oil and power quality from every asset.</p></div></div>
+        <div class="step reveal d1"><div class="n" style="background:var(--indigo)">2</div><div><h3>Think</h3><p>Scores the risk and estimates how long each part will last.</p></div></div>
+        <div class="step reveal d2"><div class="n" style="background:var(--ok)">3</div><div><h3>Act</h3><p>Opens a work order or a waste plan and says why in plain words.</p></div></div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== PRODUCT PREVIEW ===================== -->
-  <section class="section" id="product" style="background:var(--bg-1)">
+  <!-- RAIL / SUMMIT -->
+  <section class="section" id="rail">
     <div class="container">
-      <div class="row between wrap gap-4">
+      <div class="summit-head">
         <div>
-          <p class="eyebrow reveal">The product</p>
-          <h2 class="section-title reveal">See the agent think — in real time.</h2>
+          <p class="eyebrow reveal">Built for modern rail</p>
+          <h2 class="section-title reveal">Two summit topics. One working project.</h2>
+          <p class="section-lead reveal">PowerSim AI connects directly to two sessions at the Siemens Talk Students' Summit 2026.</p>
         </div>
-        <a class="btn btn-primary reveal" href="/dashboard">Open the live dashboard →</a>
-      </div>
-      <div class="shot reveal" style="margin-top:var(--s-6)">
-        <div class="browser-bar">
-          <i></i><i></i><i></i>
-          <span class="mono" style="margin-left:10px;font-size:0.68rem;color:var(--text-2)">powersim-ai — live operations dashboard</span>
-        </div>
-        <iframe class="demo-frame" src="/dashboard?embed=1" title="PowerSim AI live dashboard" loading="lazy"></iframe>
-      </div>
-      <p class="note reveal" style="margin-top:var(--s-4)">This is the real product running live, embedded. Open it full-screen to inject a fault and watch the agent detect it, explain its reasoning, and open a work order.</p>
-    </div>
-  </section>
-
-  <!-- ===================== RESEARCH FOUNDATION ===================== -->
-  <section class="section" id="research">
-    <div class="container">
-      <p class="eyebrow reveal">Research foundation</p>
-      <h2 class="section-title reveal">This product operationalizes empirically-validated research.</h2>
-      <p class="section-lead reveal">Most AI-energy startups pitch on narrative. Our thesis is measured. PowerSim AI's design is grounded in <strong>"Artificial Intelligence Adoption Intention in Egypt: Effects on Energy Efficiency and Environmental Sustainability"</strong> (Khaled Mohamed, AASTMT, June 2026) — a quantitative study surveying <strong>120 professionals</strong> across Egypt's energy, manufacturing and logistics sectors, analysed in SPSS.</p>
-
-      <div class="grid grid-3" style="margin-top:var(--s-6)">
-        <div class="finding reveal">
-          <div class="h">H1 · SUPPORTED</div>
-          <div class="stat">β = 0.761</div>
-          <div class="d">AI adoption → <strong>energy efficiency</strong>. R² = 0.579, p &lt; 0.05.</div>
-        </div>
-        <div class="finding reveal d1">
-          <div class="h">H2 · SUPPORTED</div>
-          <div class="stat">β = 0.636</div>
-          <div class="d">AI adoption → <strong>environmental sustainability</strong>. R² = 0.404, p &lt; 0.05.</div>
-        </div>
-        <div class="finding reveal d2">
-          <div class="h">SCALE RELIABILITY</div>
-          <div class="stat">α = 0.868–0.925</div>
-          <div class="d">Cronbach's Alpha across both scales — strong internal consistency.</div>
+        <div class="event reveal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+          15 October 2026 · Bibliotheca Alexandrina
         </div>
       </div>
 
-      <div class="grid grid-2" style="margin-top:var(--s-5); align-items:start">
-        <div class="card reveal">
-          <h3 style="font-size:var(--fs-md); margin-bottom:var(--s-3)">What the study establishes</h3>
-          <p style="font-size:var(--fs-sm)">In an Egyptian industrial context, intention to adopt AI is a statistically significant predictor of both energy-efficiency and environmental-sustainability outcomes — with energy efficiency the stronger relationship. That is the empirical basis for building an agent that targets <em>both</em> uptime and environmental performance, and for treating MENA industry as a receptive market rather than an assumption.</p>
-        </div>
-        <div class="card reveal d1">
-          <h3 style="font-size:var(--fs-md); margin-bottom:var(--s-3)">Literature grounding</h3>
-          <p style="font-size:var(--fs-sm)">The accompanying review covers AI in smart grids, predictive maintenance, renewable-energy forecasting, industrial waste management, and Egypt-specific renewable-adoption studies. The waste pillar's four-layer architecture and its expert-system compliance layer come directly from that review.</p>
-        </div>
-      </div>
-      <p class="note reveal" style="margin-top:var(--s-4)">Findings are reported as measured. The study establishes adoption-intention relationships among surveyed professionals; it does not measure PowerSim AI's own field performance, which remains the next milestone.</p>
-    </div>
-  </section>
-
-  <!-- ===================== IMPACT / METRICS ===================== -->
-  <section class="section" id="impact">
-    <div class="container">
-      <div class="row between wrap gap-4">
-        <div>
-          <p class="eyebrow reveal">Impact</p>
-          <h2 class="section-title reveal">Value the operator can see — computed against their numbers.</h2>
-        </div>
-        <span class="sim-tag reveal" style="align-self:center">SIMULATED PROJECTIONS</span>
-      </div>
-      <p class="section-lead reveal">These are illustrative outputs of the live simulation using default assumptions ($25k/hr downtime, $0.12/kWh, 0.45 kg CO₂e/kWh). The product lets you plug in your own line economics — no headline ROI is hard-coded.</p>
-      <div class="impact-grid" style="margin-top:var(--s-6)">
-        <div class="impact-card reveal"><div class="v">$<span data-count="150" data-decimals="0">0</span>k</div><div class="k">Value protected per predictive catch (6h downtime avoided)</div></div>
-        <div class="impact-card reveal d1"><div class="v"><span data-count="6" data-decimals="0">0</span>h</div><div class="k">Unplanned downtime avoided per prevented failure</div></div>
-        <div class="impact-card reveal d2"><div class="v"><span data-count="100" data-decimals="0">0</span>%</div><div class="k">Fleet coverage — every asset evaluated every cycle</div></div>
-        <div class="impact-card reveal d3"><div class="v"><span data-count="24" data-decimals="0">0</span>/7</div><div class="k">Continuous autonomous monitoring &amp; reasoning</div></div>
-      </div>
-      <p class="note reveal" style="margin-top:var(--s-4)">Every figure the product shows is a simulated projection with its methodology visible on hover. Real-world validation on customer assets is our next milestone.</p>
-    </div>
-  </section>
-
-  <!-- ===================== MARKET OPPORTUNITY ===================== -->
-  <section class="section" id="market" style="background:var(--bg-1)">
-    <div class="container">
-      <p class="eyebrow reveal">Market opportunity</p>
-      <h2 class="section-title reveal">A large, fast-growing market with an underserved edge — and a MENA-native wedge.</h2>
-      <div class="grid grid-2" style="margin-top:var(--s-6); align-items:start">
-        <div class="market-list reveal">
-          <div class="market-item"><span class="mk">~25%+</span><p><strong>CAGR.</strong> The predictive-maintenance software market is cited at ~$13–14B in 2025 growing toward ~$97–98B by the early-2030s (analyst estimates vary; treat as directional).</p></div>
-          <div class="market-item"><span class="mk">Now</span><p><strong>Agentic shift.</strong> Incumbents (Siemens, Honeywell, Schneider/Cognite) are racing from copilots to autonomous agents — validating the thesis, while few have scaled deployment.</p></div>
-          <div class="market-item"><span class="mk">Reg.</span><p><strong>Regulation as tailwind.</strong> EU EED audits (2026) and ISO 50001 (2027), plus CBAM, require exactly the auditable, asset-level energy data this product produces.</p></div>
-          <div class="market-item"><span class="mk">MENA</span><p><strong>Differentiated base.</strong> Egypt's 2025 removal of subsidised industrial electricity tariffs makes efficiency ROI compelling overnight — and no incumbent is MENA-native.</p></div>
-        </div>
-        <div class="card reveal d1">
-          <h3 style="font-size:var(--fs-md); margin-bottom:var(--s-4)">Where PowerSim wins</h3>
-          <div class="stack gap-3">
-            <div class="row gap-3"><span class="badge badge--ok">Agentic</span><span style="font-size:var(--fs-sm)">Closes the loop (act), not just alerts or Q&amp;A copilots.</span></div>
-            <div class="row gap-3"><span class="badge badge--info">Mid-market</span><span style="font-size:var(--fs-sm)">Software-first, sensor-agnostic — priced for plants incumbents ignore.</span></div>
-            <div class="row gap-3"><span class="badge badge--ok">Edge</span><span style="font-size:var(--fs-sm)">On-prem / edge-capable for data-sensitive operators.</span></div>
-            <div class="row gap-3"><span class="badge badge--info">Transparent</span><span style="font-size:var(--fs-sm)">Explainable, simulation-first — counters inflated-accuracy skepticism.</span></div>
-          </div>
-          <p class="note" style="margin-top:var(--s-4)">Full analysis and sources in <a href="https://github.com/yehiasamir27/powersim-ai/blob/main/docs/MARKET_RESEARCH.md" class="text-cyan">docs/MARKET_RESEARCH.md</a>.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== BUSINESS MODEL ===================== -->
-  <section class="section" id="business">
-    <div class="container">
-      <p class="eyebrow reveal">Business model</p>
-      <h2 class="section-title reveal">Software-first SaaS, priced by fleet — with an edge tier for sensitive sites.</h2>
-      <div class="grid grid-3" style="margin-top:var(--s-6)">
-        <div class="card tier reveal">
-          <div class="tname">Pilot</div>
-          <div class="tdesc">Prove the loop on a line, instrumented for ROI from day one.</div>
-          <ul><li>Up to ~10 assets</li><li>Cloud-hosted</li><li>Rule + LLM reasoning</li><li>Baseline ROI report</li></ul>
-        </div>
-        <div class="card tier featured reveal d1">
-          <div class="tname">Plant <span class="badge badge--warn" style="margin-left:6px">Core</span></div>
-          <div class="tdesc">Whole-plant coverage with the connectors your OT already speaks.</div>
-          <ul><li>Unlimited assets / site</li><li>OPC-UA / MQTT ingest</li><li>Work-order + CMMS export</li><li>ISO 50001 energy reporting</li></ul>
-        </div>
-        <div class="card tier reveal d2">
-          <div class="tname">Edge / On-prem</div>
-          <div class="tdesc">Air-gap-friendly deployment for data-sensitive operators.</div>
-          <ul><li>Fully on-prem / edge</li><li>IEC 62443-aligned roadmap</li><li>Private model hosting</li><li>SLA &amp; support</li></ul>
-        </div>
-      </div>
-      <p class="note reveal" style="margin-top:var(--s-4)">Packaging shown reflects our intended structure; final pricing is set with each design partner during the pilot.</p>
-    </div>
-  </section>
-
-  <!-- ===================== ROADMAP ===================== -->
-  <section class="section" id="roadmap" style="background:var(--bg-1)">
-    <div class="container">
-      <p class="eyebrow reveal">Roadmap</p>
-      <h2 class="section-title reveal">Built to move from simulation to real plant telemetry.</h2>
-      <div class="road reveal" style="margin-top:var(--s-6)">
-        <div class="road-col now card">
-          <h4><span class="badge badge--ok">Shipped</span></h4>
-          <ul>
-            <li><span class="b"></span>Physics-based digital twin (health, RUL, anomaly)</li>
-            <li><span class="b"></span>Continuous sense→think→act agent</li>
-            <li><span class="b"></span>Explainable reasoning "why" trail</li>
-            <li><span class="b"></span>Waste classification, compliance rules &amp; 4R routing</li>
-            <li><span class="b"></span>Business-impact model + sustainability score</li>
-            <li><span class="b"></span>Tested core + CI + one-command Docker</li>
-          </ul>
-        </div>
-        <div class="road-col next card">
-          <h4><span class="badge badge--warn">Short — medium term</span></h4>
-          <ul>
-            <li><span class="b"></span>Single-facility Egyptian pilot: basic sensors + ML classification</li>
-            <li><span class="b"></span>OPC-UA connector (live PLC/SCADA ingest)</li>
-            <li><span class="b"></span>MQTT / Sparkplug B edge streaming</li>
-            <li><span class="b"></span>IoT waste sensors &amp; conveyor vision ingest</li>
-            <li><span class="b"></span>Multi-site scaling with predictive maintenance integrated</li>
-          </ul>
-        </div>
-        <div class="road-col card">
-          <h4><span class="badge badge--info">Long term</span></h4>
-          <ul>
-            <li><span class="b"></span>Full AIHIF-style waste optimisation across facilities</li>
-            <li><span class="b"></span>Alignment with Egypt Vision 2030 &amp; national waste tracking</li>
-            <li><span class="b"></span>ISO 50001 / EU EED energy reporting export</li>
-            <li><span class="b"></span>IEC 62443-aligned on-prem/edge hardening</li>
-            <li><span class="b"></span>Trained CV/ensemble classifiers &amp; uncertainty-aware RUL</li>
-          </ul>
-        </div>
-      </div>
-      <div class="card reveal" style="margin-top:var(--s-5)">
-        <h3 style="font-size:var(--fs-md); margin-bottom:var(--s-3)">How we address the adoption barriers our research identified</h3>
-        <div class="grid grid-4">
-          <div><div class="mono" style="font-size:var(--fs-xs);color:var(--accent)">LIMITED EXPERTISE</div><p style="font-size:var(--fs-sm);margin-top:4px">Cloud-based pre-trained models — no in-house data-science team required.</p></div>
-          <div><div class="mono" style="font-size:var(--fs-xs);color:var(--accent)">HIGH COSTS</div><p style="font-size:var(--fs-sm);margin-top:4px">Modular single-use-case rollout — start with one line, expand on proven ROI.</p></div>
-          <div><div class="mono" style="font-size:var(--fs-xs);color:var(--accent)">INCONSISTENT REGULATION</div><p style="font-size:var(--fs-sm);margin-top:4px">Expert-system compliance checks encode the rules explicitly and auditably.</p></div>
-          <div><div class="mono" style="font-size:var(--fs-xs);color:var(--accent)">DATA SCARCITY</div><p style="font-size:var(--fs-sm);margin-top:4px">Transfer learning from global datasets with local fine-tuning.</p></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== TEAM ===================== -->
-  <section class="section" id="team">
-    <div class="container">
-      <p class="eyebrow reveal">Team</p>
-      <h2 class="section-title reveal">Two AASTMT engineers: one builds it, one proved the need.</h2>
-      <p class="section-lead reveal">PowerSim AI pairs technical build capability with empirical energy-sector research — both from the Arab Academy for Science, Technology and Maritime Transport, and both rooted in the Egyptian industrial market we're targeting first.</p>
       <div class="grid grid-2" style="margin-top:var(--s-6)">
-        <div class="card founder reveal">
-          <div class="avatar">YS</div>
-          <div>
-            <h3 style="font-size:var(--fs-md)">Yehia Samir</h3>
-            <div class="muted" style="font-size:var(--fs-sm)">Computer Engineering, AASTMT Alexandria (2025)</div>
-            <p style="font-size:var(--fs-sm); color:var(--text-1); margin-top:8px">Builder of PowerSim AI — the digital-twin physics, the agentic reasoning loop, the waste-classification pipeline, and the full-stack live demo.</p>
-          </div>
+        <div class="card session reveal">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#1f5eff" stroke-width="1.5"><path d="M4 21 9 3M20 21 15 3M6 15h12M7.5 9h9"/></svg>
+          <div class="tag">Session 1</div>
+          <h3>Modern Railway Infrastructure: Smart Signalling and Electrification</h3>
+          <ul>
+            <li><span class="tick">✓</span>Monitors the electrification chain: traction transformer, traction motor and cooling.</li>
+            <li><span class="tick">✓</span>Watches the backup power that keeps signalling safe.</li>
+            <li><span class="tick">✓</span>Predicts failures before they stop trains.</li>
+          </ul>
         </div>
-        <div class="card founder reveal d1">
-          <div class="avatar">KM</div>
-          <div>
-            <h3 style="font-size:var(--fs-md)">Khaled Mohamed</h3>
-            <div class="muted" style="font-size:var(--fs-sm)">Oil &amp; Gas Supply Chain Management Engineering, AASTMT — College of International Transport &amp; Logistics</div>
-            <p style="font-size:var(--fs-sm); color:var(--text-1); margin-top:8px">Author of the empirical study underpinning the product's thesis, and architect of the AI waste-management pipeline grounded in that research.</p>
-          </div>
+        <div class="card session reveal d1">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#0c9a61" stroke-width="1.5"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>
+          <div class="tag" style="color:var(--ok)">Session 2</div>
+          <h3>Renewable Energy Markets: Grid Integration and Stability</h3>
+          <ul>
+            <li><span class="tick">✓</span>Tracks power factor and voltage drift across the network.</li>
+            <li><span class="tick">✓</span>Shows energy lost to worn equipment, in kWh and CO₂.</li>
+            <li><span class="tick">✓</span>Turns savings into one clear sustainability score.</li>
+          </ul>
         </div>
       </div>
+      <p class="note reveal" style="margin-top:var(--s-4)">AASTMT is an academic partner of the summit. PowerSim AI is an independent student project and is not affiliated with or endorsed by Siemens.</p>
     </div>
   </section>
 
-  <!-- ===================== CONTACT ===================== -->
-  <section class="section" id="contact" style="background:var(--bg-1)">
+  <!-- FEATURES -->
+  <section class="section section--white">
     <div class="container">
-      <div class="contact-grid">
-        <div class="reveal">
-          <p class="eyebrow">Get in touch</p>
-          <h2 class="section-title">Request a demo, or talk to us.</h2>
-          <p class="section-lead">Whether you run a plant, invest in industrial AI, or want to explore a design-partner pilot — we'd love to show you the agent working on your use case.</p>
-          <div class="stack gap-3" style="margin-top:var(--s-5)">
-            <a class="btn btn-ghost" href="/dashboard">▶ Open the live demo</a>
-            <a class="btn btn-ghost" href="/pitch">📈 View the investor summary</a>
-          </div>
+      <div style="text-align:center">
+        <p class="eyebrow reveal">What it does</p>
+        <h2 class="section-title center-text reveal">Four jobs, one agent.</h2>
+      </div>
+      <div class="grid grid-4" style="margin-top:var(--s-6)">
+        <div class="card feat reveal">
+          <div class="ic" style="background:var(--accent-dim);color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></div>
+          <h3>Predict failures</h3><p>Health score and remaining life for every asset.</p>
         </div>
-        <form class="card reveal d1" id="contact-form" novalidate>
-          <div class="field"><label for="c-name">Name</label><input id="c-name" name="name" required maxlength="120" /></div>
-          <div class="field"><label for="c-email">Email</label><input id="c-email" name="email" type="email" required maxlength="200" /></div>
-          <div class="field"><label for="c-company">Company (optional)</label><input id="c-company" name="company" maxlength="200" /></div>
-          <div class="field"><label for="c-message">How can we help?</label><textarea id="c-message" name="message" rows="4" required maxlength="4000"></textarea></div>
-          <button class="btn btn-primary" type="submit" id="c-submit" style="width:100%">Send message</button>
-          <div class="form-msg" id="c-msg"></div>
-        </form>
+        <div class="card feat reveal d1">
+          <div class="ic" style="background:var(--indigo-dim);color:var(--indigo)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></div>
+          <h3>Explain decisions</h3><p>Clear reasons in plain words, not a black box.</p>
+        </div>
+        <div class="card feat reveal d2">
+          <div class="ic" style="background:var(--ok-dim);color:var(--ok)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 19H4l3.5 4M17 19h3l-3.5 4"/><path d="M8.5 6.5 12 2l3.5 4.5M5 13l-2 4h7M19 13l2 4h-7"/></svg></div>
+          <h3>Cut waste</h3><p>Sorts waste, checks the rules, suggests reuse or recycling.</p>
+        </div>
+        <div class="card feat reveal d3">
+          <div class="ic" style="background:var(--warn-dim);color:var(--warn)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+          <h3>Show the impact</h3><p>Downtime avoided, energy lost, CO₂ and money saved.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== CTA BAND ===================== -->
+  <!-- DEMO -->
+  <section class="section" id="demo">
+    <div class="container">
+      <div class="row between wrap gap-4">
+        <div>
+          <p class="eyebrow reveal">Live demo</p>
+          <h2 class="section-title reveal">Try it. Break a motor. Watch the agent react.</h2>
+        </div>
+        <a class="btn btn-primary reveal" href="/dashboard">Open full screen</a>
+      </div>
+      <div class="frame reveal">
+        <div class="frame-bar"><i></i><i></i><i></i><span>powersim live dashboard</span></div>
+        <iframe src="/dashboard?embed=1&amp;scenario=fault" title="PowerSim AI live dashboard" loading="lazy"></iframe>
+      </div>
+      <p class="note reveal" style="margin-top:var(--s-3)">All demo data is simulated.</p>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section class="section section--white" id="research">
+    <div class="container">
+      <div class="grid grid-2" style="align-items:center">
+        <div>
+          <p class="eyebrow reveal">Backed by research</p>
+          <h2 class="section-title reveal">Built on a real study, not a guess.</h2>
+          <p class="section-lead reveal">An AASTMT study (2026) surveyed 120 professionals in Egypt's energy, manufacturing and logistics sectors.</p>
+        </div>
+        <div class="stack gap-3">
+          <div class="stat reveal"><div class="v">β = 0.761</div><div class="k">AI adoption predicts better <b>energy efficiency</b> (R² 0.579, p &lt; 0.05).</div></div>
+          <div class="stat reveal d1"><div class="v">β = 0.636</div><div class="k">AI adoption predicts better <b>sustainability</b> (R² 0.404, p &lt; 0.05).</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section class="section section--tight">
+    <div class="container" style="text-align:center">
+      <p class="eyebrow reveal">Tech stack</p>
+      <h2 class="section-title center-text reveal">Real engineering under the hood.</h2>
+      <div class="stack-list reveal">
+        <span>Python</span><span>FastAPI</span><span>WebSocket</span><span>JavaScript</span><span>Digital twin</span><span>Local LLM (Ollama)</span><span>Docker</span><span>pytest</span><span>GitHub Actions</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="section section--white" id="team">
+    <div class="container">
+      <div style="text-align:center">
+        <p class="eyebrow reveal">Team</p>
+        <h2 class="section-title center-text reveal">Two AASTMT engineers.</h2>
+      </div>
+      <div class="grid grid-2" style="margin-top:var(--s-6)">
+        <div class="card person reveal">
+          <div class="avatar" style="background:var(--accent)">YS</div>
+          <div>
+            <h3>Yehia Samir</h3>
+            <div class="deg">Computer Engineering, AASTMT Alexandria (2025)</div>
+            <div class="role">Built the software</div>
+          </div>
+        </div>
+        <div class="card person reveal d1">
+          <div class="avatar" style="background:var(--ok)">KM</div>
+          <div>
+            <h3>Khaled Mohamed</h3>
+            <div class="deg">Oil and Gas Supply Chain Management Engineering, AASTMT</div>
+            <div class="role">Led the research</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
   <section class="section section--tight">
     <div class="container">
-      <div class="cta-band reveal">
-        <h2 class="section-title" style="margin-inline:auto">The agent is running right now.</h2>
-        <p class="section-lead" style="margin-inline:auto; text-align:center">Inject a fault and watch PowerSim AI detect it, explain itself, and open a work order — live.</p>
-        <div class="row center gap-3" style="margin-top:var(--s-5); flex-wrap:wrap">
-          <a class="btn btn-primary btn-lg" href="/dashboard">Watch the agent work →</a>
-          <a class="btn btn-ghost btn-lg" href="/pitch">For investors</a>
+      <div class="cta reveal">
+        <h2>See the agent in action.</h2>
+        <p>No sign up. Runs in your browser.</p>
+        <div class="row center gap-3 wrap" style="margin-top:var(--s-5)">
+          <a class="btn btn-primary btn-lg" href="/dashboard">Open live demo</a>
+          <a class="btn btn-ghost btn-lg" href="https://github.com/yehiasamir27/powersim-ai" target="_blank" rel="noopener">View code on GitHub</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== FOOTER ===================== -->
   <footer class="footer">
-    <div class="container footer-grid">
-      <div style="max-width:38ch">
-        <a class="brand" href="/" style="margin-bottom:10px">
-          <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#111823"/><path d="M17.5 5 8 18h6l-1.5 9L23 13h-6z" fill="#ffb020"/></svg>
-          PowerSim<span style="color:var(--accent)">&nbsp;AI</span>
-        </a>
-        <p class="note" style="font-style:normal">Agentic AI + digital-twin predictive maintenance for industrial power. All in-product metrics are simulated projections; real-world validation is the next milestone.</p>
-      </div>
-      <div class="stack gap-2">
+    <div class="container footer-row">
+      <a class="brand" href="/">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#1f5eff"/><path d="M17.5 5 8 18h6l-1.5 9L23 13h-6z" fill="#fff"/></svg>
+        PowerSim AI
+      </a>
+      <div class="row gap-4 wrap">
         <a href="/dashboard">Live demo</a>
-        <a href="/pitch">Investor summary</a>
-        <a href="#market">Market</a>
-        <a href="https://github.com/yehiasamir27/powersim-ai">GitHub</a>
+        <a href="/pitch">Project brief</a>
+        <a href="https://github.com/yehiasamir27/powersim-ai" target="_blank" rel="noopener">GitHub</a>
       </div>
-    </div>
-    <div class="container" style="margin-top:var(--s-5)">
-      <p class="note">© 2026 PowerSim AI · Yehia Samir &amp; Khaled Mohamed. Built for demonstration and evaluation.</p>
+      <span class="note">© 2026 Yehia Samir and Khaled Mohamed. Demo data is simulated.</span>
     </div>
   </footer>
 
   <script src="/static/assets/app.js"></script>
   <script src="/static/assets/sim-engine.js"></script>
   <script>
-    // Feed the hero panel from the live demo API (graceful if unavailable).
+    // Live asset card: stream from the API when it exists, else run the same
+    // simulation in the browser (static hosting).
     (function () {
-      const proto = location.protocol === "https:" ? "wss:" : "ws:";
-      const statusEl = document.getElementById("hp-status");
+      const foot = document.getElementById("live-foot");
+      const LABEL = { normal: "Healthy", degraded: "Needs care", critical: "Critical", failed: "Failed", under_maintenance: "In service" };
       function paint(state) {
         if (!state || !state.assets) return;
+        let worst = null;
         state.assets.forEach((a) => {
-          const el = document.querySelector('[data-metric="' + a.asset_id + '"]');
-          if (!el) return;
-          el.textContent = a.health.toFixed(0) + "%";
-          const card = el.closest(".hp-asset");
-          card.classList.remove("warn", "crit");
-          if (a.operating_state === "degraded") card.classList.add("warn");
-          else if (["critical", "failed"].includes(a.operating_state)) card.classList.add("crit");
+          const row = document.querySelector('[data-asset="' + a.asset_id + '"]');
+          if (!row) return;
+          row.classList.remove("warn", "crit");
+          if (a.operating_state === "degraded") row.classList.add("warn");
+          if (a.operating_state === "critical" || a.operating_state === "failed") row.classList.add("crit");
+          row.querySelector(".bar span").style.width = Math.max(4, a.health) + "%";
+          row.querySelector(".pct").textContent = Math.round(a.health) + "%";
+          row.querySelector(".st").textContent = LABEL[a.operating_state] || "Healthy";
+          if (!worst || a.health < worst.health) worst = a;
         });
-        statusEl.textContent = "Fleet health · tick #" + state.tick_count;
+        foot.innerHTML = worst && worst.operating_state !== "normal"
+          ? "<b>Agent:</b> " + worst.name + " needs attention. Work order opened."
+          : "<b>Agent:</b> all assets healthy. Checked " + state.tick_count + " times.";
       }
-      // Stream from the API when it exists; otherwise run the same simulation
-      // in-browser so the hosted static demo is just as alive.
       (async function boot() {
         let hasApi = false;
         try { hasApi = (await fetch("/health", { cache: "no-store" })).ok; } catch (_) {}
         if (hasApi) {
           try {
+            const proto = location.protocol === "https:" ? "wss:" : "ws:";
             const ws = new WebSocket(proto + "//" + location.host + "/ws/live");
-            ws.onmessage = (e) => {
-              try { const d = JSON.parse(e.data); if (d.state) paint(d.state); } catch (_) {}
-            };
+            ws.onmessage = (e) => { try { const d = JSON.parse(e.data); if (d.state) paint(d.state); } catch (_) {} };
             return;
           } catch (_) {}
         }
-        if (typeof PowerSimEngine === "function") {
-          const engine = new PowerSimEngine(42);
-          setInterval(() => paint(engine.tick().state), 2000);
+        if (typeof PowerSimEngine !== "function") return;
+        // Show a short story: a healthy fleet, then a developing motor fault.
+        const engine = new PowerSimEngine(7);
+        let n = 0;
+        paint(engine.tick().state);
+        setInterval(() => {
+          n++;
+          if (n === 4) engine.injectFailure("M1", "bearing_wear");
+          if (n === 40) { engine.performMaintenance("M1"); n = 0; }
           paint(engine.tick().state);
-        } else {
-          statusEl.textContent = "Open the dashboard for the live demo.";
-        }
+        }, 1500);
       })();
-
-      // Contact form → POST /api/contact
-      const form = document.getElementById("contact-form");
-      const msg = document.getElementById("c-msg");
-      const btn = document.getElementById("c-submit");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const data = Object.fromEntries(new FormData(form).entries());
-        if (!data.name || !data.email || !data.message) {
-          msg.style.color = "var(--warn)";
-          msg.textContent = "Please fill in your name, email, and message.";
-          return;
-        }
-        btn.disabled = true;
-        const prev = btn.textContent;
-        btn.textContent = "Sending…";
-        try {
-          const r = await fetch("/api/contact", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          });
-          const j = await r.json();
-          if (r.ok && j.success) {
-            msg.style.color = "var(--ok)";
-            msg.textContent = j.message || "Thanks — we'll be in touch shortly.";
-            form.reset();
-          } else {
-            throw new Error();
-          }
-        } catch (_) {
-          // The hosted demo is static and has no mail backend — say so plainly
-          // and give a route that actually works, rather than failing silently.
-          msg.style.color = "var(--warn)";
-          msg.innerHTML =
-            "This hosted demo is static, so the form can't deliver mail. Please reach us via " +
-            '<a class="text-cyan" href="https://github.com/yehiasamir27/powersim-ai" target="_blank" rel="noopener">the project on GitHub</a>' +
-            " — the full deployment sends this form server-side.";
-        } finally {
-          btn.disabled = false;
-          btn.textContent = prev;
-        }
-      });
     })();
   </script>
 </body>

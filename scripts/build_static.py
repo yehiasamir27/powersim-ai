@@ -58,7 +58,7 @@ def build() -> int:
         shutil.copy2(asset, PUBLIC / "static" / "assets" / asset.name)
         copied += 1
 
-    print(f"built {PUBLIC.relative_to(ROOT)}/ — {copied} files")
+    print(f"built {PUBLIC.relative_to(ROOT)}/ with {copied} files")
     return 0
 
 

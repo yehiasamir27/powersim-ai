@@ -3,158 +3,139 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PowerSim AI — Investor Summary</title>
-  <meta name="description" content="PowerSim AI investor summary: problem, solution, why now, market, business model, moat, roadmap, and the ask." />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070a0f'/%3E%3Cpath d='M17.5 5 8 18h6l-1.5 9L23 13h-6z' fill='%23ffb020'/%3E%3C/svg%3E" />
+  <title>PowerSim AI | Project brief</title>
+  <meta name="description" content="One page brief: PowerSim AI, an AI agent and digital twin for railway power assets." />
+  <meta property="og:title" content="PowerSim AI | Project brief" />
+  <meta property="og:description" content="An AI agent that keeps railway power assets healthy." />
+  <meta property="og:image" content="https://powersim-ai.vercel.app/static/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f5eff'/%3E%3Cpath d='M17.5 5 8 18h6l-1.5 9L23 13h-6z' fill='%23fff'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/assets/design-system.css" />
   <style>
-    .top { position: sticky; top: 0; z-index: 40; height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--s-5); background: rgba(7,10,15,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
-    .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; color: var(--text-0); }
-    .brand svg { width: 24px; height: 24px; }
-    .p-hero { text-align: center; padding: var(--s-8) var(--s-5) var(--s-6); position: relative; }
-    .p-hero h1 { font-size: var(--fs-2xl); max-width: 20ch; margin-inline: auto; }
-    .p-hero p { margin: var(--s-4) auto 0; max-width: 60ch; font-size: var(--fs-md); color: var(--text-1); }
-    .slide { border: 1px solid var(--border); border-radius: var(--r-lg); background: linear-gradient(180deg, var(--surface), var(--bg-1)); padding: var(--s-6); }
-    .slide h2 { font-size: var(--fs-lg); margin-bottom: var(--s-4); display: flex; align-items: center; gap: 10px; }
-    .slide h2 .n { font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--accent); }
-    .slide p, .slide li { font-size: var(--fs-sm); color: var(--text-1); line-height: 1.6; }
-    .slide ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: var(--s-2); }
-    .slide li { display: flex; gap: 10px; }
-    .slide li::before { content: "▸"; color: var(--accent); flex: none; }
-    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
-    .kpi { text-align: center; }
-    .kpi .v { font-family: var(--font-mono); font-size: var(--fs-xl); color: var(--text-0); font-weight: 700; }
-    .kpi .k { font-size: var(--fs-xs); color: var(--text-2); margin-top: 4px; }
-    .tam { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
-    .tam .t { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); text-align: center; }
-    .tam .t .lbl { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.1em; color: var(--accent); }
-    .tam .t .val { font-size: var(--fs-md); color: var(--text-0); font-weight: 700; margin: 6px 0; }
-    .tam .t .d { font-size: var(--fs-xs); color: var(--text-2); }
-    @media (max-width: 800px) { .kpis, .tam { grid-template-columns: 1fr; } }
-    @media print { .top, .cta-print { display: none; } body { background: #fff; } }
+    .top { position: sticky; top: 0; z-index: 40; height: 62px; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--s-5); background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--text-0); }
+    .brand svg { width: 28px; height: 28px; }
+    .sheet { max-width: 900px; margin: var(--s-7) auto var(--s-8); padding: 0 var(--s-5); }
+    .head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--s-4); flex-wrap: wrap; padding-bottom: var(--s-5); border-bottom: 2px solid var(--text-0); }
+    .head h1 { font-size: 2.4rem; letter-spacing: -0.03em; }
+    .head p { font-size: 1.15rem; color: var(--text-1); margin-top: 4px; }
+    .links { display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-sm); text-align: right; }
+    .links a { color: var(--accent); font-weight: 600; }
+    .block { padding: var(--s-5) 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 170px 1fr; gap: var(--s-5); }
+    .block h2 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .12em; color: var(--accent); padding-top: 4px; }
+    .block p, .block li { font-size: var(--fs-base); color: var(--text-1); }
+    .block ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .block li { display: flex; gap: 10px; }
+    .block li::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-top: 9px; }
+    .diagram { border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+    .nums { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-3); }
+    .num { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); background: var(--bg-1); }
+    .num .v { font-family: var(--font-mono); font-size: 1.4rem; font-weight: 600; color: var(--accent); }
+    .num .k { font-size: var(--fs-sm); }
+    .people { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-4); }
+    .people b { color: var(--text-0); display: block; }
+    .people span { font-size: var(--fs-sm); color: var(--text-1); }
+    .foot { margin-top: var(--s-5); font-size: var(--fs-xs); color: var(--text-2); }
+    @media (max-width: 720px) { .block { grid-template-columns: 1fr; gap: var(--s-2); } .links { text-align: left; } .nums, .people { grid-template-columns: 1fr; } }
+    @media print {
+      .top { display: none; }
+      body { background: #fff; }
+      .sheet { margin: 0 auto; }
+      .block { break-inside: avoid; padding: 14px 0; }
+    }
   </style>
 </head>
 <body>
   <div class="top">
-    <a class="brand" href="/"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#111823"/><path d="M17.5 5 8 18h6l-1.5 9L23 13h-6z" fill="#ffb020"/></svg>PowerSim<span style="color:var(--accent)">&nbsp;AI</span> <span class="badge badge--info" style="margin-left:6px">INVESTOR SUMMARY</span></a>
+    <a class="brand" href="/"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#1f5eff"/><path d="M17.5 5 8 18h6l-1.5 9L23 13h-6z" fill="#fff"/></svg>PowerSim AI</a>
     <div class="row gap-2">
-      <a class="btn btn-ghost btn-sm" href="/dashboard">Live demo</a>
-      <button class="btn btn-primary btn-sm" onclick="window.print()">Save as PDF</button>
+      <a class="btn btn-ghost" href="/dashboard">Live demo</a>
+      <button class="btn btn-primary" onclick="window.print()">Save as PDF</button>
     </div>
   </div>
 
-  <div class="p-hero">
-    <div class="grid-bg"></div>
-    <span class="chip chip--live" style="position:relative"><span class="dot"></span>Working product · live demo</span>
-    <h1 style="margin-top:var(--s-4)">Agentic predictive maintenance for the world's industrial power assets.</h1>
-    <p>PowerSim AI catches equipment failures before they happen — an autonomous agent that senses, reasons, and acts on asset health, with an explainable "why" and provable ROI. Deployment-ready architecture, MENA-native wedge, honest simulation-first approach.</p>
-  </div>
-
-  <div class="container" style="max-width:920px">
-    <div class="stack" style="gap:var(--s-5); padding-bottom:var(--s-8)">
-
-      <div class="slide reveal">
-        <h2><span class="n">01</span> Problem</h2>
-        <p>Industrial plants lose enormous value to <strong>unplanned downtime</strong>, while the <strong>reliability experts</strong> who prevent it are retiring (~1.9M US manufacturing jobs may go unfilled by 2033, per Deloitte). Legacy monitoring drowns operators in <strong>false alarms</strong>, so maintenance stays reactive. Most predictive-maintenance programs stall in "pilot purgatory" — the blocker is integration and trust, not algorithms.</p>
+  <main class="sheet">
+    <div class="head">
+      <div>
+        <h1>PowerSim AI</h1>
+        <p>An AI agent that keeps railway power assets healthy.</p>
       </div>
-
-      <div class="slide reveal">
-        <h2><span class="n">02</span> Solution</h2>
-        <p>A continuous <strong>sense → think → act</strong> agent over a physics-based digital twin. It estimates each asset's health and remaining useful life from sensor fusion, decides what to do, generates the work order, and <strong>shows its reasoning</strong> at every step — then translates prevented failures into downtime, cost, energy and CO₂ saved against the operator's own numbers.</p>
-        <ul>
-          <li><strong>Closes the loop</strong> (acts) — not just alerts or a Q&amp;A copilot.</li>
-          <li><strong>Explainable</strong> "why" trail — directly counters buyer distrust of black-box scores.</li>
-          <li><strong>Buyer-supplied ROI</strong> — no hard-coded headline numbers.</li>
-          <li><strong>Two pillars, one agent</strong> — the same engine also classifies waste streams, runs expert-system compliance checks and routes them by a 4R recommender, because degrading equipment produces more contaminated scrap and more regulatory exposure.</li>
-        </ul>
+      <div class="links">
+        <a href="https://powersim-ai.vercel.app">powersim-ai.vercel.app</a>
+        <a href="https://github.com/yehiasamir27/powersim-ai">github.com/yehiasamir27/powersim-ai</a>
       </div>
-
-      <div class="slide reveal">
-        <h2><span class="n">03</span> Why now</h2>
-        <div class="kpis">
-          <div class="kpi"><div class="v">$3.1B</div><div class="k">Schneider's 2026 acquisition of Cognite — "AI executing operations"</div></div>
-          <div class="kpi"><div class="v">$53B</div><div class="k">Gartner's 2030 forecast: SCM software with agentic AI</div></div>
-          <div class="kpi"><div class="v">2026–27</div><div class="k">EU EED audits &amp; ISO 50001 mandates force auditable energy data</div></div>
-        </div>
-        <p style="margin-top:var(--s-4)">The agentic thesis is validated by both strategic M&amp;A and incumbent roadmaps — yet few have <em>scaled deployment</em>. The opening is a trusted, transparent, fast-to-deploy entrant. Regulation (EU EED, CBAM) and Egypt's 2025 industrial-tariff reform turn efficiency from optional to mandatory.</p>
-      </div>
-
-      <div class="slide reveal">
-        <h2><span class="n">04</span> Research foundation</h2>
-        <p>Our thesis is measured, not asserted. PowerSim AI's design is grounded in <strong>"Artificial Intelligence Adoption Intention in Egypt: Effects on Energy Efficiency and Environmental Sustainability"</strong> (Khaled Mohamed, AASTMT, June 2026) — a quantitative survey of <strong>120 professionals</strong> across Egypt's energy, manufacturing and logistics sectors, analysed in SPSS.</p>
-        <div class="kpis" style="margin-top:var(--s-4)">
-          <div class="kpi"><div class="v">β = 0.761</div><div class="k">H1 supported — AI adoption → energy efficiency (R² = 0.579, p &lt; 0.05)</div></div>
-          <div class="kpi"><div class="v">β = 0.636</div><div class="k">H2 supported — AI adoption → environmental sustainability (R² = 0.404, p &lt; 0.05)</div></div>
-          <div class="kpi"><div class="v">α = 0.868–0.925</div><div class="k">Cronbach's Alpha across both scales — strong reliability</div></div>
-        </div>
-        <p style="margin-top:var(--s-4)">The accompanying literature review — AI in smart grids, predictive maintenance, renewable forecasting, industrial waste management, and Egypt-specific renewable adoption — is the direct source of the waste pillar's four-layer architecture and its expert-system compliance layer. <strong>This product operationalizes empirically-validated research</strong>, which is a genuine differentiator against AI-energy startups pitching on narrative alone.</p>
-        <p style="margin-top:var(--s-3); font-size:var(--fs-xs); color:var(--text-2)">The study establishes adoption-intention relationships among surveyed professionals; it does not measure PowerSim AI's own field performance.</p>
-      </div>
-
-      <div class="slide reveal">
-        <h2><span class="n">05</span> Market</h2>
-        <div class="tam">
-          <div class="t"><div class="lbl">TAM</div><div class="val">$13–14B → ~$97B</div><div class="d">Global predictive-maintenance software, 2025 → early-2030s (~25%+ CAGR, analyst estimates vary)</div></div>
-          <div class="t"><div class="lbl">BEACHHEAD</div><div class="val">Egypt &amp; GCC</div><div class="d">Mid-market industrial plants where no incumbent is MENA-native, reached via design-partner pilots</div></div>
-          <div class="t"><div class="lbl">EXPANSION</div><div class="val">Mid-market, global</div><div class="d">Software-first pricing for plants the enterprise incumbents don't serve</div></div>
-        </div>
-        <p style="margin-top:var(--s-4)">Regulation compounds the pull: EU Energy Efficiency Directive audits (2026) and ISO 50001 (2027), CBAM live since January 2026, and Egypt's July 2025 removal of subsidised industrial electricity tariffs — all of which require exactly the auditable, asset-level energy and waste data this product produces.</p>
-      </div>
-
-      <div class="slide reveal">
-        <h2><span class="n">06</span> Product &amp; moat</h2>
-        <ul>
-          <li><strong>Working product today:</strong> tested core, CI, one-command Docker, live agentic demo across both pillars.</li>
-          <li><strong>Architecture built for real telemetry:</strong> clean TelemetrySource / WasteEventSource seams — swapping the simulator for OPC-UA, MQTT or IoT waste sensors is a connector, not a rewrite.</li>
-          <li><strong>Research-grounded:</strong> the waste pipeline and compliance layer derive from a published empirical study, not a guess about the market.</li>
-          <li><strong>Trust as a moat:</strong> explainable, simulation-first, honestly labelled — the opposite of inflated-accuracy incumbents.</li>
-          <li><strong>MENA-native wedge:</strong> local presence, Arabic UI roadmap, data residency — no incumbent is MENA-native.</li>
-        </ul>
-      </div>
-
-      <div class="slide reveal">
-        <h2><span class="n">07</span> Business model</h2>
-        <p>Software-first SaaS priced by fleet: <strong>Pilot</strong> (prove the loop, instrumented ROI) → <strong>Plant/Core</strong> (whole-plant coverage, OPC-UA/MQTT ingest, ISO 50001 reporting) → <strong>Edge/On-prem</strong> (air-gap-friendly for data-sensitive operators). Land with a low-friction pilot, expand across sites; final pricing is set with each design partner during that pilot.</p>
-      </div>
-
-      <div class="slide reveal">
-        <h2><span class="n">08</span> Traction &amp; roadmap</h2>
-        <ul>
-          <li><strong>Now:</strong> working, tested product with a live explainable demo across predictive maintenance and waste/compliance — plus the empirical study underpinning the thesis.</li>
-          <li><strong>Short term:</strong> single-facility Egyptian pilot with basic sensors and ML classification; OPC-UA / MQTT connectors.</li>
-          <li><strong>Medium term:</strong> multi-site scaling with predictive maintenance and waste running together.</li>
-          <li><strong>Long term:</strong> full AIHIF-style waste optimisation aligned with Egypt Vision 2030 and national waste-tracking frameworks; ISO 50001 reporting; IEC 62443-aligned edge.</li>
-        </ul>
-      </div>
-
-      <div class="slide reveal">
-        <h2><span class="n">09</span> Team</h2>
-        <p>Two engineers from the Arab Academy for Science, Technology and Maritime Transport (AASTMT) — combining technical build capability with empirical energy-sector research grounding, from the same institution and rooted in the Egyptian market we target first.</p>
-        <ul>
-          <li><strong>Yehia Samir</strong> — Computer Engineering, AASTMT Alexandria (2025). Builder of PowerSim AI: digital-twin physics, the agentic reasoning loop, the waste-classification pipeline, and the full-stack live demo.</li>
-          <li><strong>Khaled Mohamed</strong> — Oil &amp; Gas Supply Chain Management Engineering, AASTMT College of International Transport &amp; Logistics. Author of the empirical study underpinning the product thesis and architect of the AI waste-management pipeline.</li>
-        </ul>
-      </div>
-
-      <div class="slide reveal" style="border-color:var(--accent-dim); box-shadow:var(--glow-accent)">
-        <h2><span class="n">10</span> The ask</h2>
-        <p>We're raising a pre-seed round to convert a working demo into validated pilots. Use of funds:</p>
-        <ul>
-          <li>Ship the OPC-UA / MQTT and IoT waste-sensor connectors for live plant data.</li>
-          <li>Run design-partner pilots on real assets in Egypt and the GCC.</li>
-          <li>Replace the simulation-grade classifiers with models trained on real labelled plant data.</li>
-        </ul>
-        <p style="margin-top:var(--s-4)">Get in touch for the round details, the full deck, and a walkthrough on your own use case.</p>
-        <div class="row gap-3 cta-print" style="margin-top:var(--s-5); flex-wrap:wrap">
-          <a class="btn btn-primary" href="/dashboard">See the live demo →</a>
-          <a class="btn btn-ghost" href="/#contact">Talk to us</a>
-        </div>
-      </div>
-
-      <p class="note" style="text-align:center">All in-product metrics are simulated projections; real-world validation is the next milestone. Market figures are cited in <a href="https://github.com/yehiasamir27/powersim-ai/blob/main/docs/MARKET_RESEARCH.md" class="text-cyan">docs/MARKET_RESEARCH.md</a>.</p>
     </div>
-  </div>
 
-  <script src="/static/assets/app.js"></script>
+    <section class="block">
+      <h2>Problem</h2>
+      <p>A power failure can stop trains on a whole line. Maintenance often comes too late, and worn equipment quietly wastes energy.</p>
+    </section>
+
+    <section class="block">
+      <h2>Solution</h2>
+      <p>A digital twin copies each asset in real time. An AI agent senses, thinks and acts every 2 seconds, and explains every decision in plain words.</p>
+    </section>
+
+    <section class="block">
+      <h2>How it works</h2>
+      <div class="diagram"><img src="/static/assets/agent-loop.svg" alt="Rail assets feed a digital twin. The AI agent senses, thinks and acts, then repeats every 2 seconds." /></div>
+    </section>
+
+    <section class="block">
+      <h2>What it does</h2>
+      <ul>
+        <li>Health score and remaining life for 4 rail assets.</li>
+        <li>Opens work orders before a breakdown.</li>
+        <li>Sorts waste, checks the rules and suggests reuse or recycling.</li>
+        <li>Measures energy lost, CO₂ and money saved.</li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <h2>Rail relevance</h2>
+      <ul>
+        <li><span><b>Smart signalling and electrification:</b> monitors the traction transformer, traction motor, cooling and signalling backup power.</span></li>
+        <li><span><b>Grid integration and stability:</b> tracks power factor, voltage drift and energy lost across the network.</span></li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <h2>Engineering</h2>
+      <p>Python and FastAPI backend with a live WebSocket stream. Optional local LLM through Ollama. A browser version of the engine powers the public demo. 91 automated tests, GitHub Actions CI and Docker.</p>
+    </section>
+
+    <section class="block">
+      <h2>Research</h2>
+      <div>
+        <p style="margin-bottom:var(--s-3)">Based on an AASTMT study (2026) of 120 professionals in Egypt's energy, manufacturing and logistics sectors.</p>
+        <div class="nums">
+          <div class="num"><div class="v">β = 0.761</div><div class="k">AI adoption predicts energy efficiency (R² 0.579)</div></div>
+          <div class="num"><div class="v">β = 0.636</div><div class="k">AI adoption predicts sustainability (R² 0.404)</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Next steps</h2>
+      <ul>
+        <li>Connect real data with OPC UA and MQTT.</li>
+        <li>Run a pilot in a real train depot.</li>
+        <li>Train the models on real labelled data.</li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <h2>Team</h2>
+      <div class="people">
+        <div><b>Yehia Samir</b><span>Computer Engineering, AASTMT Alexandria (2025). Built the software.</span></div>
+        <div><b>Khaled Mohamed</b><span>Oil and Gas Supply Chain Management Engineering, AASTMT. Led the research.</span></div>
+      </div>
+    </section>
+
+    <p class="foot">All demo data is simulated. Independent student project, not affiliated with or endorsed by Siemens.</p>
+  </main>
 </body>
 </html>

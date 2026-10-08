@@ -57,13 +57,13 @@
   };
 
   const ASSET_CONFIGS = [
-    { id: "T1", type: "transformer", name: "Main Transformer", rated: 1000, load: 0.72, rate: 0.020, crit: 40, fail: 12,
-      s: { nt: 58, ft: 115, nv: 0.8, fv: 6.0, no: 5.5, fo: 1.8, np: 0.97, fp: 0.80, volt: 11000, cur: 52, tn: 1.0, vn: 0.12 } },
-    { id: "M1", type: "motor", name: "Induction Motor A", rated: 500, load: 0.78, rate: 0.032, crit: 35, fail: 8,
-      s: { nt: 62, ft: 120, nv: 1.6, fv: 9.0, no: 4.5, fo: 1.2, np: 0.90, fp: 0.72, volt: 415, cur: 720, tn: 1.4, vn: 0.22 } },
-    { id: "G1", type: "generator", name: "Backup Generator", rated: 750, load: 0.55, rate: 0.026, crit: 38, fail: 10,
+    { id: "T1", type: "transformer", name: "Traction Transformer", rated: 1000, load: 0.72, rate: 0.020, crit: 40, fail: 12,
+      s: { nt: 58, ft: 115, nv: 0.8, fv: 6.0, no: 5.5, fo: 1.8, np: 0.97, fp: 0.80, volt: 25000, cur: 40, tn: 1.0, vn: 0.12 } },
+    { id: "M1", type: "motor", name: "Traction Motor", rated: 500, load: 0.78, rate: 0.032, crit: 35, fail: 8,
+      s: { nt: 62, ft: 120, nv: 1.6, fv: 9.0, no: 4.5, fo: 1.2, np: 0.90, fp: 0.72, volt: 1500, cur: 215, tn: 1.4, vn: 0.22 } },
+    { id: "G1", type: "generator", name: "Signalling Backup Generator", rated: 750, load: 0.55, rate: 0.026, crit: 38, fail: 10,
       s: { nt: 60, ft: 118, nv: 1.2, fv: 7.5, no: 5.0, fo: 1.5, np: 0.92, fp: 0.75, volt: 400, cur: 1082, tn: 1.3, vn: 0.18 } },
-    { id: "P1", type: "pump", name: "Coolant Pump", rated: 50, load: 0.82, rate: 0.040, crit: 30, fail: 6,
+    { id: "P1", type: "pump", name: "Transformer Cooling Pump", rated: 50, load: 0.82, rate: 0.040, crit: 30, fail: 6,
       s: { nt: 45, ft: 95, nv: 2.0, fv: 10.0, no: 4.0, fo: 1.0, np: 0.88, fp: 0.70, volt: 415, cur: 85, tn: 1.6, vn: 0.28 } },
   ];
 
@@ -195,23 +195,23 @@
   const HAZ_THRESHOLD = 0.32;
   const DIVERSION = { reduce: 0.30, reuse: 0.95, recycle: 0.85, recover: 0.60, dispose: 0.0 };
   const COMPLIANCE_RULES = {
-    "H-01": { d: "Hazardous waste must be segregated at source before disposal", s: "non_compliant" },
-    "H-02": { d: "Hazardous fraction detected in a non-hazardous stream (mixed waste)", s: "non_compliant" },
-    "C-01": { d: "Contamination above the recyclate acceptance threshold (60%)", s: "non_compliant" },
-    "C-02": { d: "Elevated contamination (>40%) — recyclate value materially reduced", s: "advisory" },
-    "M-01": { d: "Moisture above 55% — impairs recycling/recovery and risks leachate", s: "advisory" },
-    "W-01": { d: "Consignment exceeds 500 kg — regulatory manifest/tracking required", s: "advisory" },
+    "H-01": { d: "Hazardous waste must be separated before disposal", s: "non_compliant" },
+    "H-02": { d: "Hazardous material is mixed into normal waste", s: "non_compliant" },
+    "C-01": { d: "Too contaminated to recycle (over 60%)", s: "non_compliant" },
+    "C-02": { d: "High contamination (over 40%) lowers recycling value", s: "advisory" },
+    "M-01": { d: "Too wet (over 55%) to recycle or recover well", s: "advisory" },
+    "W-01": { d: "Over 500 kg, so an official waste record is required", s: "advisory" },
   };
   const WASTE_SOURCES = [
-    { id: "WT1", name: "Transformer Bay", asset: "T1", base: 85, p: 0.18, cont: 22, moist: 14,
+    { id: "WT1", name: "Traction Substation", asset: "T1", base: 85, p: 0.18, cont: 22, moist: 14,
       comp: { metal: 0.18, plastic: 0.07, organic: 0.02, chemical: 0.55, inert: 0.18 } },
     { id: "WM1", name: "Motor Workshop", asset: "M1", base: 140, p: 0.38, cont: 18, moist: 10,
       comp: { metal: 0.62, plastic: 0.12, organic: 0.03, chemical: 0.15, inert: 0.08 } },
-    { id: "WG1", name: "Generator Hall", asset: "G1", base: 95, p: 0.30, cont: 25, moist: 16,
+    { id: "WG1", name: "Signalling Power Room", asset: "G1", base: 95, p: 0.30, cont: 25, moist: 16,
       comp: { metal: 0.34, plastic: 0.14, organic: 0.06, chemical: 0.24, inert: 0.22 } },
-    { id: "WP1", name: "Coolant Loop", asset: "P1", base: 70, p: 0.32, cont: 30, moist: 38,
+    { id: "WP1", name: "Cooling System", asset: "P1", base: 70, p: 0.32, cont: 30, moist: 38,
       comp: { metal: 0.17, plastic: 0.34, organic: 0.12, chemical: 0.14, inert: 0.23 } },
-    { id: "WPL1", name: "Process Line A", asset: null, base: 320, p: 0.45, cont: 20, moist: 32,
+    { id: "WPL1", name: "Train Depot", asset: null, base: 320, p: 0.45, cont: 20, moist: 32,
       comp: { metal: 0.10, plastic: 0.34, organic: 0.40, chemical: 0.04, inert: 0.12 } },
   ];
 
@@ -248,7 +248,7 @@
         const mean = h.w.reduce((a, b) => a + b, 0) / h.w.length;
         const sd = Math.sqrt(h.w.reduce((a, b) => a + (b - mean) ** 2, 0) / h.w.length);
         const spike = sd > 1e-6 ? (weight - mean) / sd > 2.2 : weight > mean * 1.5;
-        if (spike) found.push(`Volume spike: ${weight.toFixed(0)} kg vs ${mean.toFixed(0)} kg rolling mean`);
+        if (spike) found.push(`Volume spike: ${weight.toFixed(0)} kg vs ${mean.toFixed(0)} kg usual`);
       }
       if (h.c.length >= 5) {
         let l1 = 0;
@@ -256,7 +256,7 @@
           const base = h.c.reduce((a, c) => a + c[k], 0) / h.c.length;
           l1 += Math.abs(comp[k] - base);
         });
-        if (l1 > 0.28) found.push(`Composition drift: L1 ${l1.toFixed(2)} vs rolling baseline`);
+        if (l1 > 0.28) found.push(`Composition drift: the mix changed by ${l1.toFixed(2)}`);
       }
       return found;
     }
@@ -278,16 +278,16 @@
     }
     static recommend(category, contamination, severity, anomalies) {
       if (category === "hazardous")
-        return ["recover", "Hazardous stream — route to licensed treatment for material/energy recovery; segregate at source before transport."];
+        return ["recover", "Hazardous. Send to licensed treatment to recover material or energy."];
       if (category === "reusable_byproduct" && contamination <= 40)
-        return ["reuse", "Low-contamination by-product — suitable for direct reuse as secondary feedstock."];
+        return ["reuse", "Clean byproduct. Reuse it as raw material."];
       if (category === "recyclable") {
-        if (contamination <= 40) return ["recycle", "Clean recyclable fraction — send to material recovery."];
-        return ["reduce", "Recyclable but contaminated — fix upstream segregation to restore recyclate value rather than landfilling."];
+        if (contamination <= 40) return ["recycle", "Clean recyclable material. Send it to recycling."];
+        return ["reduce", "Too dirty to recycle. Fix sorting at the source."];
       }
       if (anomalies.length || severity > 55)
-        return ["reduce", "Abnormal general-waste pattern — investigate upstream process to reduce generation at source."];
-      return ["dispose", "Mixed general waste with no viable recovery route — compliant disposal."];
+        return ["reduce", "Unusual amount of waste. Check the process that made it."];
+      return ["dispose", "Mixed waste with no reuse option. Dispose of it safely."];
     }
     tick(assetHealth) {
       this.tickCount++;
@@ -371,13 +371,13 @@
   class Agent {
     detectFactors(a, t) {
       const f = [];
-      if (a.health <= RULE_T.degraded_health) f.push(`Health at ${a.health.toFixed(1)}% (degraded)`);
-      if (t.temperature >= RULE_T.high_temperature) f.push(`High temperature ${t.temperature.toFixed(1)} C`);
-      if (t.vibration >= RULE_T.high_vibration) f.push(`Excessive vibration ${t.vibration.toFixed(2)} mm/s`);
-      if (t.bearing_wear >= RULE_T.high_bearing_wear) f.push(`Bearing wear ${t.bearing_wear.toFixed(1)}%`);
-      if (t.oil_pressure <= RULE_T.low_oil_pressure) f.push(`Low oil pressure ${t.oil_pressure.toFixed(2)} bar`);
-      if (t.rul_hours > 0 && t.rul_hours <= RULE_T.low_rul_hours) f.push(`Short RUL ${t.rul_hours.toFixed(1)} h`);
-      if (a.failure_mode) f.push(`Active fault: ${a.failure_mode}`);
+      if (a.health <= RULE_T.degraded_health) f.push(`health is low at ${Math.round(a.health)}%`);
+      if (t.temperature >= RULE_T.high_temperature) f.push(`running hot at ${t.temperature.toFixed(1)} °C`);
+      if (t.vibration >= RULE_T.high_vibration) f.push(`high vibration at ${t.vibration.toFixed(2)} mm/s`);
+      if (t.bearing_wear >= RULE_T.high_bearing_wear) f.push(`bearing wear at ${Math.round(t.bearing_wear)}%`);
+      if (t.oil_pressure <= RULE_T.low_oil_pressure) f.push(`low oil pressure at ${t.oil_pressure.toFixed(2)} bar`);
+      if (t.rul_hours > 0 && t.rul_hours <= RULE_T.low_rul_hours) f.push(`short remaining life (RUL ${Math.round(t.rul_hours)} h)`);
+      if (a.failure_mode) f.push(`active fault: ${a.failure_mode.replace("_", " ")}`);
       return f;
     }
     evaluate(a, t) {
@@ -394,21 +394,21 @@
       if (a.failure_mode) risk += 20;
 
       let dt, pr, act;
-      if (risk >= 70) { dt = "emergency"; pr = "critical"; act = "Dispatch maintenance team immediately; prepare controlled shutdown"; }
-      else if (risk >= 50) { dt = "repair"; pr = "high"; act = "Schedule corrective maintenance within 4 hours"; }
-      else if (risk >= 30) { dt = "maintain"; pr = "medium"; act = "Schedule preventive maintenance within 24 hours"; }
-      else if (risk >= 15) { dt = "inspect"; pr = "low"; act = "Schedule inspection at next maintenance window"; }
-      else { dt = "monitor"; pr = "low"; act = "Continue normal monitoring"; }
+      if (risk >= 70) { dt = "emergency"; pr = "critical"; act = "Send a team now and prepare a safe shutdown"; }
+      else if (risk >= 50) { dt = "repair"; pr = "high"; act = "Repair within 4 hours"; }
+      else if (risk >= 30) { dt = "maintain"; pr = "medium"; act = "Service within 24 hours"; }
+      else if (risk >= 15) { dt = "inspect"; pr = "low"; act = "Inspect at the next planned visit"; }
+      else { dt = "monitor"; pr = "low"; act = "Keep watching"; }
 
       const trail = [
-        `Sensed ${a.name}: ${t.temperature.toFixed(1)} C, ${t.vibration.toFixed(2)} mm/s, bearing ${t.bearing_wear.toFixed(1)}%, health ${a.health.toFixed(1)}%, RUL ${t.rul_hours.toFixed(1)} h.`,
-        factors.length ? "Flagged: " + factors.join("; ") + "." : "No thresholds breached.",
-        `Risk score ${risk.toFixed(0)}/100 → ${dt.toUpperCase()}.`,
-        `Recommended: ${act}.`,
+        `Read ${a.name}: ${t.temperature.toFixed(1)} °C, vibration ${t.vibration.toFixed(2)} mm/s, health ${Math.round(a.health)}%, remaining life ${Math.round(t.rul_hours)} h.`,
+        factors.length ? "Warning signs: " + factors.join("; ") + "." : "No warning signs.",
+        `Risk ${risk.toFixed(0)} of 100, so the decision is ${dt.toUpperCase()}.`,
+        `Action: ${act}.`,
       ];
       return {
         decision_type: dt, confidence: Math.min(95, 55 + risk * 0.4),
-        description: `${a.asset_id} (${a.name}) — ${a.operating_state.toUpperCase()}`,
+        description: `${a.asset_id} ${a.name}`,
         recommended_action: act, reasoning: trail[1], priority: pr,
         source: "rules", reasoning_trail: trail, detected_factors: factors,
         rul_hours: t.rul_hours, requires_maintenance: dt !== "monitor",
@@ -416,31 +416,40 @@
     }
   }
 
+  const WASTE_LABELS = { monitor: "WATCH", inspect: "CHECK", treat: "REVIEW", segregate: "SEPARATE", escalate: "ALERT" };
+  const PLAN_VERBS = { reduce: "fix the process that made it", reuse: "reuse it", recycle: "send it to recycling", recover: "send it to licensed treatment", dispose: "dispose of it safely" };
+
   class WasteAgentJs {
     evaluate(ev) {
       const factors = [];
       let risk = 0;
-      if (ev.compliance_status === "non_compliant") { risk += 40; factors.push("Non-compliant consignment"); }
-      else if (ev.compliance_status === "advisory") { risk += 15; factors.push("Compliance advisory raised"); }
+      if (ev.compliance_status === "non_compliant") { risk += 40; factors.push("breaks a waste rule"); }
+      else if (ev.compliance_status === "advisory") { risk += 15; factors.push("rule warning"); }
       risk += ev.severity * 0.4;
-      if (ev.category === "hazardous") { risk += 15; factors.push("Hazardous classification"); }
-      if (ev.contamination_pct > 60) factors.push(`Contamination ${ev.contamination_pct.toFixed(0)}%`);
-      ev.anomalies.forEach((a) => { risk += 12; factors.push(a); });
+      if (ev.category === "hazardous") { risk += 15; factors.push("hazardous material"); }
+      if (ev.contamination_pct > 60) factors.push(`contamination at ${ev.contamination_pct.toFixed(0)}%`);
+      ev.anomalies.forEach((a) => { risk += 12; factors.push(a.charAt(0).toLowerCase() + a.slice(1)); });
       risk = Math.min(100, risk);
 
       let dt, pr, act;
-      if (risk >= 70) { dt = "escalate"; pr = "critical"; act = "Hold consignment and notify EHS — regulatory reporting exposure."; }
-      else if (risk >= 50) { dt = "segregate"; pr = "high"; act = "Segregate at source before disposal, then re-classify."; }
-      else if (risk >= 32) { dt = "treat"; pr = "medium"; act = "Route to licensed treatment / recovery."; }
-      else if (risk >= 16) { dt = "inspect"; pr = "low"; act = "Sample and verify composition at next collection."; }
-      else { dt = "monitor"; pr = "low"; act = "No action required — continue monitoring."; }
+      if (risk >= 70) { dt = "escalate"; pr = "critical"; act = "Hold the load and tell the safety team."; }
+      else if (risk >= 50) { dt = "segregate"; pr = "high"; act = "Separate it at the source, then check it again."; }
+      else if (risk >= 32) { dt = "treat"; pr = "medium"; act = `Review the load, then ${PLAN_VERBS[ev.recommended_action]}.`; }
+      else if (risk >= 16) { dt = "inspect"; pr = "low"; act = "Check a sample at the next pickup."; }
+      else { dt = "monitor"; pr = "low"; act = "No action needed."; }
 
-      const rulesTxt = ev._rules && ev._rules.length ? ev._rules.join(", ") : "none";
+      const cat = ev.category.replace("_", " ");
+      let line2 = "No rule broken and the mix looks normal.";
+      if (factors.length) {
+        line2 = "Warning signs: " + factors.join("; ") + ".";
+        const rules = (ev._rules || []).map((c) => COMPLIANCE_RULES[c].d.toLowerCase());
+        if (rules.length) line2 += " Rule: " + rules.join("; ") + ".";
+      }
       const trail = [
-        `Detected ${ev.weight_kg.toFixed(0)} kg ${ev.category.replace("_", " ")} waste from ${ev.source_name} (${ev.source_id}) — contamination ${ev.contamination_pct.toFixed(0)}%, moisture ${ev.moisture_pct.toFixed(0)}%, classified with ${ev.classification_confidence.toFixed(0)}% confidence.`,
-        factors.length ? "Flagged: " + factors.join("; ") + `. Rules fired: ${rulesTxt}.` : "No compliance rules triggered; composition within baseline.",
-        `Risk score ${risk.toFixed(0)}/100 → ${dt.toUpperCase()}.`,
-        `4R recommendation: ${ev.recommended_action.toUpperCase()} — ${ev.action_rationale} (≈${ev.diverted_kg.toFixed(0)} kg diverted from landfill).`,
+        `Found ${ev.weight_kg.toFixed(0)} kg of ${cat} waste at ${ev.source_name}. Contamination ${ev.contamination_pct.toFixed(0)}%, moisture ${ev.moisture_pct.toFixed(0)}%, confidence ${ev.classification_confidence.toFixed(0)}%.`,
+        line2,
+        `Risk ${risk.toFixed(0)} of 100, so the decision is ${WASTE_LABELS[dt]}.`,
+        `Best option: ${ev.recommended_action.toUpperCase()}. ${ev.action_rationale} About ${ev.diverted_kg.toFixed(0)} kg kept out of landfill.`,
       ];
       return { decision_type: dt, priority: pr, source: "rules", recommended_action: act, reasoning_trail: trail, risk_score: risk };
     }
@@ -592,7 +601,7 @@
       });
       return {
         type: "agent", timestamp: new Date().toISOString(), decisions: this.decisions,
-        events, agent_status: { enabled: false, available: false, model: "rule-engine (browser)", url: "local", last_mode: "rules" },
+        events, agent_status: { enabled: false, available: false, model: "rule engine in the browser", url: "local", last_mode: "rules" },
         fleet_summary: this.fleetSummary(),
       };
     }
@@ -604,12 +613,12 @@
     }
     fleetSummary() {
       const ds = Object.values(this.decisions);
-      if (!ds.length) return "Agent initialising — awaiting first telemetry.";
+      if (!ds.length) return "The agent is starting. Waiting for the first readings.";
       const need = ds.filter((d) => d.decision_type !== "monitor");
-      if (!need.length) return `Fleet nominal — all ${ds.length} assets within normal parameters. Agent monitoring continuously.`;
+      if (!need.length) return `All ${ds.length} assets are healthy. The agent keeps watching.`;
       const rank = { emergency: 4, repair: 3, maintain: 2, inspect: 1, monitor: 0 };
       const worst = ds.reduce((m, d) => (rank[d.decision_type] > rank[m.decision_type] ? d : m));
-      return `${need.length} of ${ds.length} assets need attention; highest priority: ${worst.decision_type.toUpperCase()} on ${worst.description}.`;
+      return `${need.length} of ${ds.length} assets need attention. Top priority: ${worst.decision_type.toUpperCase()} on ${worst.description}.`;
     }
     queueStats() {
       return { total_active: this.queue.length, pending: this.queue.length, in_progress: 0,
@@ -633,11 +642,11 @@
     }
     getImpact() {
       return { snapshot: this.impact.snapshot(), methodology: {
-        disclaimer: "All figures are simulated projections from the browser demo. No real-world validation is implied. Replace the assumptions with your own line economics.",
+        disclaimer: "All figures are simulated projections from the browser demo. No real world validation is implied. Replace the assumptions with your own line economics.",
         assumptions: this.impact.a,
         formulas: {
-          downtime_cost_avoided_usd: "failures_prevented x (unplanned_downtime_hours_per_failure - planned_maintenance_hours) x downtime_cost_per_hour.",
-          energy_wasted_kwh: "Sum over ticks of rated_kW x load_fraction x (nominal_efficiency - current_efficiency) / nominal_efficiency.",
+          downtime_cost_avoided_usd: "failures_prevented x (unplanned_downtime_hours_per_failure minus planned_maintenance_hours) x downtime_cost_per_hour.",
+          energy_wasted_kwh: "Sum over ticks of rated_kW x load_fraction x (nominal_efficiency minus current_efficiency) / nominal_efficiency.",
           waste_diverted_kg: "Sum over waste events of weight_kg x the diversion rate of the recommended 4R action.",
           disposal_cost_avoided_usd: "(waste_diverted_kg / 1000) x disposal_cost_per_tonne",
           compliance_value_usd: "compliance_incidents_caught x compliance_penalty_avoided_usd",
