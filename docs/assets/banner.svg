@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-label="PowerSim AI: an AI agent that keeps railway power assets healthy">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1b3f"/>
+      <stop offset="1" stop-color="#132f7a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="78%" cy="35%" r="55%">
+      <stop offset="0" stop-color="#4b7dff" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#4b7dff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pulse" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4b7dff"/>
+      <stop offset="1" stop-color="#22d39a"/>
+    </linearGradient>
+    <style>
+      .wire { fill: none; stroke: #7f9bdc; stroke-width: 1.5; opacity: 0.7; }
+      .beat { fill: none; stroke: url(#pulse); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+              stroke-dasharray: 160 900; animation: run 3.2s linear infinite; }
+      .rail { stroke: #9fb3e6; stroke-width: 2; opacity: 0.8; }
+      .sleeper { stroke: #5d76b5; stroke-width: 3; opacity: 0.55; }
+      .mast { stroke: #9fb3e6; stroke-width: 3; }
+      .chip { fill: rgba(255,255,255,0.08); stroke: rgba(255,255,255,0.22); }
+      .chiptxt { font-size: 15px; font-weight: 600; fill: #dbe6ff; }
+      @keyframes run { from { stroke-dashoffset: 1060; } to { stroke-dashoffset: 0; } }
+    </style>
+  </defs>
+
+  <rect width="1280" height="400" rx="28" fill="url(#bg)"/>
+  <rect width="1280" height="400" rx="28" fill="url(#glow)"/>
+
+  <!-- rail line in perspective (right side) -->
+  <g>
+    <line class="rail" x1="760" y1="400" x2="1010" y2="215"/>
+    <line class="rail" x1="1180" y1="400" x2="1050" y2="215"/>
+    <line class="sleeper" x1="790" y1="378" x2="1154" y2="378"/>
+    <line class="sleeper" x1="836" y1="344" x2="1130" y2="344"/>
+    <line class="sleeper" x1="876" y1="314" x2="1110" y2="314"/>
+    <line class="sleeper" x1="910" y1="289" x2="1092" y2="289"/>
+    <line class="sleeper" x1="938" y1="268" x2="1078" y2="268"/>
+    <line class="sleeper" x1="961" y1="251" x2="1066" y2="251"/>
+    <line class="sleeper" x1="980" y1="237" x2="1058" y2="237"/>
+    <!-- masts -->
+    <line class="mast" x1="1215" y1="400" x2="1215" y2="78"/>
+    <line class="mast" x1="1215" y1="96" x2="1110" y2="96"/>
+    <line class="mast" x1="1128" y1="300" x2="1128" y2="140"/>
+    <line class="mast" x1="1128" y1="152" x2="1068" y2="152"/>
+    <line class="mast" x1="1083" y1="236" x2="1083" y2="178"/>
+    <line class="mast" x1="1083" y1="184" x2="1050" y2="184"/>
+    <!-- contact wire -->
+    <path class="wire" d="M1110 104 Q1090 125 1068 160 Q1058 172 1050 190"/>
+    <path class="wire" d="M760 104 L1110 104"/>
+  </g>
+
+  <!-- monitoring pulse along the overhead line -->
+  <path class="wire" d="M640 104 L1110 104"/>
+  <path class="beat" d="M640 104 L760 104 L790 104 L805 70 L822 140 L838 84 L852 104 L1110 104"/>
+
+  <!-- logo + text -->
+  <g transform="translate(76 92)">
+    <rect width="58" height="58" rx="15" fill="#1f5eff"/>
+    <path d="M32 9 15 33h11l-3 17 18-25H30z" fill="#ffffff"/>
+  </g>
+  <text x="152" y="138" font-size="46" font-weight="800" fill="#ffffff" letter-spacing="-1">PowerSim AI</text>
+
+  <text x="76" y="212" font-size="30" font-weight="700" fill="#ffffff" letter-spacing="-0.5">An AI agent that keeps</text>
+  <text x="76" y="250" font-size="30" font-weight="700" fill="#8fb0ff" letter-spacing="-0.5">railway power assets healthy.</text>
+
+  <g transform="translate(76 292)">
+    <rect class="chip" width="138" height="36" rx="18"/>
+    <text x="69" y="23" text-anchor="middle" class="chiptxt">Digital twin</text>
+    <rect class="chip" x="150" width="152" height="36" rx="18"/>
+    <text x="226" y="23" text-anchor="middle" class="chiptxt">Explainable AI</text>
+    <rect class="chip" x="314" width="196" height="36" rx="18"/>
+    <text x="412" y="23" text-anchor="middle" class="chiptxt">Waste and compliance</text>
+    <rect class="chip" x="522" width="150" height="36" rx="18"/>
+    <text x="597" y="23" text-anchor="middle" class="chiptxt">Grid stability</text>
+  </g>
+</svg>

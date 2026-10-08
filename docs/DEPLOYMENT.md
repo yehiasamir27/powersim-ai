@@ -67,8 +67,8 @@ export VERCEL_PROJECT_ID=...
 vercel deploy --prod --yes
 ```
 
-Production lands on the project's auto-assigned `*.vercel.app` alias. `vercel
-deploy` prints the URL on stdout — put it at the top of the README.
+Production lands on the project's auto-assigned alias. The live demo is at
+**https://powersim-ai.vercel.app**.
 
 ### Configuration
 

@@ -37,3 +37,7 @@ ngrok.zip
 # Third-party stock media — do NOT commit (replace with owned/licensed assets).
 # The original shutterstock_*.webp is likely unlicensed; the app no longer uses it.
 static/assets/shutterstock_*.webp
+
+.vercel
+.env*
+!.env.example
