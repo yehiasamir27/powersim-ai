@@ -48,19 +48,6 @@ Open the dashboard, press **Break the traction motor**, and watch the agent reac
   <img src="docs/assets/dashboard.png" alt="PowerSim AI live dashboard" width="100%">
 </p>
 
-## Built for modern rail
-
-PowerSim AI connects directly to two sessions at the **Siemens Talk Students' Summit 2026**
-(15 October, Bibliotheca Alexandrina, Alexandria).
-
-| Summit session | How PowerSim AI connects |
-|---|---|
-| **Modern Railway Infrastructure:** Smart Signalling and Electrification | Monitors the traction transformer, traction motor, cooling pump and the backup power that keeps signalling safe. Predicts failures before they stop trains. |
-| **Renewable Energy Markets:** Grid Integration and Stability | Tracks power factor, voltage drift and energy lost to worn equipment. Rolls everything into one sustainability score. |
-
-> AASTMT is an academic partner of the summit. PowerSim AI is an independent student project
-> and is not affiliated with or endorsed by Siemens.
-
 ## Backed by research
 
 Built on an AASTMT study (2026) of **120 professionals** in Egypt's energy, manufacturing and
