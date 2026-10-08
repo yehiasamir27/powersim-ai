@@ -74,32 +74,28 @@ class TelemetrySource(ABC):
 PLANNED_INTEGRATIONS: tuple[IntegrationInfo, ...] = (
     IntegrationInfo(
         key="simulator",
-        name="Digital-Twin Simulator",
+        name="Digital Twin Simulator",
         protocol="in-process",
         status="available",
-        description="Physics-based digital twin generating live asset telemetry.",
+        description="Physics based digital twin that streams live asset data.",
         standards=(),
     ),
     IntegrationInfo(
         key="opcua",
-        name="OPC-UA",
-        protocol="OPC-UA",
+        name="OPC UA",
+        protocol="OPC UA",
         status="planned",
         description=(
-            "Vendor-independent OPC-UA client for PLCs, SCADA and edge gateways — "
-            "the de-facto industrial interoperability standard."
+            "Connects to PLCs, SCADA and edge gateways using the standard industrial protocol."
         ),
-        standards=("OPC-UA", "IEC 62541"),
+        standards=("OPC UA", "IEC 62541"),
     ),
     IntegrationInfo(
         key="mqtt",
-        name="MQTT / Sparkplug B",
+        name="MQTT and Sparkplug B",
         protocol="MQTT",
         status="planned",
-        description=(
-            "Lightweight publish/subscribe transport with Sparkplug B payload "
-            "modeling for edge-to-cloud sensor streaming."
-        ),
+        description=("Light messaging that streams sensor data from the edge to the cloud."),
         standards=("MQTT 5.0", "Sparkplug B"),
     ),
     IntegrationInfo(
@@ -107,7 +103,7 @@ PLANNED_INTEGRATIONS: tuple[IntegrationInfo, ...] = (
         name="Modbus TCP",
         protocol="Modbus",
         status="planned",
-        description="Bridge for legacy/brownfield field devices speaking Modbus.",
+        description="Reads older field devices that use Modbus.",
         standards=("Modbus TCP",),
     ),
     IntegrationInfo(
@@ -115,7 +111,7 @@ PLANNED_INTEGRATIONS: tuple[IntegrationInfo, ...] = (
         name="Process Historian (OSIsoft/AVEVA PI)",
         protocol="PI Web API",
         status="planned",
-        description="Backfill and cross-reference against existing plant historians.",
+        description="Loads past data from existing plant historians.",
         standards=("AVEVA PI", "ISA-95"),
     ),
     IntegrationInfo(
@@ -123,10 +119,7 @@ PLANNED_INTEGRATIONS: tuple[IntegrationInfo, ...] = (
         name="ISO 50001 Energy Reporting",
         protocol="export",
         status="planned",
-        description=(
-            "Auditable energy-performance export aligned with ISO 50001 / EU EED "
-            "reporting obligations."
-        ),
+        description=("Energy reports ready for ISO 50001 and EU energy rules."),
         standards=("ISO 50001", "EU EED 2023/1791"),
     ),
 )

@@ -88,8 +88,7 @@ class IoTWasteSensorSource(_PlannedWasteSource):
         protocol="MQTT / HTTP",
         status="planned",
         description=(
-            "Smart-bin fill level, load-cell weight, moisture and gas sensors on "
-            "skips, compactors and weighbridges."
+            "Smart bin fill level, weight, moisture and gas sensors on skips and weighbridges."
         ),
         standards=("MQTT 5.0", "LoRaWAN"),
     )
@@ -100,13 +99,10 @@ class SmartBinCameraSource(_PlannedWasteSource):
 
     info = IntegrationInfo(
         key="waste_vision",
-        name="RFID / Conveyor Vision",
+        name="RFID and Conveyor Cameras",
         protocol="RTSP / RFID",
         status="planned",
-        description=(
-            "Consignment identity via RFID plus conveyor/bin camera frames — the "
-            "input a production CNN visual-sorting model would classify."
-        ),
+        description=("RFID tags plus camera images that a trained vision model would sort."),
         standards=("ISO 18000-6C", "RTSP"),
     )
 
@@ -116,13 +112,10 @@ class ErpMesSource(_PlannedWasteSource):
 
     info = IntegrationInfo(
         key="waste_erp",
-        name="ERP / MES Context",
+        name="ERP and MES Data",
         protocol="REST / OData",
         status="planned",
-        description=(
-            "Production orders, batches, shifts and material inputs so waste is "
-            "attributable to a job and line."
-        ),
+        description=("Production orders and shifts, so waste links to the job that made it."),
         standards=("ISA-95", "OData"),
     )
 
@@ -132,13 +125,10 @@ class RegulatoryFeedSource(_PlannedWasteSource):
 
     info = IntegrationInfo(
         key="waste_regulatory",
-        name="Regulatory & Market Feeds",
+        name="Rules and Market Prices",
         protocol="REST",
         status="planned",
-        description=(
-            "Hazardous-waste manifest rules, permitted disposal routes and "
-            "secondary-material prices to drive 4R route optimisation."
-        ),
+        description=("Waste rules, allowed disposal routes and recycled material prices."),
         standards=("Basel Convention", "Egypt Law 202/2020"),
     )
 

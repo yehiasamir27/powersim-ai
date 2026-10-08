@@ -15,7 +15,7 @@ def test_catalog_has_available_simulator_and_planned_connectors():
     assert by_key["opcua"]["status"] == "planned"
     assert by_key["mqtt"]["status"] == "planned"
     # OPC-UA and MQTT/Sparkplug B are represented (table-stakes protocols).
-    assert "OPC-UA" in by_key["opcua"]["standards"]
+    assert "OPC UA" in by_key["opcua"]["standards"]
     assert "Sparkplug B" in by_key["mqtt"]["standards"]
 
 

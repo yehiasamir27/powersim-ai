@@ -184,19 +184,15 @@ class SimulationService:
     def _fleet_summary(self) -> str:
         decisions = self.latest_decisions
         if not decisions:
-            return "Agent initialising — awaiting first telemetry."
+            return "The agent is starting. Waiting for the first readings."
         rank = {"emergency": 4, "repair": 3, "maintain": 2, "inspect": 1, "monitor": 0}
         worst = max(decisions.values(), key=lambda d: rank.get(d["decision_type"], 0))
         action_needed = [d for d in decisions.values() if d["decision_type"] != "monitor"]
         if not action_needed:
-            return (
-                f"Fleet nominal — all {len(decisions)} assets within normal parameters. "
-                "Agent monitoring continuously."
-            )
+            return f"All {len(decisions)} assets are healthy. The agent keeps watching."
         return (
-            f"{len(action_needed)} of {len(decisions)} assets need attention; "
-            f"highest priority: {worst['decision_type'].upper()} on "
-            f"{worst['description']}."
+            f"{len(action_needed)} of {len(decisions)} assets need attention. "
+            f"Top priority: {worst['decision_type'].upper()} on {worst['description']}."
         )
 
     # -- interventions (API-facing) --------------------------------------

@@ -21,13 +21,10 @@ class MqttTelemetrySource(TelemetrySource):
 
     info = IntegrationInfo(
         key="mqtt",
-        name="MQTT / Sparkplug B",
+        name="MQTT and Sparkplug B",
         protocol="MQTT",
         status="planned",
-        description=(
-            "Publish/subscribe transport with Sparkplug B payload modeling for "
-            "edge-to-cloud sensor streaming."
-        ),
+        description=("Light messaging that streams sensor data from the edge to the cloud."),
         standards=("MQTT 5.0", "Sparkplug B"),
     )
 

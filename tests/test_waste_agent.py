@@ -40,7 +40,7 @@ def _event(**overrides) -> WasteEvent:
         "compliance_status": ComplianceStatus.COMPLIANT,
         "triggered_rules": [],
         "recommended_action": RecoveryAction.RECYCLE,
-        "action_rationale": "Clean recyclable fraction — send to material recovery.",
+        "action_rationale": "Clean recyclable material. Send it to recycling.",
         "diverted_kg": 102.0,
     }
     base.update(overrides)
@@ -72,7 +72,7 @@ def test_hazardous_non_compliant_event_escalates(agent):
     )
     assert decision.decision_type is WasteDecisionType.ESCALATE
     assert decision.priority == "critical"
-    assert any("Non-compliant" in f for f in decision.detected_factors)
+    assert any("breaks a waste rule" in f for f in decision.detected_factors)
 
 
 def test_advisory_event_lands_between_monitor_and_escalate(agent):
@@ -95,10 +95,10 @@ def test_anomalies_raise_risk(agent):
 def test_trail_is_legible_and_mentions_4r(agent):
     decision = agent.evaluate(_event())
     joined = " ".join(decision.reasoning_trail)
-    assert "Detected" in joined and "kg" in joined
-    assert "Risk score" in joined
+    assert "Found" in joined and "kg" in joined
+    assert "Risk" in joined and "of 100" in joined
     assert "RECYCLE" in joined  # 4R recommendation surfaced
-    assert "diverted from landfill" in joined
+    assert "kept out of landfill" in joined
 
 
 def test_decision_serialises_like_maintenance_decision(agent):

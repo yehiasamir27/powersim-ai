@@ -17,7 +17,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
-from simulator.waste_stream import ComplianceStatus, WasteCategory, WasteEvent
+from simulator.waste_stream import (
+    COMPLIANCE_RULES,
+    ComplianceStatus,
+    RecoveryAction,
+    WasteCategory,
+    WasteEvent,
+)
 
 
 class WasteDecisionType(Enum):
@@ -28,6 +34,25 @@ class WasteDecisionType(Enum):
     TREAT = "treat"  # route to licensed treatment/recovery
     SEGREGATE = "segregate"  # fix the stream at source before disposal
     ESCALATE = "escalate"  # regulatory exposure — notify EHS
+
+
+#: What each 4R plan means as a plain instruction.
+PLAN_VERBS: dict[RecoveryAction, str] = {
+    RecoveryAction.REDUCE: "fix the process that made it",
+    RecoveryAction.REUSE: "reuse it",
+    RecoveryAction.RECYCLE: "send it to recycling",
+    RecoveryAction.RECOVER: "send it to licensed treatment",
+    RecoveryAction.DISPOSE: "dispose of it safely",
+}
+
+#: Plain English words shown to people for each decision.
+DECISION_LABELS: dict[WasteDecisionType, str] = {
+    WasteDecisionType.MONITOR: "WATCH",
+    WasteDecisionType.INSPECT: "CHECK",
+    WasteDecisionType.TREAT: "REVIEW",
+    WasteDecisionType.SEGREGATE: "SEPARATE",
+    WasteDecisionType.ESCALATE: "ALERT",
+}
 
 
 @dataclass
@@ -75,71 +100,77 @@ class WasteAgent:
         factors: list[str] = []
         risk = 0.0
 
-        # Compliance carries the most weight — it is a legal exposure, not a preference.
+        # Breaking a waste rule carries the most weight: it is a legal risk, not a preference.
         if event.compliance_status is ComplianceStatus.NON_COMPLIANT:
             risk += 40.0
-            factors.append("Non-compliant consignment")
+            factors.append("breaks a waste rule")
         elif event.compliance_status is ComplianceStatus.ADVISORY:
             risk += 15.0
-            factors.append("Compliance advisory raised")
+            factors.append("rule warning")
 
         risk += event.severity * 0.40
         if event.category is WasteCategory.HAZARDOUS:
             risk += 15.0
-            factors.append("Hazardous classification")
+            factors.append("hazardous material")
         if event.contamination_pct > 60.0:
-            factors.append(f"Contamination {event.contamination_pct:.0f}%")
+            factors.append(f"contamination at {event.contamination_pct:.0f}%")
         for anomaly in event.anomalies:
             risk += 12.0
-            factors.append(anomaly)
+            factors.append(anomaly[0].lower() + anomaly[1:])
 
         risk = min(100.0, risk)
 
         if risk >= self.THRESHOLDS["escalate"]:
             dtype, priority = WasteDecisionType.ESCALATE, "critical"
-            action = "Hold consignment and notify EHS — regulatory reporting exposure."
+            action = "Hold the load and tell the safety team."
         elif risk >= self.THRESHOLDS["segregate"]:
             dtype, priority = WasteDecisionType.SEGREGATE, "high"
-            action = "Segregate at source before disposal, then re-classify."
+            action = "Separate it at the source, then check it again."
         elif risk >= self.THRESHOLDS["treat"]:
             dtype, priority = WasteDecisionType.TREAT, "medium"
-            action = "Route to licensed treatment / recovery."
+            # Follow the 4R plan, after a quick review, so the two never disagree.
+            action = f"Review the load, then {PLAN_VERBS[event.recommended_action]}."
         elif risk >= self.THRESHOLDS["inspect"]:
             dtype, priority = WasteDecisionType.INSPECT, "low"
-            action = "Sample and verify composition at next collection."
+            action = "Check a sample at the next pickup."
         else:
             dtype, priority = WasteDecisionType.MONITOR, "low"
-            action = "No action required — continue monitoring."
+            action = "No action needed."
 
-        rules_txt = ", ".join(event.triggered_rules) if event.triggered_rules else "none"
+        category = event.category.value.replace("_", " ")
         trail = [
             (
-                f"Detected {event.weight_kg:.0f} kg {event.category.value.replace('_', ' ')} "
-                f"waste from {event.source_name} ({event.source_id}) — contamination "
-                f"{event.contamination_pct:.0f}%, moisture {event.moisture_pct:.0f}%, "
-                f"classified with {event.classification_confidence:.0f}% confidence."
+                f"Found {event.weight_kg:.0f} kg of {category} waste at {event.source_name}. "
+                f"Contamination {event.contamination_pct:.0f}%, moisture "
+                f"{event.moisture_pct:.0f}%, confidence {event.classification_confidence:.0f}%."
             )
         ]
         if factors:
-            trail.append("Flagged: " + "; ".join(factors) + f". Rules fired: {rules_txt}.")
+            rules = [
+                COMPLIANCE_RULES[c].description.lower()
+                for c in event.triggered_rules
+                if c in COMPLIANCE_RULES
+            ]
+            line = "Warning signs: " + "; ".join(factors) + "."
+            if rules:
+                line += " Rule: " + "; ".join(rules) + "."
+            trail.append(line)
         else:
-            trail.append("No compliance rules triggered; composition within baseline.")
-        trail.append(f"Risk score {risk:.0f}/100 → {dtype.value.upper()}.")
+            trail.append("No rule broken and the mix looks normal.")
+        trail.append(f"Risk {risk:.0f} of 100, so the decision is {DECISION_LABELS[dtype]}.")
         trail.append(
-            f"4R recommendation: {event.recommended_action.value.upper()} — "
-            f"{event.action_rationale} (≈{event.diverted_kg:.0f} kg diverted from landfill)."
+            f"Best option: {event.recommended_action.value.upper()}. {event.action_rationale} "
+            f"About {event.diverted_kg:.0f} kg kept out of landfill."
         )
 
-        reasoning = (
-            f"{event.category.value.replace('_', ' ').title()} consignment scored "
-            f"{risk:.0f}/100"
-            + (f" on: {'; '.join(factors)}." if factors else " with no risk factors.")
+        reasoning = f"{category.capitalize()} waste scored {risk:.0f} of 100" + (
+            f" because of: {'; '.join(factors)}." if factors else " with no warning signs."
         )
 
         return WasteDecision(
             decision_type=dtype,
             confidence=min(96.0, 58.0 + risk * 0.38),
-            description=f"{event.source_id} ({event.source_name}) — {event.category.value}",
+            description=f"{event.source_id} {event.source_name} ({category})",
             recommended_action=action,
             reasoning=reasoning,
             priority=priority,

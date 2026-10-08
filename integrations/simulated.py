@@ -17,10 +17,10 @@ class SimulatedTelemetrySource(TelemetrySource):
 
     info = IntegrationInfo(
         key="simulator",
-        name="Digital-Twin Simulator",
+        name="Digital Twin Simulator",
         protocol="in-process",
         status="available",
-        description="Physics-based digital twin generating live asset telemetry.",
+        description="Physics based digital twin that streams live asset data.",
     )
 
     def __init__(self, power_system: PowerSystem) -> None:

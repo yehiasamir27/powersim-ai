@@ -288,7 +288,7 @@ class PowerSystem:
             AssetConfig(
                 asset_id="T1",
                 asset_type=AssetType.TRANSFORMER,
-                name="Main Transformer",
+                name="Traction Transformer",
                 rated_capacity=1000.0,
                 sensors=SensorProfile(
                     nominal_temp=58.0,
@@ -299,8 +299,8 @@ class PowerSystem:
                     failure_oil_pressure=1.8,
                     nominal_power_factor=0.97,
                     failure_power_factor=0.80,
-                    nominal_voltage=11000.0,
-                    nominal_current=52.0,
+                    nominal_voltage=25000.0,
+                    nominal_current=40.0,
                     temp_noise=1.0,
                     vibration_noise=0.12,
                 ),
@@ -314,7 +314,7 @@ class PowerSystem:
             AssetConfig(
                 asset_id="M1",
                 asset_type=AssetType.MOTOR,
-                name="Induction Motor A",
+                name="Traction Motor",
                 rated_capacity=500.0,
                 sensors=SensorProfile(
                     nominal_temp=62.0,
@@ -325,8 +325,8 @@ class PowerSystem:
                     failure_oil_pressure=1.2,
                     nominal_power_factor=0.90,
                     failure_power_factor=0.72,
-                    nominal_voltage=415.0,
-                    nominal_current=720.0,
+                    nominal_voltage=1500.0,
+                    nominal_current=215.0,
                     temp_noise=1.4,
                     vibration_noise=0.22,
                 ),
@@ -340,7 +340,7 @@ class PowerSystem:
             AssetConfig(
                 asset_id="G1",
                 asset_type=AssetType.GENERATOR,
-                name="Backup Generator",
+                name="Signalling Backup Generator",
                 rated_capacity=750.0,
                 sensors=SensorProfile(
                     nominal_temp=60.0,
@@ -366,7 +366,7 @@ class PowerSystem:
             AssetConfig(
                 asset_id="P1",
                 asset_type=AssetType.PUMP,
-                name="Coolant Pump",
+                name="Transformer Cooling Pump",
                 rated_capacity=50.0,
                 sensors=SensorProfile(
                     nominal_temp=45.0,

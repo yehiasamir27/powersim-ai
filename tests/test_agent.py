@@ -16,7 +16,7 @@ def _asset_state(asset_id="M1", health=100.0, state="normal", failure=None):
     return {
         "asset_id": asset_id,
         "asset_type": "motor",
-        "name": "Induction Motor A",
+        "name": "Traction Motor",
         "health": health,
         "operating_state": state,
         "total_operating_hours": 100.0,

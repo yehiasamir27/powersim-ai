@@ -22,11 +22,11 @@ class OpcUaTelemetrySource(TelemetrySource):
 
     info = IntegrationInfo(
         key="opcua",
-        name="OPC-UA",
-        protocol="OPC-UA",
+        name="OPC UA",
+        protocol="OPC UA",
         status="planned",
-        description=("Vendor-independent OPC-UA client for PLCs, SCADA and edge gateways."),
-        standards=("OPC-UA", "IEC 62541"),
+        description="Connects to PLCs, SCADA and edge gateways.",
+        standards=("OPC UA", "IEC 62541"),
     )
 
     def __init__(self, endpoint_url: str, node_map: dict[str, dict] | None = None) -> None:

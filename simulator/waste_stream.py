@@ -90,32 +90,32 @@ class ComplianceRule:
 COMPLIANCE_RULES: dict[str, ComplianceRule] = {
     "H-01": ComplianceRule(
         "H-01",
-        "Hazardous waste must be segregated at source before disposal",
+        "Hazardous waste must be separated before disposal",
         ComplianceStatus.NON_COMPLIANT,
     ),
     "H-02": ComplianceRule(
         "H-02",
-        "Hazardous fraction detected in a non-hazardous stream (mixed waste)",
+        "Hazardous material is mixed into normal waste",
         ComplianceStatus.NON_COMPLIANT,
     ),
     "C-01": ComplianceRule(
         "C-01",
-        "Contamination above the recyclate acceptance threshold (60%)",
+        "Too contaminated to recycle (over 60%)",
         ComplianceStatus.NON_COMPLIANT,
     ),
     "C-02": ComplianceRule(
         "C-02",
-        "Elevated contamination (>40%) — recyclate value materially reduced",
+        "High contamination (over 40%) lowers recycling value",
         ComplianceStatus.ADVISORY,
     ),
     "M-01": ComplianceRule(
         "M-01",
-        "Moisture above 55% — impairs recycling/recovery and risks leachate",
+        "Too wet (over 55%) to recycle or recover well",
         ComplianceStatus.ADVISORY,
     ),
     "W-01": ComplianceRule(
         "W-01",
-        "Consignment exceeds 500 kg — regulatory manifest/tracking required",
+        "Over 500 kg, so an official waste record is required",
         ComplianceStatus.ADVISORY,
     ),
 }
@@ -220,7 +220,7 @@ class WasteStreamSystem:
         profiles = [
             WasteSourceProfile(
                 source_id="WT1",
-                name="Transformer Bay",
+                name="Traction Substation",
                 asset_id="T1",
                 base_kg_per_event=85.0,
                 # Used insulating oil / solvents — genuinely hazardous-dominant,
@@ -254,7 +254,7 @@ class WasteStreamSystem:
             ),
             WasteSourceProfile(
                 source_id="WG1",
-                name="Generator Hall",
+                name="Signalling Power Room",
                 asset_id="G1",
                 base_kg_per_event=95.0,
                 # Filters, gaskets and some used oil — tips hazardous only as the
@@ -272,7 +272,7 @@ class WasteStreamSystem:
             ),
             WasteSourceProfile(
                 source_id="WP1",
-                name="Coolant Loop",
+                name="Cooling System",
                 asset_id="P1",
                 base_kg_per_event=70.0,
                 composition={
@@ -288,7 +288,7 @@ class WasteStreamSystem:
             ),
             WasteSourceProfile(
                 source_id="WPL1",
-                name="Process Line A",
+                name="Train Depot",
                 asset_id=None,
                 base_kg_per_event=320.0,
                 composition={
@@ -471,13 +471,13 @@ class WasteStreamSystem:
                 else weight > mean * self.VOLUME_FLAT_RATIO
             )
             if spike:
-                found.append(f"Volume spike: {weight:.0f} kg vs {mean:.0f} kg rolling mean")
+                found.append(f"Volume spike: {weight:.0f} kg vs {mean:.0f} kg usual")
         comps = self._composition_history.get(source_id)
         if comps and len(comps) >= 5:
             baseline = {k: float(np.mean([c[k] for c in comps])) for k in COMPOSITION_KEYS}
             l1 = sum(abs(composition[k] - baseline[k]) for k in COMPOSITION_KEYS)
             if l1 > self.DRIFT_L1_THRESHOLD:
-                found.append(f"Composition drift: L1 {l1:.2f} vs rolling baseline")
+                found.append(f"Composition drift: the mix changed by {l1:.2f}")
         return found
 
     @staticmethod
@@ -555,34 +555,31 @@ class WasteStreamSystem:
         if category is WasteCategory.HAZARDOUS:
             return (
                 RecoveryAction.RECOVER,
-                "Hazardous stream — route to licensed treatment for material/energy "
-                "recovery; segregate at source before transport.",
+                "Hazardous. Send to licensed treatment to recover material or energy.",
             )
         if category is WasteCategory.REUSABLE_BYPRODUCT and contamination_pct <= 40.0:
             return (
                 RecoveryAction.REUSE,
-                "Low-contamination by-product — suitable for direct reuse as secondary feedstock.",
+                "Clean byproduct. Reuse it as raw material.",
             )
         if category is WasteCategory.RECYCLABLE:
             if contamination_pct <= 40.0:
                 return (
                     RecoveryAction.RECYCLE,
-                    "Clean recyclable fraction — send to material recovery.",
+                    "Clean recyclable material. Send it to recycling.",
                 )
             return (
                 RecoveryAction.REDUCE,
-                "Recyclable but contaminated — fix upstream segregation to restore "
-                "recyclate value rather than landfilling.",
+                "Too dirty to recycle. Fix sorting at the source.",
             )
         if anomalies or severity > 55.0:
             return (
                 RecoveryAction.REDUCE,
-                "Abnormal general-waste pattern — investigate upstream process to "
-                "reduce generation at source.",
+                "Unusual amount of waste. Check the process that made it.",
             )
         return (
             RecoveryAction.DISPOSE,
-            "Mixed general waste with no viable recovery route — compliant disposal.",
+            "Mixed waste with no reuse option. Dispose of it safely.",
         )
 
     # -- reporting --------------------------------------------------------

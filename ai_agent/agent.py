@@ -314,10 +314,11 @@ Be concise and actionable."""
 
         reasoning = data.get("reasoning", "LLM analysis complete.")
         trail = [
-            f"Sensed {sense_data.asset_name}: {round(tel.get('temperature', 0), 1)} C, "
-            f"{round(tel.get('vibration', 0), 2)} mm/s, health {round(sense_data.health, 1)}%.",
-            f"LLM ({self.model}) diagnosis: {reasoning}",
-            f"Decision: {decision_type.value.upper()} — {data.get('recommended_action', '')}",
+            f"Read {sense_data.asset_name}: {round(tel.get('temperature', 0), 1)} °C, "
+            f"vibration {round(tel.get('vibration', 0), 2)} mm/s, "
+            f"health {round(sense_data.health)}%.",
+            f"Language model ({self.model}) says: {reasoning}",
+            f"Decision: {decision_type.value.upper()}. {data.get('recommended_action', '')}",
         ]
         requires = decision_type != DecisionType.MONITOR
         return AgentDecision(
@@ -351,19 +352,19 @@ Be concise and actionable."""
         tel = sense_data.telemetry
         factors: list[str] = []
         if sense_data.health <= t["degraded_health"]:
-            factors.append(f"Health at {round(sense_data.health, 1)}% (degraded)")
+            factors.append(f"health is low at {round(sense_data.health)}%")
         if tel.get("temperature", 0) >= t["high_temperature"]:
-            factors.append(f"High temperature {round(tel['temperature'], 1)} C")
+            factors.append(f"running hot at {round(tel['temperature'], 1)} °C")
         if tel.get("vibration", 0) >= t["high_vibration"]:
-            factors.append(f"Excessive vibration {round(tel['vibration'], 2)} mm/s")
+            factors.append(f"high vibration at {round(tel['vibration'], 2)} mm/s")
         if tel.get("bearing_wear", 0) >= t["high_bearing_wear"]:
-            factors.append(f"Bearing wear {round(tel['bearing_wear'], 1)}%")
+            factors.append(f"bearing wear at {round(tel['bearing_wear'])}%")
         if tel.get("oil_pressure", 99) <= t["low_oil_pressure"]:
-            factors.append(f"Low oil pressure {round(tel['oil_pressure'], 2)} bar")
+            factors.append(f"low oil pressure at {round(tel['oil_pressure'], 2)} bar")
         if 0 < tel.get("rul_hours", 1e9) <= t["low_rul_hours"]:
-            factors.append(f"Short RUL {round(tel['rul_hours'], 1)} h")
+            factors.append(f"short remaining life (RUL {round(tel['rul_hours'])} h)")
         if sense_data.failure_mode:
-            factors.append(f"Active fault: {sense_data.failure_mode}")
+            factors.append(f"active fault: {sense_data.failure_mode.replace('_', ' ')}")
         return factors
 
     def _think_with_rules(
@@ -396,45 +397,42 @@ Be concise and actionable."""
 
         if risk >= 70.0:
             dtype, priority = DecisionType.EMERGENCY, "critical"
-            action = "Dispatch maintenance team immediately; prepare controlled shutdown"
+            action = "Send a team now and prepare a safe shutdown"
         elif risk >= 50.0:
             dtype, priority = DecisionType.REPAIR, "high"
-            action = "Schedule corrective maintenance within 4 hours"
+            action = "Repair within 4 hours"
         elif risk >= 30.0:
             dtype, priority = DecisionType.MAINTAIN, "medium"
-            action = "Schedule preventive maintenance within 24 hours"
+            action = "Service within 24 hours"
         elif risk >= 15.0:
             dtype, priority = DecisionType.INSPECT, "low"
-            action = "Schedule inspection at next maintenance window"
+            action = "Inspect at the next planned visit"
         else:
             dtype, priority = DecisionType.MONITOR, "low"
-            action = "Continue normal monitoring"
+            action = "Keep watching"
 
         reasoning = (
-            "Rule engine flagged " + "; ".join(factors) + f". Risk score {risk:.0f}/100."
+            "Warning signs: " + "; ".join(factors) + f". Risk {risk:.0f} of 100."
             if factors
-            else "No significant risk factors; asset within normal parameters."
+            else "No warning signs. The asset is working normally."
         )
         rul = float(tel.get("rul_hours", 0.0))
         trail = [
-            f"Sensed {sense_data.asset_name}: {round(tel.get('temperature', 0), 1)} C, "
-            f"{round(tel.get('vibration', 0), 2)} mm/s, bearing {round(tel.get('bearing_wear', 0), 1)}%, "
-            f"health {round(sense_data.health, 1)}%, RUL {round(rul, 1)} h.",
+            f"Read {sense_data.asset_name}: {round(tel.get('temperature', 0), 1)} °C, "
+            f"vibration {round(tel.get('vibration', 0), 2)} mm/s, "
+            f"health {round(sense_data.health)}%, remaining life {round(rul)} h.",
         ]
         if factors:
-            trail.append("Flagged: " + "; ".join(factors) + ".")
+            trail.append("Warning signs: " + "; ".join(factors) + ".")
         else:
-            trail.append("No thresholds breached.")
-        trail.append(f"Risk score {risk:.0f}/100 → {dtype.value.upper()}.")
-        trail.append(f"Recommended: {action}.")
+            trail.append("No warning signs.")
+        trail.append(f"Risk {risk:.0f} of 100, so the decision is {dtype.value.upper()}.")
+        trail.append(f"Action: {action}.")
 
         return AgentDecision(
             decision_type=dtype,
             confidence=min(95.0, 55.0 + risk * 0.4),
-            description=(
-                f"{sense_data.asset_id} ({sense_data.asset_name}) — "
-                f"{sense_data.operating_state.upper()}"
-            ),
+            description=f"{sense_data.asset_id} {sense_data.asset_name}",
             recommended_action=action,
             reasoning=reasoning,
             strategic_recommendation=self._strategic_recommendation(sense_data, risk),
