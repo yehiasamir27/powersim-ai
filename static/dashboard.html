@@ -91,8 +91,14 @@
     .try { background: linear-gradient(135deg, var(--navy), #163a9c); color: #fff; border: 0; }
     .try h3 { color: #fff; }
     .try .panel-sub { color: #b8c8ef; }
-    .bigbtn { width: 100%; padding: 0.9em 1em; font-size: var(--fs-sm); background: #fff; color: var(--crit); border-radius: var(--r-md); font-weight: 750; }
-    .bigbtn:hover { background: #fff3f3; }
+    .breaks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); }
+    .brk { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 11px; background: #fff; border: 1px solid transparent; border-radius: var(--r-md); font: inherit; text-align: left; cursor: pointer; transition: background .15s, transform .15s; }
+    .brk:hover, .brk.hit { background: #fff3f3; }
+    .brk:active { transform: scale(0.98); }
+    .brk:focus-visible { outline: 3px solid #9db8ff; outline-offset: 2px; }
+    .brk-v { font-size: 0.66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #c23434; }
+    .brk-n { font-size: 0.84rem; font-weight: 750; color: var(--text-0); line-height: 1.25; }
+    .brk-f { font-size: 0.7rem; font-weight: 600; color: var(--text-1); margin-top: auto; }
     .try details { margin-top: var(--s-4); }
     .try summary { cursor: pointer; font-size: var(--fs-xs); font-weight: 650; color: #dbe6ff; }
     .ctl-row { display: flex; gap: var(--s-2); margin-top: var(--s-3); flex-wrap: wrap; }
@@ -232,17 +238,17 @@
       <!-- SIDE -->
       <div class="stack" style="gap:var(--s-5)">
         <div class="panel try" id="controls-panel">
-          <div class="panel-h"><div><h3>Try it</h3><div class="panel-sub">Cause a fault and watch the agent react</div></div></div>
-          <button class="btn bigbtn" id="btn-break">Break the traction motor</button>
+          <div class="panel-h"><div><h3>Try it</h3><div class="panel-sub">Break an asset and watch the agent react</div></div></div>
+          <div class="breaks" id="break-grid"></div>
           <div class="ctl-row">
-            <select id="maint-asset"><option value="M1">M1 Traction motor</option><option value="T1">T1 Traction transformer</option><option value="G1">G1 Signalling generator</option><option value="P1">P1 Cooling pump</option></select>
+            <select id="maint-asset" aria-label="Asset to fix"><option value="M1">M1 Traction motor</option><option value="T1">T1 Traction transformer</option><option value="G1">G1 Signalling generator</option><option value="P1">P1 Cooling pump</option></select>
             <button class="btn btn-light btn-sm" id="btn-maint">Fix it</button>
           </div>
           <details>
             <summary>More faults</summary>
             <div class="ctl-row">
-              <select id="fail-asset"><option value="T1">T1 Transformer</option><option value="M1">M1 Motor</option><option value="G1">G1 Generator</option><option value="P1">P1 Pump</option></select>
-              <select id="fail-type"><option value="overload">Overload</option><option value="bearing_wear">Bearing wear</option><option value="oil_degradation">Old oil</option><option value="misalignment">Misalignment</option><option value="insulation_breakdown">Insulation fault</option></select>
+              <select id="fail-asset" aria-label="Asset"><option value="T1">T1 Transformer</option><option value="M1">M1 Motor</option><option value="G1">G1 Generator</option><option value="P1">P1 Pump</option></select>
+              <select id="fail-type" aria-label="Fault"><option value="overload">Overload</option><option value="bearing_wear">Bearing wear</option><option value="oil_degradation">Old oil</option><option value="misalignment">Shaft misalignment</option><option value="insulation_breakdown">Insulation fault</option></select>
             </div>
             <div class="ctl-row">
               <button class="btn btn-ghost btn-sm" id="btn-inject" style="flex:1">Add fault</button>
@@ -338,6 +344,13 @@
       const ASSETS = ["T1", "M1", "G1", "P1"];
       const NAMES = { T1: "Traction transformer", M1: "Traction motor", G1: "Signalling generator", P1: "Cooling pump" };
       const NOMINAL_V = { T1: 25000, M1: 1500, G1: 400, P1: 415 };
+      // The fault each "Break" button adds: the most typical one for that kind of machine.
+      const BREAKS = {
+        T1: { type: "insulation_breakdown", label: "Insulation fault" },
+        M1: { type: "bearing_wear", label: "Bearing wear" },
+        G1: { type: "overload", label: "Overload" },
+        P1: { type: "misalignment", label: "Shaft misalignment" },
+      };
       const STATE_LABEL = { normal: "Healthy", degraded: "Needs care", critical: "Critical", failed: "Failed", under_maintenance: "In service" };
       const LABEL = { monitor: "MONITOR", inspect: "INSPECT", maintain: "MAINTAIN", repair: "REPAIR", emergency: "EMERGENCY",
                       treat: "REVIEW", segregate: "SEPARATE", escalate: "ALERT" };
@@ -377,6 +390,10 @@
           </div>
           <div class="dec" id="dec-${id}">Agent: waiting</div>
         </div>`).join("");
+      document.getElementById("break-grid").innerHTML = ASSETS.map((id) => `
+        <button class="brk" id="brk-${id}" data-asset="${id}">
+          <span class="brk-v">Break</span><span class="brk-n">${NAMES[id]}</span><span class="brk-f">${BREAKS[id].label}</span>
+        </button>`).join("");
 
       function drawSpark(id, data, color) {
         const svg = document.getElementById("spark-" + id);
@@ -638,13 +655,39 @@
         document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.f === f));
       }
       document.querySelectorAll("#tabs button").forEach((b) => b.addEventListener("click", () => setFilter(b.dataset.f)));
-      function breakMotor() { inject("M1", "bearing_wear"); setFilter("assets"); }
+      function breakAsset(id) {
+        inject(id, BREAKS[id].type);
+        setFilter("assets");
+        document.getElementById("maint-asset").value = id; // "Fix it" now targets what was just broken
+      }
+      function breakMotor() { breakAsset("M1"); }
 
-      document.getElementById("btn-break").addEventListener("click", (e) => {
-        breakMotor();
-        e.currentTarget.textContent = "Fault added. Watch the agent";
-        setTimeout(() => { document.getElementById("btn-break").textContent = "Break the traction motor"; }, 4000);
-      });
+      // Bring the broken asset's card into view (when the layout stacks it out of
+      // sight) and pulse it, so the reaction is easy to spot.
+      function showCard(id) {
+        const card = document.getElementById("ac-" + id);
+        const r = card.getBoundingClientRect();
+        if (!active && (r.top < HEADER || r.bottom > window.innerHeight)) {
+          window.scrollTo({ top: window.scrollY + r.top - HEADER - EDGE }); // smooth via CSS, instant for reduced motion
+        }
+        if (card.animate && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          card.animate([
+            { boxShadow: "0 0 0 0 rgba(214,60,60,0)" },
+            { boxShadow: "0 0 0 5px rgba(214,60,60,0.45)", offset: 0.25 },
+            { boxShadow: "0 0 0 0 rgba(214,60,60,0)" },
+          ], { duration: 1800, easing: "ease-out" });
+        }
+      }
+
+      document.querySelectorAll("#break-grid .brk").forEach((b) => b.addEventListener("click", () => {
+        const id = b.dataset.asset;
+        breakAsset(id);
+        showCard(id);
+        b.classList.add("hit");
+        b.querySelector(".brk-v").textContent = "Fault added";
+        clearTimeout(b._reset);
+        b._reset = setTimeout(() => { b.classList.remove("hit"); b.querySelector(".brk-v").textContent = "Break"; }, 4000);
+      }));
       document.getElementById("btn-inject").addEventListener("click", () =>
         inject(document.getElementById("fail-asset").value, document.getElementById("fail-type").value));
       document.getElementById("btn-maint").addEventListener("click", () => {
@@ -693,8 +736,8 @@
           b: "These four cards are live copies of railway power assets. The big number is health. Green means healthy." },
         { el: "#ac-M1", t: "One asset up close",
           b: "Each card shows temperature, vibration, hours of life left, risk, and the agent's decision at the bottom." },
-        { el: "#btn-break", t: "Break something",
-          b: "This button adds a bearing fault to the traction motor. Press it after the tour and watch the motor card." },
+        { el: "#break-grid", t: "Break something",
+          b: "Each button adds a fault to one asset. Press one after the tour and watch its card and the agent react." },
         { el: "#trail-panel", t: "The agent explains itself",
           b: "Every decision lists what the agent read, what it found, the risk, and the action. Use the tabs to filter." },
         { el: "#waste-panel", t: "Waste and rules",

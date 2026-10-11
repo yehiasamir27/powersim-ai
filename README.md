@@ -42,7 +42,7 @@ It repeats every 2 seconds.
 
 **[powersim-ai.vercel.app](https://powersim-ai.vercel.app)** · no sign up, runs in your browser.
 
-Open the dashboard, press **Break the traction motor**, and watch the agent react.
+Open the dashboard, press **Break** on any of the four assets, and watch the agent react.
 
 <p align="center">
   <img src="docs/assets/dashboard.png" alt="PowerSim AI live dashboard" width="100%">
